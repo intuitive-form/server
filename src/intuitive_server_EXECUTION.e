@@ -18,9 +18,6 @@ feature {NONE} -- Local variables
 feature {NONE} -- Initialization
 
 	initialize
-		local
-			reader: PLAIN_TEXT_FILE
-			body: STRING
 		do
 			Precursor
 			initialize_404
@@ -44,12 +41,17 @@ feature {NONE} -- Initialization
 feature -- Execution
 
 	execute
-		-- This method runs the server
+		-- Process and answer an inbound query
 		local
 			mesg: WSF_HTML_PAGE_RESPONSE
 			reader: PLAIN_TEXT_FILE
+			path: STRING
 		do
-			create reader.make_with_path (create {PATH}.make_from_string ("./www" + request.path_info))
+			path := "./www" + request.path_info
+			if path.at (path.count) = '/' then
+				path := path + "index.html"
+			end
+			create reader.make_with_path (create {PATH}.make_from_string (path))
 			if not reader.exists then
 				response.send (response404)
 			else
@@ -60,12 +62,13 @@ feature -- Execution
 			end
 		end
 
-feature -- Queries
+feature {NONE} -- Queries
 
 	read_from_file(file: PLAIN_TEXT_FILE): STRING
-		-- reads and returns the text
+		-- Reads and returns the text
 		require
 			file_exists: file.exists
+			is_file: file.is_plain_text
 		do
 			create Result.make_empty
 			file.open_read
