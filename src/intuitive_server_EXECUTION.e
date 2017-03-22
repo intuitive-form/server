@@ -42,6 +42,15 @@ feature -- Execution
 
 	execute
 		-- Process and answer an inbound query
+		do
+			if request.request_method ~ "GET" then
+				answer_get
+			elseif request.request_method ~ "POST" then
+				-- unimplemented
+			end
+		end
+
+	answer_get
 		local
 			mesg: WSF_HTML_PAGE_RESPONSE
 			reader: PLAIN_TEXT_FILE
