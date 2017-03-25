@@ -1,5 +1,115 @@
 <!DOCTYPE html>
 <html>
-    <head></head>
-    <body><a href="userapp1.html">Continue</a></body>
+    <head>
+        <script type="text/javascript" src="scripts/pageSwitcher.js"></script>
+    </head>
+    <body>
+        <div class="page" id="1">
+            <h1>Innopolis University: unit annual report, 2016</h1>
+            <p>This form collects all the information relative to the activity a unit (such as a laboratory) of Innopolis University over the calendar year 2016. It should include all activity in which at least one member of the unit has participated.</p>
+            <button class="next">Next</button>
+        </div>
+        <div class="page" id="2" style="visibility: hidden">
+            <h1>Innopolis University: unit annual report, 2016</h1>
+            <p>* Compulsory</p>
+            <h2>Section 1: general</h2>
+            <p style="font-size: 14pt">Name of unit *<p>
+            <p>Official name, for example laboratory name</p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">Name of head unit *<p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">Start of reporting period (if other than 1.1.2016)</p>
+            <input type="date"><br>
+            <p style="font-size: 14pt">End of reporting period (if other than 31.12.2016)</p>
+            <input type="date"><br>
+            <button class="previous">Previous</button>
+            <button class="next">Next</button>
+        </div>
+        <div class="page" id="3" style="visibility: hidden">
+                <h1>Innopolis University: unit annual report, 2016</h1>
+            <p>* Compulsory</p>
+            <h2>Section 2: teaching</h2>
+            <p>This section covers the educational activities of your unit.</p>
+            <p style="font-size: 14pt">Courses taught *<p>
+            <p>Numbered list. Include all courses taught or co-taught by members of your unit.
+                For each item, list: course name; semester ("Spring" or "Fall"); level (bachelor, master, PhD); approximate number of students.</p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">Examinations *<p>
+            <p>Numbered list. Include all examinations administered or co-administered by members of your unit.
+                For each item, list: course name; semester ("Spring" or "Fall"); kind of exam (final exam of the course, repetition exam); approximate number of students taking the exam.</p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">Students supervised *<p>
+            <p>For each student, indicate student name and nature of work, e.g. bachelor thesis, master thesis, summer internship.</p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">Completed student reports *<p>
+            <p>For each report, indicate student name, title of report, as well as publication plans if any.</p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">Completed PhD theses<p>
+            <p>For each report, indicate student name, title of report, as well as publication plans if any.</p>
+            <button class="previous">Previous</button>
+            <button class="next">Next</button>
+        </div>
+        <div class="page" id="4" style="visibility: hidden">
+            <h1>Innopolis University: unit annual report, 2016</h1>
+            <p>* Compulsory</p>
+            <h2>Section 2: teaching</h2>
+            <p>This section covers research and publication activities of your unit.</p>
+            <p style="font-size: 14pt">Grants *<p>
+            <p>Numbered list. For each item, list: title of project; granting agency; period covered by grant; whether continuation of other grant; amount.</p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">Research projects *<p>
+            <p>Numbered list. Include all significant research themes in which members of your unit are involved, whether or not supported by a grant. For each item, list: title of project; Innopolis University personnel involved; external personnel involved if any; start date of project; expected end date; sources of financing.</p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">Research collaborations<p>
+            <p>Numbered list. For each item, indicate: country of institution; name of institution (and department or unit if relevant); name of principal contact and any other important contacts; nature of collaboration</p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">Conference publications<p>
+            <p>Numbered list. Indicate all publications of which members of the unit are authors or coauthors. Use standard style for scientific bibliography entries.</p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">Journal publications<p>
+            <p>Numbered list. Indicate all publications of which members of the unit are authors or coauthors. Use standard style for scientific bibliography entries.</p>
+            <input type="text"><br>
+            <button class="previous">Previous</button>
+            <button class="next">Next</button>
+        </div>
+        <div class="page" id="5" style="visibility: hidden">
+            <h1>Innopolis University: unit annual report, 2016</h1>
+            <h2>Section 4: technology transfer</h2>
+            <p>This section covers patents, licenses and other technology transfer activities</p>
+            <p style="font-size: 14pt">Patents<p>
+            <p>List patents filed or otherwise submitted during the reported period. Indicate country of patent office.</p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">IP licensing (software or others)<p>
+            <p>List licenses granted.</p>
+            <input type="text"><br>
+            <button class="previous">Previous</button>
+            <button class="next">Next</button>
+        </div>
+        <div class="page" id="6" style="visibility: hidden">
+            <h1>Innopolis University: unit annual report, 2016</h1>
+            <h2>Section 5: distinctions</h2>
+            <p>This section covers honors received by the unit's members.</p>
+            <p style="font-size: 14pt">Best paper awards<p>
+            <p>For each item, indicate authors of the awarded article, title of the article, awarding conference or journal, exact wording of award, date</p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">Memberships<p>
+            <p>Membership in academies, international working groups (for example IFIP or ACM), standards committees (e.g. ISO, Ecma) etc. For each item, indicate name of member, date of membership</p>
+            <input type="text"><br>
+            <p style="font-size: 14pt">Prizes<p>
+            <p>List prizes received during reporting period. For each item, indicate recipient, name of prize, granting institution, date.</p>
+            <input type="text"><br>
+            <button class="previous">Previous</button>
+            <button class="next">Next</button>
+        </div>
+        <div class="page" id="7" style="visibility: hidden">
+            <h1>Innopolis University: unit annual report, 2016</h1>
+            <h2>Section 7: other information</h2>
+            <p>This section covers anything not included in previous sections.</p>
+            <p style="font-size: 14pt">Other relevant information<p>
+            <p>Add any information on your unit's achievements that is not covered by the previous sections.</p>
+            <input type="text"><br>
+            <button class="previous">Previous</button>
+            <button>Submit</button>
+        </div>
+    </body>
 </html>
