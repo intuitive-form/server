@@ -26,6 +26,7 @@
 			<concurrency support="scoop"/>
 			<void_safety support="all"/>
 		</capability>
+		<library name="sqlite" location="$ISE_LIBRARY\unstable\library\persistency\database\sqlite3\sqlite.ecf"/>
 		<library name="standalone" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\connector\standalone-safe.ecf"/>
 		<cluster name="launcher" location=".\launcher\">
 			<cluster name="any_launcher" location="$|any\"/>

@@ -3,9 +3,9 @@ class
 
 inherit
 	WSF_EXECUTION
-	redefine
-		initialize
-	end
+		redefine
+			initialize
+		end
 
 create
 	make
@@ -13,29 +13,11 @@ create
 
 feature {NONE} -- Local variables
 
-	response404: WSF_HTML_PAGE_RESPONSE
 
 feature {NONE} -- Initialization
-
 	initialize
 		do
 			Precursor
-			initialize_404
-		end
-
-	initialize_404
-		-- initializes 404 web page
-		local
-			reader: PLAIN_TEXT_FILE
-		do
-			create response404.make
-			response404.set_status_code (404)
-			create reader.make_with_path (create {PATH}.make_from_string ("./www/404.html"))
-			if not reader.exists then
-				response404.set_body ("This web page does not exist, try harder")
-			else
-				response404.set_body (read_from_file(reader))
-			end
 		end
 
 feature -- Execution
@@ -61,14 +43,15 @@ feature -- Execution
 				path := path + "index.html"
 			end
 			create reader.make_with_path (create {PATH}.make_from_string (path))
+			create mesg.make
 			if not reader.exists then
-				response.send (response404)
+				mesg.set_status_code (404)
+				mesg.set_body (get_404)
 			else
-				create mesg.make
 				mesg.set_status_code (200)
 				mesg.set_body (read_from_file(reader))
-				response.send (mesg)
 			end
+			response.send (mesg)
 		end
 
 feature {NONE} -- Queries
@@ -88,6 +71,19 @@ feature {NONE} -- Queries
 			loop
 				Result.append (file.last_string)
 				file.read_line
+			end
+		end
+
+	get_404: STRING
+		-- Returns response body for 404 error
+		local
+			reader: PLAIN_TEXT_FILE
+		do
+			create reader.make_with_path (create {PATH}.make_from_string ("./www/404.html"))
+			if not reader.exists then
+				Result := "This web page does not exist, try harder"
+			else
+				Result := read_from_file (reader)
 			end
 		end
 end
