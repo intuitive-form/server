@@ -78,8 +78,10 @@ feature {NONE} -- Queries
 				file.exhausted
 			loop
 				Result.append (file.last_string)
+				Result.append ("%N")
 				file.read_line
 			end
+			Result.append (file.last_string)
 		end
 
 	get_404: STRING
