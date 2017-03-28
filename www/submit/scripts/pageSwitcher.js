@@ -13,9 +13,11 @@ function showPage(page) {
 
 function showNextPage() {
     var parent = this.parentElement;
-    hidePage(parent);
-    var nextPage = document.getElementById(parseInt(parent.id) + 1);
-    showPage(nextPage);
+    if (checkCompulsoryFields(parent)) {
+        hidePage(parent);
+        var nextPage = document.getElementById(parseInt(parent.id) + 1);
+        showPage(nextPage);
+    }
 }
 
 function showPreviousPage() {
