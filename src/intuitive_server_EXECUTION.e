@@ -34,7 +34,7 @@ feature -- Execution
 
 	answer_get
 		local
-			mesg: WSF_HTML_PAGE_RESPONSE
+			mesg: WSF_PAGE_RESPONSE
 			reader: PLAIN_TEXT_FILE
 			path: STRING
 		do
@@ -46,8 +46,16 @@ feature -- Execution
 			create mesg.make
 			if not reader.exists then
 				mesg.set_status_code (404)
+				mesg.header.put_content_type_text_html
 				mesg.set_body (get_404)
 			else
+				if path.ends_with (".html") then
+					mesg.header.put_content_type_text_html
+				elseif path.ends_with (".js") then
+					mesg.header.put_content_type_text_javascript
+				else
+					mesg.header.put_content_type_text_plain
+				end
 				mesg.set_status_code (200)
 				mesg.set_body (read_from_file(reader))
 			end

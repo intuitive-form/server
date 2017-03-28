@@ -11,14 +11,14 @@ function showPage(page) {
     page.style.display = "block";
 }
 
-var showNextPage = function () {
+function showNextPage() {
     var parent = this.parentElement;
     hidePage(parent);
     var nextPage = document.getElementById(parseInt(parent.id) + 1);
     showPage(nextPage);
 }
 
-var showPreviousPage = function () {
+function showPreviousPage() {
     var parent = this.parentElement;
     hidePage(parent);
     var previousPage = document.getElementById(parseInt(parent.id) - 1);
