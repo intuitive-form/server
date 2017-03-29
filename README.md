@@ -10,7 +10,7 @@ and analyzing previously submitted data with provided queries
 
 Clone the repository:
 
-    git clone https://github.com/intuitive-form/server.git
+    git clone https://github.com/intuitive-form/server.git --recursive
 
 Open `intuitive_server.ecf` in Eiffel Studio and press `Run`.
 
@@ -18,7 +18,7 @@ Open `intuitive_server.ecf` in Eiffel Studio and press `Run`.
 
 Clone the repository:
 
-    $ git clone https://github.com/intuitive-form/server.git
+    $ git clone https://github.com/intuitive-form/server.git --recursive
 
 Open `intuitive_server.ecf` in Eiffel Studio and press `Run`.
 
@@ -29,6 +29,9 @@ Build the project:
 
     $ cd server
     $ ec -config intuitive_server.ecf -target intuitive_server
+    $ cd EIFGENs/intuitive_server/W_code
+    $ finish_freezing
+    $ cd ../../..
 
 Run the binary:
 
