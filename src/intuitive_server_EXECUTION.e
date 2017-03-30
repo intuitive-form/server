@@ -25,10 +25,10 @@ feature -- Execution
 	execute
 		-- Process and answer an inbound query
 		do
-			if request.request_method ~ "GET" then
+			if request.is_get_request_method then
 				answer_get
-			elseif request.request_method ~ "POST" then
-				-- unimplemented
+			elseif request.is_post_request_method then
+				process_data
 			end
 		end
 
@@ -95,5 +95,21 @@ feature {NONE} -- Queries
 			else
 				Result := read_from_file (reader)
 			end
+		end
+
+feature -- Commands
+
+	process_data
+		-- Extracts data from the request
+		local
+			output: STRING
+		do
+			create output.make_empty
+			across request.form_parameters as ic
+			loop
+				output.append (ic.item.key)
+				output.append ("%N")
+			end
+			response.put_string (output)
 		end
 end
