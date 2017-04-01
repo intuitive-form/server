@@ -103,6 +103,7 @@ feature -- Commands
 		-- Extracts data from the request
 		local
 			output: STRING
+			lol: SUBMIT_DATA
 		do
 			create output.make_empty
 			across request.form_parameters as ic
@@ -110,6 +111,7 @@ feature -- Commands
 				output.append (ic.item.key)
 				output.append ("%N")
 			end
+			create lol.make(request)
 			response.put_string (output)
 		end
 end
