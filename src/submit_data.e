@@ -125,4 +125,12 @@ feature -- Commands
 				a_csn := csn + i.out
 			end
 		end
+
+invariant
+	is_correct implies (
+	attached unit_name and
+	attached head_name and
+	attached reporting_period_start and
+	attached reporting_period_end and
+	attached courses)
 end
