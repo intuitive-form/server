@@ -98,21 +98,29 @@ feature {NONE} -- Queries
 		end
 
 feature -- Commands
-
 	process_data
 		-- Extracts data from the request
 		local
 			output: STRING
 			lol: SUBMIT_DATA
+			db: DB_HANDLER
 		do
 			create output.make_empty
 			create lol.make(request)
-			output.append (lol.is_correct.out)
-			output.append ("%N")
 			across request.form_parameters as ic
 			loop
 				output.append (ic.item.key)
 				output.append ("%N")
+			end
+			output.append ("%N")
+
+			create db.make
+			if lol.is_correct then
+				db.insert (lol)
+			end
+			across db.unit_names as it loop
+				output.append (it.item)
+				output.append("%N")
 			end
 			response.put_string (output)
 		end
