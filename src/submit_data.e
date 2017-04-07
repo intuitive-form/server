@@ -10,7 +10,7 @@ feature {NONE} -- Initialization
 		do
 			if
 				-- Section #1
-				attached {WSF_STRING} request.form_parameter ("unit_name") as a_unit_name and then
+				attached {WSF_STRING} request.form_parameter ("unit-name") as a_unit_name and then
 				attached {WSF_STRING} request.form_parameter ("head-name")as a_head_name and then
 
 				-- Section #2
@@ -39,7 +39,8 @@ feature {NONE} -- Initialization
 				attached {WSF_STRING} request.form_parameter ("research-projects-end-date-1")as a_r_p_e_date_1
 			then
 				is_correct := True
-				proceed_table_courses(request)
+				proceed_s1_general (request)
+				proceed_s2_courses(request)
 			else
 				is_correct := False
 			end
@@ -52,27 +53,55 @@ feature -- Attributes
 	is_correct: BOOLEAN
 		-- True if the submitted form is correct
 
-	unit_name: detachable STRING
-		-- Name of the unit
+	s1_general: detachable TUPLE[STRING, STRING, STRING, STRING]
+		-- Section #1 General: Name of unit / Name of head unit / Start of the reporting period /
+		-- /End of the reporting period
 
-	head_name: detachable STRING
-		-- Head of the unit
+	s2_courses: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING]]
+		-- Section #2 Courses: Course Name / Semester / Level / Number of students
 
-	reporting_period_start: detachable STRING
-		-- Start date
+	s2_examinations: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING]]
+		-- Section #2 Examinations: Course Name / Semester / Kind of exam / Number of students
 
-	reporting_period_end: detachable STRING
-		-- End date
+	s2_students: detachable ARRAYED_LIST[TUPLE[STRING, STRING]]
+		-- Section #2 Students: Name / Nature of work
 
-	courses: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING]]
-		-- Courses
+	s2_student_reports: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING]]
+		-- Section #2 Stundent reports: Student Name / Title / Publication plans
+
+	s2_phd: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING]]
+		-- Section #2 PhD theses: Student Name / Title / Publication plans
+
 
 feature -- Queries
 
 feature -- Commands
 
-	proceed_table_courses(request: WSF_REQUEST)
-		-- Proceeds data from courses
+	proceed_into_tuple(request: WSF_REQUEST; param_name: STRING; tuple: TUPLE; index: INTEGER)
+		require
+			request_exists: request /= Void
+			param_name_exists: param_name /= Void
+			tuple_exists: tuple /= Void
+		do
+			if
+				attached {WSF_STRING} request.form_parameter (param_name) as value
+			then
+				tuple.put(value.value.as_string_8, index)
+			end
+		end
+
+	proceed_s1_general(request: WSF_REQUEST)
+		-- Proceeds data from Section #1 General
+		do
+			create s1_general.default_create
+			proceed_into_tuple (request, "unit-name", s1_general, 0)
+			proceed_into_tuple (request, "head-name", s1_general, 1)
+			proceed_into_tuple (request, "reporting-period-start", s1_general, 2)
+			proceed_into_tuple (request, "reporting-period-end", s1_general, 3)
+		end
+
+	proceed_s2_courses(request: WSF_REQUEST)
+		-- Proceeds data from Section #2 Courses
 		local
 			data: TUPLE[STRING, STRING, STRING, STRING]
 			values: HASH_TABLE[WSF_VALUE, STRING_32]
@@ -80,7 +109,7 @@ feature -- Commands
 			ccn, cs, cl, csn: STRING
 			a_ccn, a_cs, a_cl, a_csn: STRING
 		do
-			create courses.make (2)
+			create s2_courses.make (2)
 			ccn := "courses-course-name-"
 			cs := "courses-semester-"
 			cl := "courses-level-"
@@ -95,27 +124,11 @@ feature -- Commands
 				attached {WSF_STRING} request.form_parameter(a_ccn)
 			loop
 				create data.default_create
-				if
-					attached {WSF_STRING} request.form_parameter (a_ccn) as value
-				then
-					data.put (value, 0)
-				end
-				if
-					attached {WSF_STRING} request.form_parameter (a_cs) as value
-				then
-					data.put (value, 1)
-				end
-				if
-					attached {WSF_STRING} request.form_parameter (a_cl) as value
-				then
-					data.put (value, 2)
-				end
-				if
-					attached {WSF_STRING} request.form_parameter (a_csn) as value
-				then
-					data.put (value, 3)
-				end
-				if attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING]]} courses as a_courses then
+				proceed_into_tuple (request, a_ccn, data, 0)
+				proceed_into_tuple (request, a_cs, data, 1)
+				proceed_into_tuple (request, a_cl, data, 2)
+				proceed_into_tuple (request, a_csn, data, 3)
+				if attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING]]} s2_courses as a_courses then
 					a_courses.put (data)
 				end
 				i := i + 1
@@ -128,9 +141,6 @@ feature -- Commands
 
 invariant
 	is_correct implies (
-	attached unit_name and
-	attached head_name and
-	attached reporting_period_start and
-	attached reporting_period_end and
-	attached courses)
+	attached s1_general and
+	attached s2_courses)
 end

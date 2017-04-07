@@ -106,12 +106,14 @@ feature -- Commands
 			lol: SUBMIT_DATA
 		do
 			create output.make_empty
+			create lol.make(request)
+			output.append (lol.is_correct.out)
+			output.append ("%N")
 			across request.form_parameters as ic
 			loop
 				output.append (ic.item.key)
 				output.append ("%N")
 			end
-			create lol.make(request)
 			response.put_string (output)
 		end
 end
