@@ -34,7 +34,13 @@ feature
 			q_insert: SQLITE_INSERT_STATEMENT
 		do
 			create q_insert.make ("INSERT INTO units (name, head, start_date, end_date) VALUES (?1, ?2, ?3, ?4);", db)
-			q_insert.execute_with_arguments (<<data.unit_name, data.head_name, data.reporting_period_start, data.reporting_period_end>>)
+			if attached data.s1_general as tuple and then
+				attached {STRING} tuple.item (1) as i1 and then
+				attached {STRING} tuple.item (2) as i2 and then
+				attached {STRING} tuple.item (3) as i3 and then
+				attached {STRING} tuple.item (4) as i4 then
+				q_insert.execute_with_arguments (<<i1, i2, i3, i4>>)
+			end
 		end
 
 	unit_names: ITERABLE[STRING]
