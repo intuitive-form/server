@@ -12,7 +12,7 @@
 		<capability>
 			<catcall_detection support="none"/>
 			<concurrency support="scoop" use="scoop"/>
-			<void_safety support="all"/>
+			<void_safety support="all" use="none"/>
 		</capability>
 		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
 		<library name="http" location="$ISE_LIBRARY\contrib\library\network\protocol\http\http-safe.ecf"/>

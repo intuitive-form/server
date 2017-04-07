@@ -40,7 +40,8 @@ feature {NONE} -- Initialization
 			then
 				is_correct := True
 				proceed_s1_general (request)
-				proceed_s2_courses(request)
+				proceed_s2_courses (request)
+				proceed_s2_examinations(request)
 			else
 				is_correct := False
 			end
@@ -53,7 +54,7 @@ feature -- Attributes
 	is_correct: BOOLEAN
 		-- True if the submitted form is correct
 
-	s1_general: detachable TUPLE[STRING, STRING, STRING, STRING]
+	s1_general: detachable TUPLE[STRING_8, STRING_8, STRING_8, STRING_8]
 		-- Section #1 General: Name of unit / Name of head unit / Start of the reporting period /
 		-- /End of the reporting period
 
@@ -86,25 +87,39 @@ feature -- Commands
 			if
 				attached {WSF_STRING} request.form_parameter (param_name) as value
 			then
-				tuple.put(value.value.as_string_8, index)
+				if
+					attached {TUPLE[STRING, STRING, STRING, STRING]} tuple as t
+				then
+					t.put(value.value.as_string_8, index)
+				end
+				if
+					attached {TUPLE[STRING, STRING, STRING]} tuple as t
+				then
+					t.put (value.value.as_string_8, index)
+				end
+				if
+					attached {TUPLE[STRING, STRING]} tuple as t
+				then
+					t.put (value.value.as_string_8, index)
+				end
 			end
+
 		end
 
 	proceed_s1_general(request: WSF_REQUEST)
 		-- Proceeds data from Section #1 General
 		do
-			create s1_general.default_create
-			proceed_into_tuple (request, "unit-name", s1_general, 0)
-			proceed_into_tuple (request, "head-name", s1_general, 1)
-			proceed_into_tuple (request, "reporting-period-start", s1_general, 2)
-			proceed_into_tuple (request, "reporting-period-end", s1_general, 3)
+			s1_general := ["", "", "", ""]
+			proceed_into_tuple (request, "unit-name", s1_general, 1)
+			proceed_into_tuple (request, "head-name", s1_general, 2)
+			proceed_into_tuple (request, "reporting-period-start", s1_general, 3)
+			proceed_into_tuple (request, "reporting-period-end", s1_general, 4)
 		end
 
 	proceed_s2_courses(request: WSF_REQUEST)
 		-- Proceeds data from Section #2 Courses
 		local
 			data: TUPLE[STRING, STRING, STRING, STRING]
-			values: HASH_TABLE[WSF_VALUE, STRING_32]
 			i: INTEGER
 			ccn, cs, cl, csn: STRING
 			a_ccn, a_cs, a_cl, a_csn: STRING
@@ -123,13 +138,13 @@ feature -- Commands
 			until
 				attached {WSF_STRING} request.form_parameter(a_ccn)
 			loop
-				create data.default_create
-				proceed_into_tuple (request, a_ccn, data, 0)
-				proceed_into_tuple (request, a_cs, data, 1)
-				proceed_into_tuple (request, a_cl, data, 2)
-				proceed_into_tuple (request, a_csn, data, 3)
+				data := ["", "", "", ""]
+				proceed_into_tuple (request, a_ccn, data, 1)
+				proceed_into_tuple (request, a_cs, data, 2)
+				proceed_into_tuple (request, a_cl, data, 3)
+				proceed_into_tuple (request, a_csn, data, 4)
 				if attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING]]} s2_courses as a_courses then
-					a_courses.put (data)
+					a_courses.sequence_put (data)
 				end
 				i := i + 1
 				a_ccn := ccn + i.out
@@ -139,8 +154,47 @@ feature -- Commands
 			end
 		end
 
+	proceed_s2_examinations(request: WSF_REQUEST)
+		-- Proceeds data from Section #2 Examinations
+		local
+			data: TUPLE[STRING, STRING, STRING, STRING]
+			ecn, es, eek, esn: STRING
+			a_ecn, a_es, a_eek, a_esn: STRING
+			i: INTEGER
+		do
+			create s2_examinations.make (2)
+			ecn := "examinations-course-name-"
+			es := "examinations-semester-"
+			eek := "examinations-exam-kind-"
+			esn := "examinations-students-number-"
+			from
+				i := 1
+				a_ecn := ecn + i.out
+				a_es := es + i.out
+				a_eek := eek + i.out
+				a_esn := esn + i.out
+			until
+				not attached {WSF_STRING} request.form_parameter (a_ecn)
+			loop
+				data := ["", "", "", ""]
+				proceed_into_tuple (request, a_ecn, data, 1)
+				proceed_into_tuple (request, a_es, data, 2)
+				proceed_into_tuple (request, a_eek, data, 3)
+				proceed_into_tuple (request, a_esn, data, 4)
+				if attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING]]} s2_examinations as a_examinations then
+					a_examinations.sequence_put (data)
+				end
+				i :=  i + 1
+				a_ecn := ecn + i.out
+				a_es := es + i.out
+				a_eek := eek + i.out
+				a_esn := esn + i.out
+			end
+		end
+
 invariant
 	is_correct implies (
 	attached s1_general and
-	attached s2_courses)
+	attached s2_courses and
+	attached s2_examinations)
 end

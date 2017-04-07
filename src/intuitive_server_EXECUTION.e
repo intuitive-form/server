@@ -118,7 +118,8 @@ feature -- Commands
 			if lol.is_correct then
 				db.insert (lol)
 			end
-			across db.unit_names as it loop
+			across db.unit_names as it
+			loop
 				output.append (it.item)
 				output.append("%N")
 			end

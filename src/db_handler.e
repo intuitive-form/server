@@ -22,7 +22,7 @@ feature {NONE}
 			q_modify: SQLITE_MODIFY_STATEMENT
 		do
 			create db.make_create_read_write ("db.sqlite")
-			create q_modify.make("CREATE TABLE units (id INTEGER PRIMARY KEY, name TEXT UNIQUE, head TEXT, start_date TEXT, end_date TEXT);", db)
+			create q_modify.make("CREATE TABLE units (id INTEGER PRIMARY KEY, name TEXT, head TEXT, start_date TEXT, end_date TEXT);", db)
 			q_modify.execute
 		end
 
