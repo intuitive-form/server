@@ -45,6 +45,7 @@ feature {NONE} -- Initialization
 				proceed_s2_students (request)
 				proceed_s2_students_reports (request)
 				proceed_s2_phd (request)
+				proceed_s3_grants (request)
 			else
 				is_correct := False
 			end
@@ -76,6 +77,10 @@ feature -- Attributes
 	s2_phd: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING]]
 		-- Section #2 PhD theses: Student Name / Title / Publication plans
 
+	s3_grants: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING, STRING, STRING]]
+		-- Section #3 Grants: Title / Granting agency / Period start / Period end /
+		-- /Continuation of other grant / Amount
+
 
 feature -- Queries
 
@@ -91,6 +96,11 @@ feature -- Commands
 			if
 				attached {WSF_STRING} request.form_parameter (param_name) as value
 			then
+				if
+					attached {TUPLE[STRING, STRING, STRING, STRING, STRING, STRING]} tuple as t
+				then
+					t.put(value.value.as_string_8, index)
+				end
 				if
 					attached {TUPLE[STRING, STRING, STRING, STRING]} tuple as t
 				then
@@ -315,6 +325,54 @@ feature -- Commands
 			end
 		end
 
+	proceed_s3_grants(request: WSF_REQUEST)
+		-- Proceeds data from Section #3 Grants
+		local
+			data: TUPLE[STRING, STRING, STRING, STRING, STRING, STRING]
+			i: INTEGER
+			gt, gga, ps, pe, gc, ga: STRING
+			a_gt, a_gga, a_ps, a_pe, a_gc, a_ga: STRING
+		do
+			create s3_grants.make(2)
+			gt := "grants-title-"
+			gga := "grants-granting-agency-"
+			ps := "period-start-"
+			pe := "period-end-"
+			gc := "grants-continuation-"
+			ga := "grants-amount-"
+			from
+				i := 1
+				a_gt := gt + i.out
+				a_gga := gga + i.out
+				a_ps := ps + i.out
+				a_pe := pe + i.out
+				a_gc := gc + i.out
+				a_ga := ga + i.out
+			until
+				not attached {WSF_STRING} request.form_parameter (a_gt)
+			loop
+				data := ["", "", "", "", "", ""]
+				proceed_into_tuple(request, a_gt, data, 1)
+				proceed_into_tuple(request, a_gga, data, 2)
+				proceed_into_tuple(request, a_ps, data, 3)
+				proceed_into_tuple(request, a_pe, data, 4)
+				proceed_into_tuple(request, a_gc, data, 5)
+				proceed_into_tuple(request, a_ga, data, 6)
+				if
+					attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING, STRING, STRING]]} s3_grants as a_grants
+				then
+					a_grants.sequence_put (data)
+				end
+				i := i + 1
+				a_gt := gt + i.out
+				a_gga := gga + i.out
+				a_ps := ps + i.out
+				a_pe := pe + i.out
+				a_gc := gc + i.out
+				a_ga := ga + i.out
+			end
+		end
+
 invariant
 	is_correct implies (
 	attached s1_general and
@@ -322,5 +380,6 @@ invariant
 	attached s2_examinations and
 	attached s2_students and
 	attached s2_student_reports and
-	attached s2_phd)
+	attached s2_phd and
+	attached s3_grants)
 end
