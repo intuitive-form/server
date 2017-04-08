@@ -44,6 +44,7 @@ feature {NONE} -- Initialization
 				proceed_s2_examinations(request)
 				proceed_s2_students (request)
 				proceed_s2_students_reports (request)
+				proceed_s2_phd (request)
 			else
 				is_correct := False
 			end
@@ -273,9 +274,9 @@ feature -- Commands
 			flag: BOOLEAN
 		do
 			create s2_phd.make (2)
-			cptn := ""
-			cptt := ""
-			cptpp := ""
+			cptn := "completed-PhD-theses-name-"
+			cptt := "completed-PhD-theses-title-"
+			cptpp := "completed-PhD-theses-publication-plans-"
 			flag := True
 			from
 				i := 1
@@ -320,5 +321,6 @@ invariant
 	attached s2_courses and
 	attached s2_examinations and
 	attached s2_students and
-	attached s2_student_reports)
+	attached s2_student_reports and
+	attached s2_phd)
 end
