@@ -79,6 +79,7 @@ feature -- Queries
 feature -- Commands
 
 	proceed_into_tuple(request: WSF_REQUEST; param_name: STRING; tuple: TUPLE; index: INTEGER)
+		-- Proceeds form parameter with 'param_name' from 'request' into 'tuple' with 'index'
 		require
 			request_exists: request /= Void
 			param_name_exists: param_name /= Void
@@ -189,6 +190,74 @@ feature -- Commands
 				a_es := es + i.out
 				a_eek := eek + i.out
 				a_esn := esn + i.out
+			end
+		end
+
+	proceed_s2_students(request: WSF_REQUEST)
+		-- Proceeds data from Section #2 Students
+		local
+			data: TUPLE[STRING, STRING]
+			i: INTEGER
+			ssn, sswn: STRING
+			a_ssn, a_sswn: STRING
+		do
+			create s2_students.make (2)
+			ssn := "students-supervised-name-"
+			sswn := "students-supervised-work-nature-"
+			from
+				i := 1
+				a_ssn := ssn + i.out
+				a_sswn := sswn + i.out
+			until
+				not attached {WSF_STRING} request.form_parameter (a_ssn)
+			loop
+				data := ["", ""]
+				proceed_into_tuple (request, a_ssn, data, 1)
+				proceed_into_tuple (request, a_ssn, data, 2)
+				if
+					attached {ARRAYED_LIST[TUPLE[STRING, STRING]]} s2_students as a_students
+				then
+					a_students.sequence_put (data)
+				end
+				i := i + 1
+				a_ssn := ssn + i.out
+				a_sswn := sswn + i.out
+			end
+		end
+
+	proceed_s2_students_reports(request: WSF_REQUEST)
+		-- Proceeds data from Section #2 Student reports
+		local
+			data: TUPLE[STRING, STRING, STRING]
+			i: INTEGER
+			csrn, csrt, csrpp: STRING
+			a_csrn, a_csrt, a_csrpp: STRING
+		do
+			create s2_student_reports.make(2)
+			csrn := "completed-student-reports-name-"
+			csrt := "completed-student-reports-title-"
+			csrpp := "completed-student-reports-publication-plans-"
+			from
+				i := 1
+				a_csrn := csrn + i.out
+				a_csrt := csrt + i.out
+				a_csrpp := csrpp + i.out
+			until
+				not attached {WSF_STRING} request.form_parameter (a_csrn)
+			loop
+				data := ["", "", ""]
+				proceed_into_tuple(request, a_csrn, data, 1)
+				proceed_into_tuple(request, a_csrt, data, 2)
+				proceed_into_tuple(request, a_csrpp, data, 3)
+				if
+					attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING]]} s2_student_reports as a_student_reports
+				then
+					a_student_reports.sequence_put (data)
+				end
+				i := i + 1
+				a_csrn := csrn + i.out
+				a_csrt := csrt + i.out
+				a_csrpp := csrpp + i.out
 			end
 		end
 
