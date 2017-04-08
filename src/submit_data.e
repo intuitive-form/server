@@ -42,6 +42,8 @@ feature {NONE} -- Initialization
 				proceed_s1_general (request)
 				proceed_s2_courses (request)
 				proceed_s2_examinations(request)
+				proceed_s2_students (request)
+				proceed_s2_students_reports (request)
 			else
 				is_correct := False
 			end
@@ -261,9 +263,62 @@ feature -- Commands
 			end
 		end
 
+	proceed_s2_phd(request: WSF_REQUEST)
+		-- Proceeds data from Section #2 Phd theses
+		local
+			data: TUPLE[STRING, STRING, STRING]
+			i: INTEGER
+			cptn, cptt, cptpp: STRING
+			a_cptn, a_cptt, a_cptpp: STRING
+			flag: BOOLEAN
+		do
+			create s2_phd.make (2)
+			cptn := ""
+			cptt := ""
+			cptpp := ""
+			flag := True
+			from
+				i := 1
+				a_cptn := cptn + i.out
+				a_cptt := cptt + i.out
+				a_cptpp := cptpp + i.out
+			until
+				not (attached {WSF_STRING} request.form_parameter (a_cptn) or
+				attached {WSF_STRING} request.form_parameter (a_cptt) or
+				attached {WSF_STRING} request.form_parameter (a_cptpp))
+			loop
+				data := ["", "", ""]
+				proceed_into_tuple(request, a_cptn, data, 1)
+				proceed_into_tuple(request, a_cptt, data, 2)
+				proceed_into_tuple(request, a_cptpp, data, 3)
+				if
+					attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING]]} s2_phd as a_phd
+				then
+					a_phd.sequence_put (data)
+				end
+				flag := False
+				i := i + 1
+				a_cptn := cptn + i.out
+				a_cptt := cptt + i.out
+				a_cptpp := cptpp + i.out
+			end
+			if
+				flag
+			then
+				if
+					attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING]]} s2_phd as a_phd
+				then
+					data := ["", "", ""]
+					a_phd.sequence_put (data)
+				end
+			end
+		end
+
 invariant
 	is_correct implies (
 	attached s1_general and
 	attached s2_courses and
-	attached s2_examinations)
+	attached s2_examinations and
+	attached s2_students and
+	attached s2_student_reports)
 end
