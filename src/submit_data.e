@@ -81,6 +81,9 @@ feature -- Attributes
 		-- Section #3 Grants: Title / Granting agency / Period start / Period end /
 		-- /Continuation of other grant / Amount
 
+	s3_researh_projects: detachable ARRAYED_LIST[TUPLE[STRING, ARRAYED_LIST[STRING], ARRAYED_LIST[STRING], STRING, STRING, STRING]]
+		-- Section #3 Research Collaborations: Title / Personnel involved / Extra personnel involved /
+		-- /Date of start / Expected Date of end / Sources of financing
 
 feature -- Queries
 
@@ -96,6 +99,11 @@ feature -- Commands
 			if
 				attached {WSF_STRING} request.form_parameter (param_name) as value
 			then
+				if
+					attached {TUPLE[STRING, ARRAYED_LIST[STRING], ARRAYED_LIST[STRING], STRING, STRING, STRING]} tuple as t
+				then
+					t.put (value.value.as_string_8, index)
+				end
 				if
 					attached {TUPLE[STRING, STRING, STRING, STRING, STRING, STRING]} tuple as t
 				then
@@ -138,7 +146,7 @@ feature -- Commands
 			ccn, cs, cl, csn: STRING
 			a_ccn, a_cs, a_cl, a_csn: STRING
 		do
-			create s2_courses.make (2)
+			create s2_courses.make (1)
 			ccn := "courses-course-name-"
 			cs := "courses-semester-"
 			cl := "courses-level-"
@@ -176,7 +184,7 @@ feature -- Commands
 			a_ecn, a_es, a_eek, a_esn: STRING
 			i: INTEGER
 		do
-			create s2_examinations.make (2)
+			create s2_examinations.make (1)
 			ecn := "examinations-course-name-"
 			es := "examinations-semester-"
 			eek := "examinations-exam-kind-"
@@ -214,7 +222,7 @@ feature -- Commands
 			ssn, sswn: STRING
 			a_ssn, a_sswn: STRING
 		do
-			create s2_students.make (2)
+			create s2_students.make (1)
 			ssn := "students-supervised-name-"
 			sswn := "students-supervised-work-nature-"
 			from
@@ -246,7 +254,7 @@ feature -- Commands
 			csrn, csrt, csrpp: STRING
 			a_csrn, a_csrt, a_csrpp: STRING
 		do
-			create s2_student_reports.make(2)
+			create s2_student_reports.make(1)
 			csrn := "completed-student-reports-name-"
 			csrt := "completed-student-reports-title-"
 			csrpp := "completed-student-reports-publication-plans-"
@@ -283,7 +291,7 @@ feature -- Commands
 			a_cptn, a_cptt, a_cptpp: STRING
 			flag: BOOLEAN
 		do
-			create s2_phd.make (2)
+			create s2_phd.make (1)
 			cptn := "completed-PhD-theses-name-"
 			cptt := "completed-PhD-theses-title-"
 			cptpp := "completed-PhD-theses-publication-plans-"
@@ -333,7 +341,7 @@ feature -- Commands
 			gt, gga, ps, pe, gc, ga: STRING
 			a_gt, a_gga, a_ps, a_pe, a_gc, a_ga: STRING
 		do
-			create s3_grants.make(2)
+			create s3_grants.make(1)
 			gt := "grants-title-"
 			gga := "grants-granting-agency-"
 			ps := "period-start-"
@@ -370,6 +378,94 @@ feature -- Commands
 				a_pe := pe + i.out
 				a_gc := gc + i.out
 				a_ga := ga + i.out
+			end
+		end
+
+	proceed_s3_researh_projects(request: WSF_REQUEST)
+		-- Proceeds data from Section #3 Researh Projects
+		local
+			data_1: ARRAYED_LIST[STRING]
+			data_2: ARRAYED_LIST[STRING]
+			data: TUPLE[STRING, ARRAYED_LIST[STRING], ARRAYED_LIST[STRING], STRING, STRING, STRING]
+			i, j: INTEGER
+			rpt, rppin, rpepin, rpsd, rped, rpfs: STRING
+			a_rpt, a_rppin, b_rppin, a_rpepin, b_rpepin, a_rpsd, a_rped, a_rpfs: STRING
+		do
+			create s3_researh_projects.make(1)
+			rpt := ""
+			rppin := ""
+			rpepin := ""
+			rpsd := ""
+			rped := ""
+			rpfs := ""
+			from
+				i := 1
+				a_rpt := rpt + i.out
+				a_rppin := rppin + i.out + "-"
+				a_rpepin := rpepin + i.out + "-"
+				a_rpsd := rpsd + i.out
+				a_rped := rped + i.out
+				a_rpfs := rpfs + i.out
+			until
+				not attached {WSF_STRING} request.form_parameter (a_rpt)
+			loop
+				create data_1.make (1)
+				create data_1.make (1)
+				from
+					j := 1
+					b_rppin := a_rppin + i.out
+				until
+					not attached {WSF_STRING} request.form_parameter (b_rppin) as value
+				loop
+					if
+						attached {ARRAYED_LIST[STRING]} data_1 as a_data
+					then
+						a_data.sequence_put (value.value.as_string_8)
+					end
+					j := j + 1
+					b_rppin := a_rppin + i.out
+				end
+				from
+					j := 1
+					b_rpepin := a_rpepin + i.out
+				until
+					not attached {WSF_STRING} request.form_parameter (b_rpepin) as value
+				loop
+					if
+						attached {ARRAYED_LIST[STRING]} data_2 as a_data
+					then
+						a_data.sequence_put (value.value.as_string_8)
+					end
+					j := j + 1
+					b_rpepin := a_rpepin + i.out
+				end
+				if
+				 	attached {ARRAYED_LIST[STRING]} data_2 as a_data and then a_data.count = 0
+				then
+					a_data.sequence_put ("")
+				end
+				if
+					attached {ARRAYED_LIST[STRING]} data_1 as a_data_1 and then
+					attached {ARRAYED_LIST[STRING]} data_2 as a_data_2
+				then
+					data := ["", a_data_1, a_data_2, "", "", ""]
+				end
+				proceed_into_tuple (request, a_rpt, data, 1)
+				proceed_into_tuple (request, a_rpsd, data, 4)
+				proceed_into_tuple (request, a_rped, data, 5)
+				proceed_into_tuple (request, a_rpfs, data, 6)
+				if
+					attached {ARRAYED_LIST[TUPLE[STRING, ARRAYED_LIST[STRING], ARRAYED_LIST[STRING], STRING, STRING, STRING]]} s3_researh_projects as a_research_projects
+ 				then
+					a_research_projects.sequence_put (data)
+				end
+				i := 1
+				a_rpt := rpt + i.out
+				a_rppin := rppin + i.out + "-"
+				a_rpepin := rpepin + i.out + "-"
+				a_rpsd := rpsd + i.out
+				a_rped := rped + i.out
+				a_rpfs := rpfs + i.out
 			end
 		end
 
