@@ -74,23 +74,23 @@ feature -- Attributes
 	s2_courses: detachable ARRAYED_LIST[COURSE]
 		-- Section #2 Courses: Course Name / Semester / Level / Number of students
 
-	s2_examinations: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING]]
+	s2_examinations: detachable ARRAYED_LIST[EXAM]
 		-- Section #2 Examinations: Course Name / Semester / Kind of exam / Number of students
 
-	s2_students: detachable ARRAYED_LIST[TUPLE[STRING, STRING]]
+	s2_students: detachable ARRAYED_LIST[STUDENT]
 		-- Section #2 Students: Name / Nature of work
 
-	s2_student_reports: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING]]
+	s2_student_reports: detachable ARRAYED_LIST[STUDENT_REPORT]
 		-- Section #2 Stundent reports: Student Name / Title / Publication plans
 
-	s2_phd: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING]]
+	s2_phd: detachable ARRAYED_LIST[PHD_THESIS]
 		-- Section #2 PhD theses: Student Name / Title / Publication plans
 
-	s3_grants: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING, STRING, STRING]]
+	s3_grants: detachable ARRAYED_LIST[GRANT]
 		-- Section #3 Grants: Title / Granting agency / Period start / Period end /
 		-- /Continuation of other grant / Amount
 
-	s3_researh_projects: detachable ARRAYED_LIST[TUPLE[STRING, ARRAYED_LIST[STRING], ARRAYED_LIST[STRING], STRING, STRING, STRING]]
+	s3_researh_projects: detachable ARRAYED_LIST[RESEARCH_PROJECT]
 		-- Section #3 Research Collaborations: Title / Personnel involved / Extra personnel involved /
 		-- /Date of start / Expected Date of end / Sources of financing
 
@@ -155,12 +155,13 @@ feature {NONE} -- Commands
 				not attached {WSF_STRING} request.form_parameter(a_ccn)
 			loop
 				if
-					attached {WSF_STRING} request.form_parameter(a_ccn) and then
-					attached {WSF_STRING} request.form_parameter(a_cs) and then
-					attached {WSF_STRING} request.form_parameter(a_cl) and then
-					attached {WSF_STRING} request.form_parameter(a_csn)
+					attached {WSF_STRING} request.form_parameter(a_ccn) as value_1 and then
+					attached {WSF_STRING} request.form_parameter(a_cs) as value_2 and then
+					attached {WSF_STRING} request.form_parameter(a_cl) as value_3 and then
+					attached {WSF_STRING} request.form_parameter(a_csn) as value_4
 				then
-					s2_courses.sequence_put (create {COURSE}.make(a_ccn, a_cs, a_cl, a_csn))
+					s2_courses.sequence_put (create {COURSE}.make(value_1.value.as_string_8, value_2.value.as_string_8,
+							value_3.value.as_string_8, value_4.value.as_string_8))
 				end
 				i := i + 1
 				a_ccn := ccn + i.out
@@ -173,10 +174,9 @@ feature {NONE} -- Commands
 	proceed_s2_examinations(request: WSF_REQUEST)
 		-- Proceeds data from Section #2 Examinations
 		local
-			data: TUPLE[STRING, STRING, STRING, STRING]
+			i: INTEGER
 			ecn, es, eek, esn: STRING
 			a_ecn, a_es, a_eek, a_esn: STRING
-			i: INTEGER
 		do
 			create s2_examinations.make (1)
 			ecn := "examinations-course-name-"
@@ -192,13 +192,14 @@ feature {NONE} -- Commands
 			until
 				not attached {WSF_STRING} request.form_parameter (a_ecn)
 			loop
-				data := ["", "", "", ""]
-				proceed_into_tuple (request, a_ecn, data, 1)
-				proceed_into_tuple (request, a_es, data, 2)
-				proceed_into_tuple (request, a_eek, data, 3)
-				proceed_into_tuple (request, a_esn, data, 4)
-				if attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING]]} s2_examinations as a_examinations then
-					a_examinations.sequence_put (data)
+				if
+					attached {WSF_STRING} request.form_parameter (a_ecn) as value_1 and then
+					attached {WSF_STRING} request.form_parameter (a_es) as value_2 and then
+					attached {WSF_STRING} request.form_parameter (a_eek) as value_3 and then
+					attached {WSF_STRING} request.form_parameter (a_esn) as value_4
+				then
+					s2_examinations.sequence_put (create {EXAM}.make (value_1.value.as_string_8, value_2.value.as_string_8,
+						value_3.value.as_string_8, value_4.value.as_string_8))
 				end
 				i :=  i + 1
 				a_ecn := ecn + i.out
@@ -211,7 +212,6 @@ feature {NONE} -- Commands
 	proceed_s2_students(request: WSF_REQUEST)
 		-- Proceeds data from Section #2 Students
 		local
-			data: TUPLE[STRING, STRING]
 			i: INTEGER
 			ssn, sswn: STRING
 			a_ssn, a_sswn: STRING
@@ -226,13 +226,11 @@ feature {NONE} -- Commands
 			until
 				not attached {WSF_STRING} request.form_parameter (a_ssn)
 			loop
-				data := ["", ""]
-				proceed_into_tuple (request, a_ssn, data, 1)
-				proceed_into_tuple (request, a_ssn, data, 2)
 				if
-					attached {ARRAYED_LIST[TUPLE[STRING, STRING]]} s2_students as a_students
+					attached {WSF_STRING} request.form_parameter (a_ssn) as value_1 and then
+					attached {WSF_STRING} request.form_parameter (a_sswn) as value_2
 				then
-					a_students.sequence_put (data)
+					s2_students.sequence_put (create {STUDENT}.make (value_1.value.as_string_8, value_2.value.as_string_8))
 				end
 				i := i + 1
 				a_ssn := ssn + i.out
@@ -243,7 +241,6 @@ feature {NONE} -- Commands
 	proceed_s2_students_reports(request: WSF_REQUEST)
 		-- Proceeds data from Section #2 Student reports
 		local
-			data: TUPLE[STRING, STRING, STRING]
 			i: INTEGER
 			csrn, csrt, csrpp: STRING
 			a_csrn, a_csrt, a_csrpp: STRING
@@ -260,14 +257,19 @@ feature {NONE} -- Commands
 			until
 				not attached {WSF_STRING} request.form_parameter (a_csrn)
 			loop
-				data := ["", "", ""]
-				proceed_into_tuple(request, a_csrn, data, 1)
-				proceed_into_tuple(request, a_csrt, data, 2)
-				proceed_into_tuple(request, a_csrpp, data, 3)
 				if
-					attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING]]} s2_student_reports as a_student_reports
+					attached {WSF_STRING} request.form_parameter (a_csrn) as value_1 and then
+					attached {WSF_STRING} request.form_parameter (a_csrt) as value_2
 				then
-					a_student_reports.sequence_put (data)
+					if
+						attached {WSF_STRING} request.form_parameter (a_csrpp) as value_3
+					then
+						s2_student_reports.sequence_put (create {STUDENT_REPORT}.make (value_1.value.as_string_8,
+							value_2.value.as_string_8, value_3.value.as_string_8))
+					else
+						s2_student_reports.sequence_put (create {STUDENT_REPORT}.make (value_1.value.as_string_8,
+							value_2.value.as_string_8, ""))
+					end
 				end
 				i := i + 1
 				a_csrn := csrn + i.out
@@ -279,17 +281,14 @@ feature {NONE} -- Commands
 	proceed_s2_phd(request: WSF_REQUEST)
 		-- Proceeds data from Section #2 Phd theses
 		local
-			data: TUPLE[STRING, STRING, STRING]
 			i: INTEGER
 			cptn, cptt, cptpp: STRING
 			a_cptn, a_cptt, a_cptpp: STRING
-			flag: BOOLEAN
 		do
 			create s2_phd.make (1)
 			cptn := "completed-PhD-theses-name-"
 			cptt := "completed-PhD-theses-title-"
 			cptpp := "completed-PhD-theses-publication-plans-"
-			flag := True
 			from
 				i := 1
 				a_cptn := cptn + i.out
@@ -300,37 +299,67 @@ feature {NONE} -- Commands
 				attached {WSF_STRING} request.form_parameter (a_cptt) or
 				attached {WSF_STRING} request.form_parameter (a_cptpp))
 			loop
-				data := ["", "", ""]
-				proceed_into_tuple(request, a_cptn, data, 1)
-				proceed_into_tuple(request, a_cptt, data, 2)
-				proceed_into_tuple(request, a_cptpp, data, 3)
 				if
-					attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING]]} s2_phd as a_phd
+					attached {WSF_STRING} request.form_parameter (a_cptn) as value_1
 				then
-					a_phd.sequence_put (data)
+					if
+						attached {WSF_STRING} request.form_parameter (a_cptt) as value_2
+					then
+						if
+							attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
+						then
+							s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
+								value_2.value.as_string_8, value_3.value.as_string_8))
+						else
+							s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
+														value_2.value.as_string_8, ""))
+						end
+					else
+						if
+							attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
+						then
+							s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
+								"", value_3.value.as_string_8))
+						else
+							s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
+														"", ""))
+						end
+					end
+				else
+					if
+						attached {WSF_STRING} request.form_parameter (a_cptt) as value_2
+					then
+						if
+							attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
+						then
+							s2_phd.sequence_put (create {PHD_THESIS}.make ("",
+								value_2.value.as_string_8, value_3.value.as_string_8))
+						else
+							s2_phd.sequence_put (create {PHD_THESIS}.make ("",
+														value_2.value.as_string_8, ""))
+						end
+					else
+						if
+							attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
+						then
+							s2_phd.sequence_put (create {PHD_THESIS}.make ("",
+								"", value_3.value.as_string_8))
+						end
+					end
 				end
-				flag := False
 				i := i + 1
 				a_cptn := cptn + i.out
 				a_cptt := cptt + i.out
 				a_cptpp := cptpp + i.out
 			end
-			if
-				flag
-			then
-				if
-					attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING]]} s2_phd as a_phd
-				then
-					data := ["", "", ""]
-					a_phd.sequence_put (data)
-				end
-			end
 		end
+
 
 	proceed_s3_grants(request: WSF_REQUEST)
 		-- Proceeds data from Section #3 Grants
 		local
-			data: TUPLE[STRING, STRING, STRING, STRING, STRING, STRING]
+			date_1, date_2: DATE
+			data: TUPLE[STRING, STRING, DATE, DATE, STRING, STRING]
 			i: INTEGER
 			gt, gga, ps, pe, gc, ga: STRING
 			a_gt, a_gga, a_ps, a_pe, a_gc, a_ga: STRING
@@ -353,17 +382,24 @@ feature {NONE} -- Commands
 			until
 				not attached {WSF_STRING} request.form_parameter (a_gt)
 			loop
-				data := ["", "", "", "", "", ""]
-				proceed_into_tuple(request, a_gt, data, 1)
-				proceed_into_tuple(request, a_gga, data, 2)
-				proceed_into_tuple(request, a_ps, data, 3)
-				proceed_into_tuple(request, a_pe, data, 4)
-				proceed_into_tuple(request, a_gc, data, 5)
-				proceed_into_tuple(request, a_ga, data, 6)
 				if
-					attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING, STRING, STRING]]} s3_grants as a_grants
+					attached {WSF_STRING} request.form_parameter (a_gt) as value_1 and then
+					attached {WSF_STRING} request.form_parameter (a_gga) as value_2 and then
+					attached {WSF_STRING} request.form_parameter (a_ps) as value_3 and then
+					attached {WSF_STRING} request.form_parameter (a_pe) as value_4 and then
+					attached {WSF_STRING} request.form_parameter (a_ga) as value_6
 				then
-					a_grants.sequence_put (data)
+					if
+						attached {WSF_STRING} request.form_parameter (a_gc) as value_5
+					then
+						s3_grants.sequence_put (create {GRANT}.make (value_1.value.as_string_8,
+							value_2.value.as_string_8, value_3.value.as_string_8, value_4.value.as_string_8,
+								value_5.value.as_string_8, value_6.value.as_string_8))
+					else
+						s3_grants.sequence_put (create {GRANT}.make (value_1.value.as_string_8,
+							value_2.value.as_string_8, value_3.value.as_string_8, value_4.value.as_string_8,
+								"", value_6.value.as_string_8))
+					end
 				end
 				i := i + 1
 				a_gt := gt + i.out
@@ -380,7 +416,6 @@ feature {NONE} -- Commands
 		local
 			data_1: ARRAYED_LIST[STRING]
 			data_2: ARRAYED_LIST[STRING]
-			data: TUPLE[STRING, ARRAYED_LIST[STRING], ARRAYED_LIST[STRING], STRING, STRING, STRING]
 			i, j: INTEGER
 			rpt, rppin, rpepin, rpsd, rped, rpfs: STRING
 			a_rpt, a_rppin, b_rppin, a_rpepin, b_rpepin, a_rpsd, a_rped, a_rpfs: STRING
@@ -430,15 +465,15 @@ feature {NONE} -- Commands
 				then
 					data_2.sequence_put ("")
 				end
-				data := ["", data_1, data_2, "", "", ""]
-				proceed_into_tuple (request, a_rpt, data, 1)
-				proceed_into_tuple (request, a_rpsd, data, 4)
-				proceed_into_tuple (request, a_rped, data, 5)
-				proceed_into_tuple (request, a_rpfs, data, 6)
 				if
-					attached {ARRAYED_LIST[TUPLE[STRING, ARRAYED_LIST[STRING], ARRAYED_LIST[STRING], STRING, STRING, STRING]]} s3_researh_projects as a_research_projects
- 				then
-					a_research_projects.sequence_put (data)
+					attached {WSF_STRING} request.form_parameter (a_rpt) as value_1 and then
+					attached {WSF_STRING} request.form_parameter (a_rpsd) as value_2 and then
+					attached {WSF_STRING} request.form_parameter (a_rped) as value_3 and then
+					attached {WSF_STRING} request.form_parameter (a_rpfs) as value_4
+				then
+					s3_researh_projects.sequence_put (create {RESEARCH_PROJECT}.make (value_1.value.as_string_8,
+						value_2.value.as_string_8, value_3.value.as_string_8, value_4.value.as_string_8,
+							data_1, data_2))
 				end
 				i := 1
 				a_rpt := rpt + i.out
