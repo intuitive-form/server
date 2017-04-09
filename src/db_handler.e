@@ -19,11 +19,41 @@ feature {NONE}
 
 	init_db
 		local
-			q_modify: SQLITE_MODIFY_STATEMENT
+			q: SQLITE_MODIFY_STATEMENT
 		do
 			create db.make_create_read_write ("db.sqlite")
-			create q_modify.make("CREATE TABLE units (id INTEGER PRIMARY KEY, name TEXT, head TEXT, start_date TEXT, end_date TEXT);", db)
-			q_modify.execute
+			create q.make ("CREATE TABLE units (id INTEGER PRIMARY KEY, name TEXT, head TEXT, start-date INTEGER, end-date INTEGER);", db)
+			q.execute
+			create q.make ("CREATE TABLE courses (id INTEGER PRIMARY KEY, unit INTEGER, name TEXT UNIQUE, semester TEXT UNIQUE, level TEXT, students INTEGER);", db)
+			q.execute
+			create q.make ("CREATE TABLE exams (id INTEGER PRIMARY KEY, unit INTEGER UNIQUE, course INTEGER UNIQUE, type TEXT, students INTEGER);", db)
+			q.execute
+			create q.make ("CREATE TABLE supervisions (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, work TEXT);", db)
+			q.execute
+			create q.make ("CREATE TABLE reports (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, title TEXT, publication TEXT);", db)
+			q.execute
+			create q.make ("CREATE TABLE phd-theses (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, title TEXT, publication TEXT);", db)
+			q.execute
+			create q.make ("CREATE TABLE grants (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, granter TEXT, start-date INTEGER, end-date INTEGER, continuing TEXT, amount INTEGER);", db)
+			q.execute
+			create q.make ("CREATE TABLE researches (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, start-date INTEGER, end-date INTEGER, financing TEXT);", db)
+			q.execute
+			create q.make ("CREATE TABLE research-personnel (id INTEGER PRIMARY KEY, research INTEGER, name TEXT);", db)
+			q.execute
+			create q.make ("CREATE TABLE research-extra-personnel (id INTEGER PRIMARY KEY, research INTEGER, name TEXT);", db)
+			q.execute
+			create q.make ("CREATE TABLE research-collabs (id INTEGER PRIMARY KEY, unit INTEGER, country TEXT, institution TEXT, nature TEXT);", db)
+			q.execute
+			create q.make ("CREATE TABLE collabs-contacts (id INTEGER PRIMARY KEY, collab INTEGER, name TEXT);", db)
+			q.execute
+			create q.make ("CREATE TABLE conference-publications (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT);", db)
+			q.execute
+			create q.make ("CREATE TABLE journal-publications (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT);", db)
+			q.execute
+			create q.make ("CREATE TABLE conference-publications-authors (id INTEGER PRIMARY KEY, publication INTEGER, name TEXT);", db)
+			q.execute
+			create q.make ("CREATE TABLE journal-publications-authors (id INTEGER PRIMARY KEY, journal INTEGER, name TEXT);", db)
+			q.execute
 		end
 
 feature
