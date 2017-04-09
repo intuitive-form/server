@@ -19,6 +19,5 @@ feature {NONE} -- Initialization
 			Precursor
 			set_service_option ("port", 8080)
 			set_service_option ("verbose", "no")
-			set_service_option ("force_single_threaded", true)
 		end
 end

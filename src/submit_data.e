@@ -7,11 +7,15 @@ feature {NONE} -- Initialization
 
 	make(request: WSF_REQUEST)
 		-- Constructor
+		local
+			s1_date_start, s1_date_end: DATE
 		do
 			if
 				-- Section #1
 				attached {WSF_STRING} request.form_parameter ("unit-name") as a_unit_name and then
 				attached {WSF_STRING} request.form_parameter ("head-name")as a_head_name and then
+				attached {WSF_STRING} request.form_parameter ("reporting-period-start") as a_date_start and then
+				attached {WSF_STRING} request.form_parameter ("reporting-period-end") as a_date_end and then
 
 				-- Section #2
 				attached {WSF_STRING} request.form_parameter ("courses-course-name-1")as a_c_c_name_1 and then
@@ -39,7 +43,12 @@ feature {NONE} -- Initialization
 				attached {WSF_STRING} request.form_parameter ("research-projects-end-date-1")as a_r_p_e_date_1
 			then
 				is_correct := True
-				proceed_s1_general (request)
+
+				create s1_date_start.make_from_string (a_date_start.value, "yyyy-[0]mm-[0]dd")
+				create s1_date_end.make_from_string (a_date_end.value, "yyyy-[0]mm-[0]dd")
+
+				s1_general := [a_unit_name.value.to_string_8, a_head_name.value.to_string_8, s1_date_start, s1_date_end]
+
 				proceed_s2_courses (request)
 				proceed_s2_examinations(request)
 				proceed_s2_students (request)
@@ -58,7 +67,7 @@ feature -- Attributes
 	is_correct: BOOLEAN
 		-- True if the submitted form is correct
 
-	s1_general: detachable TUPLE[STRING_8, STRING_8, STRING_8, STRING_8]
+	s1_general: detachable TUPLE[STRING_8, STRING_8, DATE, DATE]
 		-- Section #1 General: Name of unit / Name of head unit / Start of the reporting period /
 		-- /End of the reporting period
 
@@ -87,7 +96,7 @@ feature -- Attributes
 
 feature -- Queries
 
-feature -- Commands
+feature {NONE} -- Commands
 
 	proceed_into_tuple(request: WSF_REQUEST; param_name: STRING; tuple: TUPLE; index: INTEGER)
 		-- Proceeds form parameter with 'param_name' from 'request' into 'tuple' with 'index'
@@ -103,39 +112,25 @@ feature -- Commands
 					attached {TUPLE[STRING, ARRAYED_LIST[STRING], ARRAYED_LIST[STRING], STRING, STRING, STRING]} tuple as t
 				then
 					t.put (value.value.as_string_8, index)
-				end
-				if
+				elseif
 					attached {TUPLE[STRING, STRING, STRING, STRING, STRING, STRING]} tuple as t
 				then
 					t.put(value.value.as_string_8, index)
-				end
-				if
+				elseif
 					attached {TUPLE[STRING, STRING, STRING, STRING]} tuple as t
 				then
 					t.put(value.value.as_string_8, index)
-				end
-				if
+				elseif
 					attached {TUPLE[STRING, STRING, STRING]} tuple as t
 				then
 					t.put (value.value.as_string_8, index)
-				end
-				if
+				elseif
 					attached {TUPLE[STRING, STRING]} tuple as t
 				then
 					t.put (value.value.as_string_8, index)
 				end
 			end
 
-		end
-
-	proceed_s1_general(request: WSF_REQUEST)
-		-- Proceeds data from Section #1 General
-		do
-			s1_general := ["", "", "", ""]
-			proceed_into_tuple (request, "unit-name", s1_general, 1)
-			proceed_into_tuple (request, "head-name", s1_general, 2)
-			proceed_into_tuple (request, "reporting-period-start", s1_general, 3)
-			proceed_into_tuple (request, "reporting-period-end", s1_general, 4)
 		end
 
 	proceed_s2_courses(request: WSF_REQUEST)
@@ -394,7 +389,7 @@ feature -- Commands
 			create s3_researh_projects.make(1)
 			rpt := "research-projects-title-"
 			rppin := "research-projects-personnel-involved-name-"
-			rpepin := "research-projects-extra-personnel-involved-name-1-"
+			rpepin := "research-projects-extra-personnel-involved-name-"
 			rpsd := "research-projects-start-date-"
 			rped := "research-projects-end-date-"
 			rpfs := "research-projects-financing-sources-"
@@ -410,18 +405,14 @@ feature -- Commands
 				not attached {WSF_STRING} request.form_parameter (a_rpt)
 			loop
 				create data_1.make (1)
-				create data_1.make (1)
+				create data_2.make (1)
 				from
 					j := 1
 					b_rppin := a_rppin + i.out
 				until
 					not attached {WSF_STRING} request.form_parameter (b_rppin) as value
 				loop
-					if
-						attached {ARRAYED_LIST[STRING]} data_1 as a_data
-					then
-						a_data.sequence_put (value.value.as_string_8)
-					end
+					data_1.sequence_put (value.value.as_string_8)
 					j := j + 1
 					b_rppin := a_rppin + i.out
 				end
@@ -431,25 +422,16 @@ feature -- Commands
 				until
 					not attached {WSF_STRING} request.form_parameter (b_rpepin) as value
 				loop
-					if
-						attached {ARRAYED_LIST[STRING]} data_2 as a_data
-					then
-						a_data.sequence_put (value.value.as_string_8)
-					end
+					data_2.sequence_put (value.value.as_string_8)
 					j := j + 1
 					b_rpepin := a_rpepin + i.out
 				end
 				if
-				 	attached {ARRAYED_LIST[STRING]} data_2 as a_data and then a_data.count = 0
+				    data_2.count = 0
 				then
-					a_data.sequence_put ("")
+					data_2.sequence_put ("")
 				end
-				if
-					attached {ARRAYED_LIST[STRING]} data_1 as a_data_1 and then
-					attached {ARRAYED_LIST[STRING]} data_2 as a_data_2
-				then
-					data := ["", a_data_1, a_data_2, "", "", ""]
-				end
+				data := ["", data_1, data_2, "", "", ""]
 				proceed_into_tuple (request, a_rpt, data, 1)
 				proceed_into_tuple (request, a_rpsd, data, 4)
 				proceed_into_tuple (request, a_rped, data, 5)
