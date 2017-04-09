@@ -392,12 +392,12 @@ feature -- Commands
 			a_rpt, a_rppin, b_rppin, a_rpepin, b_rpepin, a_rpsd, a_rped, a_rpfs: STRING
 		do
 			create s3_researh_projects.make(1)
-			rpt := ""
-			rppin := ""
-			rpepin := ""
-			rpsd := ""
-			rped := ""
-			rpfs := ""
+			rpt := "research-projects-title-"
+			rppin := "research-projects-personnel-involved-name-"
+			rpepin := "research-projects-extra-personnel-involved-name-1-"
+			rpsd := "research-projects-start-date-"
+			rped := "research-projects-end-date-"
+			rpfs := "research-projects-financing-sources-"
 			from
 				i := 1
 				a_rpt := rpt + i.out
