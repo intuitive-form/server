@@ -71,7 +71,7 @@ feature -- Attributes
 		-- Section #1 General: Name of unit / Name of head unit / Start of the reporting period /
 		-- /End of the reporting period
 
-	s2_courses: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING]]
+	s2_courses: detachable ARRAYED_LIST[COURSE]
 		-- Section #2 Courses: Course Name / Semester / Level / Number of students
 
 	s2_examinations: detachable ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING]]
@@ -136,7 +136,6 @@ feature {NONE} -- Commands
 	proceed_s2_courses(request: WSF_REQUEST)
 		-- Proceeds data from Section #2 Courses
 		local
-			data: TUPLE[STRING, STRING, STRING, STRING]
 			i: INTEGER
 			ccn, cs, cl, csn: STRING
 			a_ccn, a_cs, a_cl, a_csn: STRING
@@ -153,15 +152,15 @@ feature {NONE} -- Commands
 				a_cl := cl + i.out
 				a_csn := csn + i.out
 			until
-				attached {WSF_STRING} request.form_parameter(a_ccn)
+				not attached {WSF_STRING} request.form_parameter(a_ccn)
 			loop
-				data := ["", "", "", ""]
-				proceed_into_tuple (request, a_ccn, data, 1)
-				proceed_into_tuple (request, a_cs, data, 2)
-				proceed_into_tuple (request, a_cl, data, 3)
-				proceed_into_tuple (request, a_csn, data, 4)
-				if attached {ARRAYED_LIST[TUPLE[STRING, STRING, STRING, STRING]]} s2_courses as a_courses then
-					a_courses.sequence_put (data)
+				if
+					attached {WSF_STRING} request.form_parameter(a_ccn) and then
+					attached {WSF_STRING} request.form_parameter(a_cs) and then
+					attached {WSF_STRING} request.form_parameter(a_cl) and then
+					attached {WSF_STRING} request.form_parameter(a_csn)
+				then
+					s2_courses.sequence_put (create {COURSE}.make(a_ccn, a_cs, a_cl, a_csn))
 				end
 				i := i + 1
 				a_ccn := ccn + i.out
