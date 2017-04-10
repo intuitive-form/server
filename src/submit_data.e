@@ -143,15 +143,20 @@ feature {NONE} -- Proceeding features
 				a_csd := csd + i.out
 				a_ced := ced + i.out
 			until
-				not attached {WSF_STRING} request.form_parameter(a_ccn)
+				not	attached {WSF_STRING} request.form_parameter(a_ccn) as value_1 or else
+				not	attached {WSF_STRING} request.form_parameter(a_cs) as value_2 or else
+				not	attached {WSF_STRING} request.form_parameter(a_cl) as value_3 or else
+				not	attached {WSF_STRING} request.form_parameter(a_csn) as value_4 or else
+				not	attached {WSF_STRING} request.form_parameter (a_csd) as value_date_s or else
+				not	attached {WSF_STRING} request.form_parameter (a_ced) as value_date_e
 			loop
 				if
-					attached {WSF_STRING} request.form_parameter(a_ccn) as value_1 and then
-					attached {WSF_STRING} request.form_parameter(a_cs) as value_2 and then
-					attached {WSF_STRING} request.form_parameter(a_cl) as value_3 and then
-					attached {WSF_STRING} request.form_parameter(a_csn) as value_4 and then
-					attached {WSF_STRING} request.form_parameter (a_csd) as value_date_s and then
-					attached {WSF_STRING} request.form_parameter (a_ced) as value_date_e
+					not value_1.value.as_string_8.is_empty and then
+					not value_2.value.as_string_8.is_empty and then
+					not value_3.value.as_string_8.is_empty and then
+					not value_4.value.as_string_8.is_empty and then
+					not value_date_s.value.as_string_8.is_empty and then
+					not value_date_e.value.as_string_8.is_empty
 				then
 					s2_courses.sequence_put (create {COURSE}.make(value_1.value.as_string_8, value_2.value.as_string_8,
 							value_3.value.as_string_8, value_4.value.as_string_8, value_date_s.value.as_string_8,
@@ -186,13 +191,16 @@ feature {NONE} -- Proceeding features
 				a_eek := eek + i.out
 				a_esn := esn + i.out
 			until
-				not attached {WSF_STRING} request.form_parameter (a_ecn)
+				not attached {WSF_STRING} request.form_parameter (a_ecn) as value_1 or else
+				not	attached {WSF_STRING} request.form_parameter (a_es) as value_2 or else
+				not	attached {WSF_STRING} request.form_parameter (a_eek) as value_3 or else
+				not	attached {WSF_STRING} request.form_parameter (a_esn) as value_4
 			loop
 				if
-					attached {WSF_STRING} request.form_parameter (a_ecn) as value_1 and then
-					attached {WSF_STRING} request.form_parameter (a_es) as value_2 and then
-					attached {WSF_STRING} request.form_parameter (a_eek) as value_3 and then
-					attached {WSF_STRING} request.form_parameter (a_esn) as value_4
+					not value_1.value.as_string_8.is_empty and then
+					not value_2.value.as_string_8.is_empty and then
+					not value_3.value.as_string_8.is_empty and then
+					not value_4.value.as_string_8.is_empty
 				then
 					s2_examinations.sequence_put (create {EXAM}.make (value_1.value.as_string_8, value_2.value.as_string_8,
 						value_3.value.as_string_8, value_4.value.as_string_8))
@@ -220,11 +228,12 @@ feature {NONE} -- Proceeding features
 				a_ssn := ssn + i.out
 				a_sswn := sswn + i.out
 			until
-				not attached {WSF_STRING} request.form_parameter (a_ssn)
+				not attached {WSF_STRING} request.form_parameter (a_ssn) as value_1 or else
+				not	attached {WSF_STRING} request.form_parameter (a_sswn) as value_2
 			loop
 				if
-					attached {WSF_STRING} request.form_parameter (a_ssn) as value_1 and then
-					attached {WSF_STRING} request.form_parameter (a_sswn) as value_2
+					not value_1.value.as_string_8.is_empty and then
+					not value_2.value.as_string_8.is_empty
 				then
 					s2_students.sequence_put (create {STUDENT}.make (value_1.value.as_string_8, value_2.value.as_string_8))
 				end
@@ -251,11 +260,12 @@ feature {NONE} -- Proceeding features
 				a_csrt := csrt + i.out
 				a_csrpp := csrpp + i.out
 			until
-				not attached {WSF_STRING} request.form_parameter (a_csrn)
+				not attached {WSF_STRING} request.form_parameter (a_csrn) as value_1 or else
+				not	attached {WSF_STRING} request.form_parameter (a_csrt) as value_2
 			loop
 				if
-					attached {WSF_STRING} request.form_parameter (a_csrn) as value_1 and then
-					attached {WSF_STRING} request.form_parameter (a_csrt) as value_2
+					not value_1.value.is_empty and then
+					not value_2.value.is_empty
 				then
 					if
 						attached {WSF_STRING} request.form_parameter (a_csrpp) as value_3
@@ -374,14 +384,18 @@ feature {NONE} -- Proceeding features
 				a_gc := gc + i.out
 				a_ga := ga + i.out
 			until
-				not attached {WSF_STRING} request.form_parameter (a_gt)
+				not attached {WSF_STRING} request.form_parameter (a_gt) as value_1 or else
+				not	attached {WSF_STRING} request.form_parameter (a_gga) as value_2 or else
+				not	attached {WSF_STRING} request.form_parameter (a_ps) as value_3 or else
+				not	attached {WSF_STRING} request.form_parameter (a_pe) as value_4 or else
+				not	attached {WSF_STRING} request.form_parameter (a_ga) as value_6
 			loop
 				if
-					attached {WSF_STRING} request.form_parameter (a_gt) as value_1 and then
-					attached {WSF_STRING} request.form_parameter (a_gga) as value_2 and then
-					attached {WSF_STRING} request.form_parameter (a_ps) as value_3 and then
-					attached {WSF_STRING} request.form_parameter (a_pe) as value_4 and then
-					attached {WSF_STRING} request.form_parameter (a_ga) as value_6
+					not value_1.value.as_string_8.is_empty and then
+					not value_2.value.as_string_8.is_empty and then
+					not value_3.value.as_string_8.is_empty and then
+					not value_4.value.as_string_8.is_empty and then
+					not value_6.value.as_string_8.is_empty
 				then
 					if
 						attached {WSF_STRING} request.form_parameter (a_gc) as value_5
@@ -430,43 +444,43 @@ feature {NONE} -- Proceeding features
 				a_rped := rped + i.out
 				a_rpfs := rpfs + i.out
 			until
-				not attached {WSF_STRING} request.form_parameter (a_rpt)
+				not attached {WSF_STRING} request.form_parameter (a_rpt) as value_1 or else
+				not	attached {WSF_STRING} request.form_parameter (a_rpsd) as value_2 or else
+				not	attached {WSF_STRING} request.form_parameter (a_rped) as value_3 or else
+				not	attached {WSF_STRING} request.form_parameter (a_rpfs) as value_4
 			loop
-				create data_1.make (1)
-				create data_2.make (1)
-
-				from
-					j := 1
-					b_rppin := a_rppin + j.out
-				until
-					not attached {WSF_STRING} request.form_parameter (b_rppin) as value
-				loop
-					io.new_line
-					data_1.sequence_put (value.value.as_string_8)
-					j := j + 1
-					b_rppin := a_rppin + j.out
-				end
-
-				from
-					j := 1
-					b_rpepin := a_rpepin + j.out
-				until
-					not attached {WSF_STRING} request.form_parameter (b_rpepin) as value
-				loop
-					data_2.sequence_put (value.value.as_string_8)
-					j := j + 1
-					b_rpepin := a_rpepin + j.out
-				end
-
 				if
-					attached {WSF_STRING} request.form_parameter (a_rpt) as value_1 and then
-					attached {WSF_STRING} request.form_parameter (a_rpsd) as value_2 and then
-					attached {WSF_STRING} request.form_parameter (a_rped) as value_3 and then
-					attached {WSF_STRING} request.form_parameter (a_rpfs) as value_4
+					not value_1.value.as_string_8.is_empty and then
+					not value_2.value.as_string_8.is_empty and then
+					not value_3.value.as_string_8.is_empty and then
+					not value_4.value.as_string_8.is_empty
 				then
+					create data_1.make (1)
+					create data_2.make (1)
+					from
+						j := 1
+						b_rppin := a_rppin + j.out
+					until
+						not attached {WSF_STRING} request.form_parameter (b_rppin) as value
+					loop
+						io.new_line
+						data_1.sequence_put (value.value.as_string_8)
+						j := j + 1
+						b_rppin := a_rppin + j.out
+					end
+					from
+						j := 1
+						b_rpepin := a_rpepin + j.out
+					until
+						not attached {WSF_STRING} request.form_parameter (b_rpepin) as value
+					loop
+						data_2.sequence_put (value.value.as_string_8)
+						j := j + 1
+						b_rpepin := a_rpepin + j.out
+					end
 					s3_research_projects.sequence_put (create {RESEARCH_PROJECT}.make (value_1.value.as_string_8,
 						value_2.value.as_string_8, value_3.value.as_string_8, value_4.value.as_string_8,
-							data_1, data_2))
+						data_1, data_2))
 				end
 				i := i + 1
 				a_rpt := rpt + i.out
@@ -590,22 +604,27 @@ feature {NONE} -- Proceeding features
 				not attached {WSF_STRING} request.form_parameter(a_cpt) as value_1 or
 				not attached {WSF_STRING} request.form_parameter (a_cpd) as value_date
 			loop
-				create data_1.make (1)
-				from
-					j := 1
-					b_cpa := a_cpa + j.out
-				until
-					not attached {WSF_STRING} request.form_parameter(b_cpa) as value
-				loop
-					data_1.sequence_put (value.value.as_string_8)
-					j := j + 1
-					b_cpa := a_cpa + j.out
+				if
+					not value_1.value.as_string_8.is_empty and then
+					not value_date.value.as_string_8.is_empty
+				then
+					create data_1.make (1)
+					from
+						j := 1
+						b_cpa := a_cpa + j.out
+					until
+						not attached {WSF_STRING} request.form_parameter(b_cpa) as value
+					loop
+						data_1.sequence_put (value.value.as_string_8)
+						j := j + 1
+						b_cpa := a_cpa + j.out
+					end
+					s3_conference_publications.sequence_put (create {PUBLICATION}.make (
+						value_1.value.as_string_8,
+						value_date.value.as_string_8,
+						data_1)
+					)
 				end
-				s3_conference_publications.sequence_put (create {PUBLICATION}.make (
-					value_1.value.as_string_8,
-					value_date.value.as_string_8,
-					data_1)
-				)
 				i := i + 1
 				a_cpt := cpt + i.out
 				a_cpa := cpa + i.out + "-"
@@ -634,22 +653,27 @@ feature {NONE} -- Proceeding features
 				not attached {WSF_STRING} request.form_parameter(a_cpt) as value_1 or
 				not attached {WSF_STRING} request.form_parameter (a_cpd) as value_date
 			loop
-				create data_1.make (1)
-				from
-					j := 1
-					b_cpa := a_cpa + j.out
-				until
-					not attached {WSF_STRING} request.form_parameter(b_cpa) as value
-				loop
-					data_1.sequence_put (value.value.as_string_8)
-					j := j + 1
-					b_cpa := a_cpa + j.out
+				if
+					not value_1.value.as_string_8.is_empty and then
+					not value_date.value.as_string_8.is_empty
+				then
+					create data_1.make (1)
+					from
+						j := 1
+						b_cpa := a_cpa + j.out
+					until
+						not attached {WSF_STRING} request.form_parameter(b_cpa) as value
+					loop
+						data_1.sequence_put (value.value.as_string_8)
+						j := j + 1
+						b_cpa := a_cpa + j.out
+					end
+					s3_journal_publications.sequence_put (create {PUBLICATION}.make (
+						value_1.value.as_string_8,
+						value_date.value.as_string_8,
+						data_1)
+					)
 				end
-				s3_journal_publications.sequence_put (create {PUBLICATION}.make (
-					value_1.value.as_string_8,
-					value_date.value.as_string_8,
-					data_1)
-				)
 				i := i + 1
 				a_cpt := cpt + i.out
 				a_cpa := cpa + i.out + "-"
