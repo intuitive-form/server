@@ -27,26 +27,31 @@ feature -- Execution
 		local
 			db: DB_HANDLER
 			path: STRING_8
+			list: LINKED_LIST[STRING]
 		do
 			if request.is_get_request_method then
 				path := request.path_info.as_string_8
-				if path ~ "/units" then
+				if path.starts_with ("/units/") then
 					create db.make
 					answer_with_array(db.unit_names)
-				elseif path.starts_with ("/pubs/") then
-					if path.count > 6 and then path.substring (7, path.count).is_integer then
-						create db.make
-						io.put_string (path.substring (7, path.count))
-						io.new_line
-						answer_with_array(db.conf_pubs (path.substring (7, path.count).to_integer))
+				elseif path.starts_with ("/courses/") then
+					create db.make
+					if path.count > ("/courses/").count then
+						answer_with_array(db.courses_of_unit (path.substring (("/courses/").count + 1, path.count)))
+					else
+						answer_with_array(db.courses)
 					end
-				elseif path.starts_with ("/journal-pubs/") then
-					if path.count > 14 and then path.substring (15, path.count).is_integer then
-						create db.make
-						io.put_string (path.substring (15, path.count))
-						io.new_line
-						answer_with_array(db.journal_pubs (path.substring (15, path.count).to_integer))
-					end
+				elseif path.starts_with ("/conference-pubs/") and attached path.substring (("/conference-pubs/").count + 1, path.count) as param and then param.is_integer then
+					create db.make
+					answer_with_array(db.conf_pubs (param.to_integer))
+				elseif path.starts_with ("/journal-pubs/") and attached path.substring (("/journal-pubs/").count + 1, path.count) as param and then param.is_integer then
+					create db.make
+					answer_with_array(db.journal_pubs (param.to_integer))
+				elseif path.starts_with ("/pubs/") and attached path.substring (("/pubs/").count + 1, path.count) as param and then param.is_integer then
+					create db.make
+					list := db.journal_pubs (param.to_integer)
+					list.append (db.conf_pubs (param.to_integer))
+					answer_with_array(list)
 				else
 					answer_get
 				end
@@ -58,7 +63,9 @@ feature -- Execution
 
 feature {NONE}
 
-	answer_with_array(arr: ITERABLE[STRING])
+
+
+	answer_with_array(arr: LINKED_LIST[STRING])
 		local
 			mesg: WSF_PAGE_RESPONSE
 		do
@@ -83,13 +90,13 @@ feature {NONE}
 			if path.at (path.count) = '/' then
 				path := path + "index.html"
 			end
-			create reader.make_with_path (create {PATH}.make_from_string (path))
 			create mesg.make
-			if not reader.exists then
+			if not (create {RAW_FILE}.make_with_name(path)).exists then
 				mesg.set_status_code (404)
 				mesg.header.put_content_type_text_html
 				mesg.set_body (get_404)
 			else
+				create reader.make_with_path (create {PATH}.make_from_string (path))
 				if path.ends_with (".html") then
 					mesg.header.put_content_type_text_html
 				elseif path.ends_with (".js") then

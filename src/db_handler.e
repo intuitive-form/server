@@ -17,6 +17,11 @@ feature {NONE}
 			end
 		end
 
+	handler(i: NATURAL): BOOLEAN
+		do
+			Result := true
+		end
+
 	init_db
 		local
 			q: SQLITE_MODIFY_STATEMENT
@@ -78,8 +83,8 @@ feature
 			end
 
 			create q_insert.make ("INSERT INTO courses (unit, name, semester, level, students) VALUES (?1, ?2, ?3, ?4, ?5);", db)
-			check attached data.s2_courses as courses then
-				across courses as c loop
+			check attached data.s2_courses as crss then
+				across crss as c loop
 					q_insert.execute_with_arguments (<<unit_id, c.item.name, c.item.semester, c.item.level, c.item.students>>)
 				end
 			end
@@ -182,21 +187,19 @@ feature
 			io.put_string ("Inserted in DB%N")
 		end
 
-	unit_names: ITERABLE[STRING]
+	unit_names: LINKED_LIST[STRING]
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 		do
 			create q_select.make ("SELECT name FROM units;", db)
-			create {LINKED_LIST[STRING]} Result.make
+			create Result.make
 
-			check attached {LINKED_LIST[STRING]} Result as list then
-				across q_select.execute_new as it loop
-					list.put_front (it.item.string_value(1))
-				end
+			across q_select.execute_new as it loop
+				Result.put_front (it.item.string_value(1))
 			end
 		end
 
-	conf_pubs(year: INTEGER): ITERABLE[STRING]
+	conf_pubs(year: INTEGER): LINKED_LIST[STRING]
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 			date_1, date_2: DATE
@@ -205,19 +208,13 @@ feature
 			create date_1.make (year, 1, 1)
 			create date_2.make (year + 1, 1, 1)
 			date_2.day_back
-			create {LINKED_LIST[STRING]} Result.make
-			io.put_integer_64 (date_1.days)
-			io.put_character (' ')
-			io.put_integer_64 (date_2.days)
-			io.new_line
-			check attached {LINKED_LIST[STRING]} Result as list then
-				across q_select.execute_new_with_arguments (<<date_1.days, date_2.days>>) as i loop
-					list.put_front(i.item.string_value (1))
-				end
+			create Result.make
+			across q_select.execute_new_with_arguments (<<date_1.days, date_2.days>>) as i loop
+				Result.put_front(i.item.string_value (1))
 			end
 		end
 
-	journal_pubs(year: INTEGER): ITERABLE[STRING]
+	journal_pubs(year: INTEGER): LINKED_LIST[STRING]
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 			date_1, date_2: DATE
@@ -226,14 +223,37 @@ feature
 			create date_1.make (year, 1, 1)
 			create date_2.make (year + 1, 1, 1)
 			date_2.day_back
-			create {LINKED_LIST[STRING]} Result.make
-			io.put_integer_64 (date_1.days)
-			io.put_character (' ')
-			io.put_integer_64 (date_2.days)
+			create Result.make
+			across q_select.execute_new_with_arguments (<<date_1.days, date_2.days>>) as i loop
+				Result.put_front(i.item.string_value (1))
+			end
+		end
+
+	courses: LINKED_LIST[STRING]
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+		do
+			create q_select.make ("SELECT name FROM courses;", db)
+			create Result.make
+			across q_select.execute_new as i loop
+				Result.put_front(i.item.string_value (1))
+			end
+		end
+
+	courses_of_unit(unit: STRING): LINKED_LIST[STRING]
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+			it: SQLITE_STATEMENT_ITERATION_CURSOR
+		do
+			io.put_string (unit)
 			io.new_line
-			check attached {LINKED_LIST[STRING]} Result as list then
-				across q_select.execute_new_with_arguments (<<date_1.days, date_2.days>>) as i loop
-					list.put_front(i.item.string_value (1))
+			create Result.make
+			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
+			it := q_select.execute_new_with_arguments(<<unit>>)
+			if not it.after and then attached it.item.integer_value (1) as unit_id then
+				create q_select.make ("SELECT name FROM courses WHERE unit = ?1;", db)
+				across q_select.execute_new_with_arguments (<<unit_id>>) as i loop
+					Result.put_front(i.item.string_value (1))
 				end
 			end
 		end
