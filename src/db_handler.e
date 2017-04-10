@@ -200,6 +200,18 @@ feature
 			end
 		end
 
+	head_name(unit: STRING): STRING
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+		do
+			create q_select.make ("SELECT head FROM units WHERE name = ?1;", db)
+			check attached q_select.execute_new_with_arguments (<<unit>>) as it then
+				if not it.after then
+					Result := it.item.string_value(1)
+				end
+			end
+		end
+
 	conf_pubs(year: INTEGER): LINKED_LIST[STRING]
 		local
 			q_select: SQLITE_QUERY_STATEMENT
@@ -272,6 +284,48 @@ feature
 			if not it.after and then attached it.item.integer_value (1) as unit_id then
 				create q_select.make ("SELECT name FROM courses WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)
 				across q_select.execute_new_with_arguments (<<unit_id, date1.days, date2.days>>) as i loop
+					Result.put_front(i.item.string_value (1))
+				end
+			end
+		end
+
+	grants_of_unit(unit: STRING): LINKED_LIST[STRING]
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+			it: SQLITE_STATEMENT_ITERATION_CURSOR
+		do
+			io.put_string (unit)
+			io.new_line
+			create Result.make
+			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
+			it := q_select.execute_new_with_arguments(<<unit>>)
+			if not it.after and then attached it.item.integer_value (1) as unit_id then
+				create q_select.make ("SELECT title, granter, continuing, amount FROM grants WHERE unit = ?1;", db)
+				across q_select.execute_new_with_arguments (<<unit_id>>) as i loop
+					Result.put_front(i.item.string_value (4))
+					Result.put_front(i.item.string_value (3))
+					Result.put_front(i.item.string_value (2))
+					Result.put_front(i.item.string_value (1))
+				end
+			end
+		end
+
+	grants_of_unit_between_dates(unit: STRING; date1, date2: DATE): LINKED_LIST[STRING]
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+			it: SQLITE_STATEMENT_ITERATION_CURSOR
+		do
+			io.put_string (unit)
+			io.new_line
+			create Result.make
+			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
+			it := q_select.execute_new_with_arguments(<<unit>>)
+			if not it.after and then attached it.item.integer_value (1) as unit_id then
+				create q_select.make ("SELECT title, granter, continuing, amount FROM grants WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)
+				across q_select.execute_new_with_arguments (<<unit_id, date1.days, date2.days>>) as i loop
+					Result.put_front(i.item.string_value (4))
+					Result.put_front(i.item.string_value (3))
+					Result.put_front(i.item.string_value (2))
 					Result.put_front(i.item.string_value (1))
 				end
 			end

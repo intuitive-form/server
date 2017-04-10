@@ -51,9 +51,30 @@ feature -- Execution
 					else
 						answer_with_array(db.courses)
 					end
+				elseif path.starts_with ("/grants/") then
+					create db.make
+					params := path.substring (("/grants/").count + 1, path.count).split ('/')
+					if path.count > ("/grants/").count then
+						if params.count = 1 then
+							answer_with_array(db.grants_of_unit (params.at (1)))
+						elseif params.count = 3 then
+							answer_with_array(db.grants_of_unit_between_dates (
+								params.at (1),
+								create {DATE}.make_from_string(params.at (2), "yyyy-[0]mm-[0]dd"),
+								create {DATE}.make_from_string(params.at (3), "yyyy-[0]mm-[0]dd")
+							))
+						end
+					else
+						answer_with_array(db.courses)
+					end
 				elseif path.starts_with ("/conference-pubs/") and attached path.substring (("/conference-pubs/").count + 1, path.count) as param and then param.is_integer then
 					create db.make
 					answer_with_array(db.conf_pubs (param.to_integer))
+				elseif path.starts_with ("/head/") and attached path.substring (("/head/").count + 1, path.count) as param then
+					create db.make
+					create {ARRAYED_LIST[STRING]} params.make (1)
+					params.sequence_put (db.head_name (path.substring (("/head/").count + 1, path.count)))
+					answer_with_array(params)
 				elseif path.starts_with ("/journal-pubs/") and attached path.substring (("/journal-pubs/").count + 1, path.count) as param and then param.is_integer then
 					create db.make
 					answer_with_array(db.journal_pubs (param.to_integer))
@@ -75,7 +96,7 @@ feature {NONE}
 
 
 
-	answer_with_array(arr: LINKED_LIST[STRING])
+	answer_with_array(arr: LIST[STRING])
 		local
 			mesg: WSF_PAGE_RESPONSE
 		do
