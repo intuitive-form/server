@@ -15,6 +15,7 @@ feature {NONE}
 			else
 				init_db
 			end
+			db.set_busy_handler (agent handler)
 		end
 
 	handler(i: NATURAL): BOOLEAN
@@ -29,7 +30,7 @@ feature {NONE}
 			create db.make_create_read_write ("db.sqlite")
 			create q.make ("CREATE TABLE units (id INTEGER PRIMARY KEY, name TEXT UNIQUE, head TEXT, start_date INTEGER, end_date INTEGER);", db)
 			q.execute
-			create q.make ("CREATE TABLE courses (id INTEGER PRIMARY KEY, unit INTEGER, name TEXT, semester TEXT, level TEXT, students INTEGER, CONSTRAINT course_unique UNIQUE (name, semester));", db)
+			create q.make ("CREATE TABLE courses (id INTEGER PRIMARY KEY, unit INTEGER, name TEXT, semester TEXT, level TEXT, students INTEGER, start_date INTEGER, end_date INTEGER, CONSTRAINT course_unique UNIQUE (name, semester));", db)
 			q.execute
 			create q.make ("CREATE TABLE exams (id INTEGER PRIMARY KEY, unit INTEGER, course INTEGER, type TEXT, students INTEGER);", db)
 			q.execute
@@ -82,17 +83,17 @@ feature
 				unit_id := q_insert.last_row_id
 			end
 
-			create q_insert.make ("INSERT INTO courses (unit, name, semester, level, students) VALUES (?1, ?2, ?3, ?4, ?5);", db)
+			create q_insert.make ("INSERT INTO courses (unit, name, semester, level, students, start_date, end_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);", db)
 			check attached data.s2_courses as crss then
 				across crss as c loop
-					q_insert.execute_with_arguments (<<unit_id, c.item.name, c.item.semester, c.item.level, c.item.students>>)
+					q_insert.execute_with_arguments (<<unit_id, c.item.name, c.item.semester, c.item.level, c.item.students, c.item.start_date.days, c.item.end_date.days>>)
 				end
 			end
 
 			create q_insert.make ("INSERT INTO exams (unit, course, type, students) VALUES (?1, ?2, ?3, ?4);", db)
-			create q_select.make ("SELECT id FROM courses WHERE name = ?1 AND semester = ?2;", db)
 			check attached data.s2_examinations as exams then
 				across exams as e loop
+					create q_select.make ("SELECT id FROM courses WHERE name = ?1 AND semester = ?2;", db)
 					check attached q_select.execute_new_with_arguments (<<e.item.course_name, e.item.semester>>) as ic then
 						if not ic.after then
 							course_id := ic.item.integer_64_value (1)
@@ -253,6 +254,24 @@ feature
 			if not it.after and then attached it.item.integer_value (1) as unit_id then
 				create q_select.make ("SELECT name FROM courses WHERE unit = ?1;", db)
 				across q_select.execute_new_with_arguments (<<unit_id>>) as i loop
+					Result.put_front(i.item.string_value (1))
+				end
+			end
+		end
+
+	courses_of_unit_between_dates(unit: STRING; date1, date2: DATE): LINKED_LIST[STRING]
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+			it: SQLITE_STATEMENT_ITERATION_CURSOR
+		do
+			io.put_string (unit)
+			io.new_line
+			create Result.make
+			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
+			it := q_select.execute_new_with_arguments(<<unit>>)
+			if not it.after and then attached it.item.integer_value (1) as unit_id then
+				create q_select.make ("SELECT name FROM courses WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)
+				across q_select.execute_new_with_arguments (<<unit_id, date1.days, date2.days>>) as i loop
 					Result.put_front(i.item.string_value (1))
 				end
 			end

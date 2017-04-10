@@ -28,6 +28,7 @@ feature -- Execution
 			db: DB_HANDLER
 			path: STRING_8
 			list: LINKED_LIST[STRING]
+			params: LIST[STRING]
 		do
 			if request.is_get_request_method then
 				path := request.path_info.as_string_8
@@ -36,8 +37,17 @@ feature -- Execution
 					answer_with_array(db.unit_names)
 				elseif path.starts_with ("/courses/") then
 					create db.make
+					params := path.substring (("/courses/").count + 1, path.count).split ('/')
 					if path.count > ("/courses/").count then
-						answer_with_array(db.courses_of_unit (path.substring (("/courses/").count + 1, path.count)))
+						if params.count = 1 then
+							answer_with_array(db.courses_of_unit (params.at (1)))
+						elseif params.count = 3 then
+							answer_with_array(db.courses_of_unit_between_dates (
+								params.at (1),
+								create {DATE}.make_from_string(params.at (2), "yyyy-[0]mm-[0]dd"),
+								create {DATE}.make_from_string(params.at (3), "yyyy-[0]mm-[0]dd")
+							))
+						end
 					else
 						answer_with_array(db.courses)
 					end
