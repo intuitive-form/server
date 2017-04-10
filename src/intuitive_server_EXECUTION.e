@@ -33,11 +33,23 @@ feature -- Execution
 				if path ~ "/units" then
 					create db.make
 					answer_with_array(db.unit_names)
-				elseif path.starts_with ("/pubs/") and path.substring (7, path.count - 1).is_integer then
-					create db.make
-					answer_with_array(db.publications (path.substring (7, path.count - 1).to_integer))
+				elseif path.starts_with ("/pubs/") then
+					if path.count > 6 and then path.substring (7, path.count).is_integer then
+						create db.make
+						io.put_string (path.substring (7, path.count))
+						io.new_line
+						answer_with_array(db.conf_pubs (path.substring (7, path.count).to_integer))
+					end
+				elseif path.starts_with ("/journal-pubs/") then
+					if path.count > 14 and then path.substring (15, path.count).is_integer then
+						create db.make
+						io.put_string (path.substring (15, path.count))
+						io.new_line
+						answer_with_array(db.journal_pubs (path.substring (15, path.count).to_integer))
+					end
+				else
+					answer_get
 				end
-				answer_get
 			elseif request.is_post_request_method then
 				process_data
 			end
@@ -53,6 +65,7 @@ feature {NONE}
 			create mesg.make
 			mesg.header.put_content_type_text_plain
 			mesg.set_body ("")
+			mesg.set_status_code (200)
 			across arr as s loop
 				mesg.body.append (s.item)
 				mesg.body.append ("%N")

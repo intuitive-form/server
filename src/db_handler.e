@@ -196,17 +196,41 @@ feature
 			end
 		end
 
-	publications(year: INTEGER): ITERABLE[STRING]
+	conf_pubs(year: INTEGER): ITERABLE[STRING]
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 			date_1, date_2: DATE
 		do
-			create q_select.make ("SELECT title FROM conference_publications WHERE year BETWEEN ?1 and ?2;", db)
+			create q_select.make ("SELECT title FROM conference_publications WHERE date BETWEEN ?1 AND ?2;", db)
 			create date_1.make (year, 1, 1)
 			create date_2.make (year + 1, 1, 1)
 			date_2.day_back
 			create {LINKED_LIST[STRING]} Result.make
+			io.put_integer_64 (date_1.days)
+			io.put_character (' ')
+			io.put_integer_64 (date_2.days)
+			io.new_line
+			check attached {LINKED_LIST[STRING]} Result as list then
+				across q_select.execute_new_with_arguments (<<date_1.days, date_2.days>>) as i loop
+					list.put_front(i.item.string_value (1))
+				end
+			end
+		end
 
+	journal_pubs(year: INTEGER): ITERABLE[STRING]
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+			date_1, date_2: DATE
+		do
+			create q_select.make ("SELECT title FROM journal_publications WHERE date BETWEEN ?1 AND ?2;", db)
+			create date_1.make (year, 1, 1)
+			create date_2.make (year + 1, 1, 1)
+			date_2.day_back
+			create {LINKED_LIST[STRING]} Result.make
+			io.put_integer_64 (date_1.days)
+			io.put_character (' ')
+			io.put_integer_64 (date_2.days)
+			io.new_line
 			check attached {LINKED_LIST[STRING]} Result as list then
 				across q_select.execute_new_with_arguments (<<date_1.days, date_2.days>>) as i loop
 					list.put_front(i.item.string_value (1))
