@@ -32,7 +32,17 @@
 		<cluster name="launcher" location=".\launcher\">
 			<cluster name="any_launcher" location="$|any\"/>
 		</cluster>
-		<cluster name="src" location=".\src\" recursive="true"/>
+		<cluster name="src" location=".\src\" recursive="true">
+			<file_rule>
+				<exclude>^data$</exclude>
+			</file_rule>
+			<file_rule>
+				<exclude>^data$</exclude>
+			</file_rule>
+			<file_rule>
+				<exclude>^data$</exclude>
+			</file_rule>
+		</cluster>
 	</target>
 	<target name="intuitive_server_standalone" extends="common">
 		<root class="INTUITIVE_SERVER" feature="make_and_launch"/>
