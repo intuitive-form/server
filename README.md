@@ -36,3 +36,8 @@ Build the project:
 Run the binary:
 
     $ EIFGENs/intuitive_server/W_code/intuitive_server 
+    
+## Using
+
+The application has two main interfaces, form interface at `/submit/` and query interface at `/admin/`. Default port is 8080.
+To use the application, visit ether `http://<address>:8080/submit/` or `http://<address>:8080/admin/`.
