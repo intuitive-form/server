@@ -10,10 +10,12 @@ feature -- Fields
 	semester: STRING
 	level: STRING
 	students: INTEGER
+	start_date: DATE
+	end_date: DATE
 
 feature {NONE} -- Constructor
 
-	make(p_name, p_semester, p_level, number_of_students: STRING)
+	make(p_name, p_semester, p_level, number_of_students, p_start_date, p_end_date: STRING)
 		require
 			valid_semester(p_semester)
 			valid_level(p_level)
@@ -23,6 +25,8 @@ feature {NONE} -- Constructor
 			semester := p_semester
 			level := p_level
 			students := number_of_students.to_integer
+			create start_date.make_from_string(p_start_date, "yyyy-[0]mm-[0]dd")
+			create end_date.make_from_string(p_end_date, "yyyy-[0]mm-[0]dd")
 		end
 
 

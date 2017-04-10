@@ -18,29 +18,29 @@ feature {NONE} -- Initialization
 				attached {WSF_STRING} request.form_parameter ("reporting-period-end") as a_date_end and then
 
 				-- Section #2
-				attached {WSF_STRING} request.form_parameter ("courses-course-name-1")as a_c_c_name_1 and then
-				attached {WSF_STRING} request.form_parameter ("courses-students-number-1")as a_c_s_number_1 and then
+				attached {WSF_STRING} request.form_parameter ("courses-course-name-1") and then
+				attached {WSF_STRING} request.form_parameter ("courses-students-number-1") and then
 
-				attached {WSF_STRING} request.form_parameter ("examinations-course-name-1")as a_e_c_name_1 and then
-				attached {WSF_STRING} request.form_parameter ("examinations-students-number-1")as a_e_s_number_1 and then
+				attached {WSF_STRING} request.form_parameter ("examinations-course-name-1") and then
+				attached {WSF_STRING} request.form_parameter ("examinations-students-number-1") and then
 
-				attached {WSF_STRING} request.form_parameter ("students-supervised-name-1")as a_s_s_name_1 and then
-				attached {WSF_STRING} request.form_parameter ("students-supervised-work-nature-1")as a_s_s_w_nature_1 and then
+				attached {WSF_STRING} request.form_parameter ("students-supervised-name-1") and then
+				attached {WSF_STRING} request.form_parameter ("students-supervised-work-nature-1") and then
 
-				attached {WSF_STRING} request.form_parameter ("completed-student-reports-name-1")as a_c_s_r_name_1 and then
-				attached {WSF_STRING} request.form_parameter ("completed-student-reports-title-1")as a_c_s_r_title_1 and then
+				attached {WSF_STRING} request.form_parameter ("completed-student-reports-name-1") and then
+				attached {WSF_STRING} request.form_parameter ("completed-student-reports-title-1") and then
 
 				-- Section #3
-				attached {WSF_STRING} request.form_parameter ("grants-title-1")as a_g_title_1 and then
-				attached {WSF_STRING} request.form_parameter ("grants-granting-agency-1")as a_g_g_agency_1 and then
-				attached {WSF_STRING} request.form_parameter ("period-start-1")as a_p_start_1 and then
-				attached {WSF_STRING} request.form_parameter ("period-end-1")as a_p_end_1 and then
-				attached {WSF_STRING} request.form_parameter ("grants-amount-1")as a_g_amount_1 and then
+				attached {WSF_STRING} request.form_parameter ("grants-title-1") and then
+				attached {WSF_STRING} request.form_parameter ("grants-granting-agency-1") and then
+				attached {WSF_STRING} request.form_parameter ("period-start-1") and then
+				attached {WSF_STRING} request.form_parameter ("period-end-1") and then
+				attached {WSF_STRING} request.form_parameter ("grants-amount-1") and then
 
-				attached {WSF_STRING} request.form_parameter ("research-projects-title-1")as a_r_p_title_1 and then
-				attached {WSF_STRING} request.form_parameter ("research-projects-personnel-involved-name-1-1")as a_r_p_p_i_name_1_1 and then
-				attached {WSF_STRING} request.form_parameter ("research-projects-start-date-1")as a_r_p_s_date_1 and then
-				attached {WSF_STRING} request.form_parameter ("research-projects-end-date-1")as a_r_p_e_date_1
+				attached {WSF_STRING} request.form_parameter ("research-projects-title-1")and then
+				attached {WSF_STRING} request.form_parameter ("research-projects-personnel-involved-name-1-1") and then
+				attached {WSF_STRING} request.form_parameter ("research-projects-start-date-1") and then
+				attached {WSF_STRING} request.form_parameter ("research-projects-end-date-1")
 			then
 				is_correct := True
 
@@ -124,20 +124,24 @@ feature {NONE} -- Proceeding features
 		-- Proceeds data from Section #2 Courses
 		local
 			i: INTEGER
-			ccn, cs, cl, csn: STRING
-			a_ccn, a_cs, a_cl, a_csn: STRING
+			ccn, cs, cl, csn, csd, ced: STRING
+			a_ccn, a_cs, a_cl, a_csn, a_csd, a_ced: STRING
 		do
 			create s2_courses.make (1)
 			ccn := "courses-course-name-"
 			cs := "courses-semester-"
 			cl := "courses-level-"
 			csn := "courses-students-number-"
+			csd := "courses-start-date-"
+			ced := "courses-end-date-"
 			from
 				i := 1
 				a_ccn := ccn + i.out
 				a_cs := cs + i.out
 				a_cl := cl + i.out
 				a_csn := csn + i.out
+				a_csd := csd + i.out
+				a_ced := ced + i.out
 			until
 				not attached {WSF_STRING} request.form_parameter(a_ccn)
 			loop
@@ -145,16 +149,21 @@ feature {NONE} -- Proceeding features
 					attached {WSF_STRING} request.form_parameter(a_ccn) as value_1 and then
 					attached {WSF_STRING} request.form_parameter(a_cs) as value_2 and then
 					attached {WSF_STRING} request.form_parameter(a_cl) as value_3 and then
-					attached {WSF_STRING} request.form_parameter(a_csn) as value_4
+					attached {WSF_STRING} request.form_parameter(a_csn) as value_4 and then
+					attached {WSF_STRING} request.form_parameter (a_csd) as value_date_s and then
+					attached {WSF_STRING} request.form_parameter (a_ced) as value_date_e
 				then
 					s2_courses.sequence_put (create {COURSE}.make(value_1.value.as_string_8, value_2.value.as_string_8,
-							value_3.value.as_string_8, value_4.value.as_string_8))
+							value_3.value.as_string_8, value_4.value.as_string_8, value_date_s.value.as_string_8,
+								value_date_e.value.as_string_8))
 				end
 				i := i + 1
 				a_ccn := ccn + i.out
 				a_cs := cs + i.out
 				a_cl := cl + i.out
 				a_csn := csn + i.out
+				a_csd := csd + i.out
+				a_ced := ced + i.out
 			end
 		end
 
