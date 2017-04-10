@@ -12,7 +12,7 @@ Clone the repository:
 
     git clone https://github.com/intuitive-form/server.git --recursive
 
-Open `intuitive_server.ecf` in Eiffel Studio and press `Run`.
+Open `intuitive_server.ecf` in Eiffel Studio, select target `intuitive_server` and press `Run`.
 
 ### Linux
 
@@ -20,7 +20,7 @@ Clone the repository:
 
     $ git clone https://github.com/intuitive-form/server.git --recursive
 
-Open `intuitive_server.ecf` in Eiffel Studio and press `Run`.
+Open `intuitive_server.ecf` in Eiffel Studio, select target `intuitive_server` and press `Run`.
 
 
 ### Linux without GUI
