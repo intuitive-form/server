@@ -306,50 +306,56 @@ feature {NONE} -- Proceeding features
 				attached {WSF_STRING} request.form_parameter (a_cptpp))
 			loop
 				if
-					attached {WSF_STRING} request.form_parameter (a_cptn) as value_1
+					(attached {WSF_STRING} request.form_parameter (a_cptn) as value_1 and then not value_1.value.as_string_8.is_empty) or else
+					(attached {WSF_STRING} request.form_parameter (a_cptt) as value_2 and then not value_2.value.as_string_8.is_empty) or else
+					(attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3 and then not value_3.value.as_string_8.is_empty)
 				then
 					if
-						attached {WSF_STRING} request.form_parameter (a_cptt) as value_2
+						attached {WSF_STRING} request.form_parameter (a_cptn) as value_1
 					then
 						if
-							attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
+							attached {WSF_STRING} request.form_parameter (a_cptt) as value_2
 						then
-							s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
-								value_2.value.as_string_8, value_3.value.as_string_8))
-						else
-							s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
+							if
+								attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
+							then
+								s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
+									value_2.value.as_string_8, value_3.value.as_string_8))
+							else
+								s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
 														value_2.value.as_string_8, ""))
-						end
-					else
-						if
-							attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
-						then
-							s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
-								"", value_3.value.as_string_8))
+							end
 						else
-							s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
+							if
+								attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
+							then
+								s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
+									"", value_3.value.as_string_8))
+							else
+								s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
 														"", ""))
-						end
-					end
-				else
-					if
-						attached {WSF_STRING} request.form_parameter (a_cptt) as value_2
-					then
-						if
-							attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
-						then
-							s2_phd.sequence_put (create {PHD_THESIS}.make ("",
-								value_2.value.as_string_8, value_3.value.as_string_8))
-						else
-							s2_phd.sequence_put (create {PHD_THESIS}.make ("",
-														value_2.value.as_string_8, ""))
+							end
 						end
 					else
 						if
-							attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
+							attached {WSF_STRING} request.form_parameter (a_cptt) as value_2
 						then
-							s2_phd.sequence_put (create {PHD_THESIS}.make ("",
-								"", value_3.value.as_string_8))
+							if
+								attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
+							then
+								s2_phd.sequence_put (create {PHD_THESIS}.make ("",
+									value_2.value.as_string_8, value_3.value.as_string_8))
+							else
+								s2_phd.sequence_put (create {PHD_THESIS}.make ("",
+															value_2.value.as_string_8, ""))
+							end
+						else
+							if
+								attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
+							then
+								s2_phd.sequence_put (create {PHD_THESIS}.make ("",
+									"", value_3.value.as_string_8))
+							end
 						end
 					end
 				end
@@ -463,10 +469,13 @@ feature {NONE} -- Proceeding features
 					until
 						not attached {WSF_STRING} request.form_parameter (b_rppin) as value
 					loop
-						io.new_line
-						data_1.sequence_put (value.value.as_string_8)
-						j := j + 1
-						b_rppin := a_rppin + j.out
+						if
+							not value.value.as_string_8.is_empty
+						then
+							data_1.sequence_put (value.value.as_string_8)
+							j := j + 1
+							b_rppin := a_rppin + j.out
+						end
 					end
 					from
 						j := 1
@@ -474,9 +483,13 @@ feature {NONE} -- Proceeding features
 					until
 						not attached {WSF_STRING} request.form_parameter (b_rpepin) as value
 					loop
-						data_2.sequence_put (value.value.as_string_8)
-						j := j + 1
-						b_rpepin := a_rpepin + j.out
+						if
+							not value.value.as_string_8.is_empty
+						then
+							data_2.sequence_put (value.value.as_string_8)
+							j := j + 1
+							b_rpepin := a_rpepin + j.out
+						end
 					end
 					s3_research_projects.sequence_put (create {RESEARCH_PROJECT}.make (value_1.value.as_string_8,
 						value_2.value.as_string_8, value_3.value.as_string_8, value_4.value.as_string_8,
@@ -516,62 +529,72 @@ feature {NONE} -- Proceeding features
 					attached {WSF_STRING} request.form_parameter (a_rcn) or
 					attached {WSF_STRING} request.form_parameter (a_rccn))
 			loop
-				create data_1.make (1)
-				from
-					j := 1
-					b_rccn := a_rccn + j.out
-				until
-					not attached {WSF_STRING} request.form_parameter (b_rccn) as value
-				loop
-					data_1.sequence_put (value.value.as_string_8)
-					j := j + 1
-					b_rccn := a_rccn + j.out
-				end
 				if
-					attached {WSF_STRING} request.form_parameter (a_rcc) as value_1
+					(attached {WSF_STRING} request.form_parameter (a_rcc) as value_1 and then not value_1.value.is_empty) or else
+					(attached {WSF_STRING} request.form_parameter (a_rcn) as value_2 and then not value_2.value.is_empty) or else
+					(attached {WSF_STRING} request.form_parameter (a_rccn) as value_3 and then not value_3.value.is_empty)
 				then
-					if
-						attached {WSF_STRING} request.form_parameter (a_rcn) as value_2
-					then
+					create data_1.make (1)
+					from
+						j := 1
+						b_rccn := a_rccn + j.out
+					until
+						not attached {WSF_STRING} request.form_parameter (b_rccn) as value
+					loop
 						if
-							attached {WSF_STRING} request.form_parameter (a_rccn) as value_3
+							not value.value.as_string_8.is_empty
 						then
-							s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (value_1.value.as_string_8,
-								 value_2.value.as_string_8, value_3.value.as_string_8, data_1))
-						else
-							s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (value_1.value.as_string_8,
-								 value_2.value.as_string_8, "", data_1))
-						end
-					else
-						if
-							attached {WSF_STRING} request.form_parameter (a_rccn) as value_3
-						then
-							s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (value_1.value.as_string_8,
-								 "", value_3.value.as_string_8, data_1))
-						else
-							s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (value_1.value.as_string_8,
-								 "", "", data_1))
+							data_1.sequence_put (value.value.as_string_8)
+							j := j + 1
+							b_rccn := a_rccn + j.out
 						end
 					end
-				else
 					if
-						attached {WSF_STRING} request.form_parameter (a_rcn) as value_2
+						attached {WSF_STRING} request.form_parameter (a_rcc) as value_1
 					then
 						if
-							attached {WSF_STRING} request.form_parameter (a_rccn) as value_3
+							attached {WSF_STRING} request.form_parameter (a_rcn) as value_2
 						then
-							s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make ("",
-								 value_2.value.as_string_8, value_3.value.as_string_8, data_1))
+							if
+								attached {WSF_STRING} request.form_parameter (a_rccn) as value_3
+							then
+								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (value_1.value.as_string_8,
+									 value_2.value.as_string_8, value_3.value.as_string_8, data_1))
+							else
+								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (value_1.value.as_string_8,
+									 value_2.value.as_string_8, "", data_1))
+							end
 						else
-							s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make ("",
-								 value_2.value.as_string_8, "", data_1))
+							if
+								attached {WSF_STRING} request.form_parameter (a_rccn) as value_3
+							then
+								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (value_1.value.as_string_8,
+									 "", value_3.value.as_string_8, data_1))
+							else
+								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (value_1.value.as_string_8,
+									 "", "", data_1))
+							end
 						end
 					else
 						if
-							attached {WSF_STRING} request.form_parameter (a_rccn) as value_3
+							attached {WSF_STRING} request.form_parameter (a_rcn) as value_2
 						then
-							s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make ("",
-								 "", value_3.value.as_string_8, data_1))
+							if
+								attached {WSF_STRING} request.form_parameter (a_rccn) as value_3
+							then
+								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make ("",
+									 value_2.value.as_string_8, value_3.value.as_string_8, data_1))
+							else
+								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make ("",
+									 value_2.value.as_string_8, "", data_1))
+							end
+						else
+							if
+								attached {WSF_STRING} request.form_parameter (a_rccn) as value_3
+							then
+								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make ("",
+									 "", value_3.value.as_string_8, data_1))
+							end
 						end
 					end
 				end
@@ -601,7 +624,7 @@ feature {NONE} -- Proceeding features
 				a_cpa := cpa + i.out + "-"
 				a_cpd := cpd + i.out
 			until
-				not attached {WSF_STRING} request.form_parameter(a_cpt) as value_1 or
+				not attached {WSF_STRING} request.form_parameter(a_cpt) as value_1 or else
 				not attached {WSF_STRING} request.form_parameter (a_cpd) as value_date
 			loop
 				if
@@ -615,9 +638,13 @@ feature {NONE} -- Proceeding features
 					until
 						not attached {WSF_STRING} request.form_parameter(b_cpa) as value
 					loop
-						data_1.sequence_put (value.value.as_string_8)
-						j := j + 1
-						b_cpa := a_cpa + j.out
+						if
+							not value.value.as_string_8.is_empty
+						then
+							data_1.sequence_put (value.value.as_string_8)
+							j := j + 1
+							b_cpa := a_cpa + j.out
+						end
 					end
 					s3_conference_publications.sequence_put (create {PUBLICATION}.make (
 						value_1.value.as_string_8,
@@ -650,7 +677,7 @@ feature {NONE} -- Proceeding features
 				a_cpa := cpa + i.out + "-"
 				a_cpd := cpd + i.out
 			until
-				not attached {WSF_STRING} request.form_parameter(a_cpt) as value_1 or
+				not attached {WSF_STRING} request.form_parameter(a_cpt) as value_1 or else
 				not attached {WSF_STRING} request.form_parameter (a_cpd) as value_date
 			loop
 				if
@@ -664,9 +691,13 @@ feature {NONE} -- Proceeding features
 					until
 						not attached {WSF_STRING} request.form_parameter(b_cpa) as value
 					loop
-						data_1.sequence_put (value.value.as_string_8)
-						j := j + 1
-						b_cpa := a_cpa + j.out
+						if
+							not value.value.as_string_8.is_empty
+						then
+							data_1.sequence_put (value.value.as_string_8)
+							j := j + 1
+							b_cpa := a_cpa + j.out
+						end
 					end
 					s3_journal_publications.sequence_put (create {PUBLICATION}.make (
 						value_1.value.as_string_8,
