@@ -40,4 +40,4 @@ Run the binary:
 ## Using
 
 The application has two main interfaces, form interface at `/submit/` and query interface at `/admin/`. Default port is 8080.
-To use the application, visit ether `http://<address>:8080/submit/` or `http://<address>:8080/admin/`.
+To use the application, visit either `http://<address>:8080/submit/` or `http://<address>:8080/admin/`.
