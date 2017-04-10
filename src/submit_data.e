@@ -49,15 +49,25 @@ feature {NONE} -- Initialization
 
 				s1_general := [a_unit_name.value.to_string_8, a_head_name.value.to_string_8, s1_date_start, s1_date_end]
 
+				io.put_string ("SUBMIT_DATA: Processing coures%N")
 				proceed_s2_courses (request)
+				io.put_string ("SUBMIT_DATA: Processing exams%N")
 				proceed_s2_examinations(request)
+				io.put_string ("SUBMIT_DATA: Processing students%N")
 				proceed_s2_students (request)
+				io.put_string ("SUBMIT_DATA: Processing reports%N")
 				proceed_s2_students_reports (request)
+				io.put_string ("SUBMIT_DATA: Processing PhDs%N")
 				proceed_s2_phd (request)
+				io.put_string ("SUBMIT_DATA: Processing Section 3, grants%N")
 				proceed_s3_grants (request)
+				io.put_string ("SUBMIT_DATA: Processing research projects%N")
 				proceed_s3_research_projects (request)
+				io.put_string ("SUBMIT_DATA: Processing research collabs%N")
 				proceed_s3_research_collaborations (request)
+				io.put_string ("SUBMIT_DATA: Processing conf pubs%N")
 				proceed_s3_conference_publications (request)
+				io.put_string ("SUBMIT_DATA: Processing journal pubs%N")
 				proceed_s3_journal_publications (request)
 			else
 				is_correct := False
@@ -415,31 +425,30 @@ feature {NONE} -- Proceeding features
 			loop
 				create data_1.make (1)
 				create data_2.make (1)
+
 				from
 					j := 1
-					b_rppin := a_rppin + i.out
+					b_rppin := a_rppin + j.out
 				until
 					not attached {WSF_STRING} request.form_parameter (b_rppin) as value
 				loop
+					io.new_line
 					data_1.sequence_put (value.value.as_string_8)
 					j := j + 1
-					b_rppin := a_rppin + i.out
+					b_rppin := a_rppin + j.out
 				end
+
 				from
 					j := 1
-					b_rpepin := a_rpepin + i.out
+					b_rpepin := a_rpepin + j.out
 				until
 					not attached {WSF_STRING} request.form_parameter (b_rpepin) as value
 				loop
 					data_2.sequence_put (value.value.as_string_8)
 					j := j + 1
-					b_rpepin := a_rpepin + i.out
+					b_rpepin := a_rpepin + j.out
 				end
-				if
-				    data_2.count = 0
-				then
-					data_2.sequence_put ("")
-				end
+
 				if
 					attached {WSF_STRING} request.form_parameter (a_rpt) as value_1 and then
 					attached {WSF_STRING} request.form_parameter (a_rpsd) as value_2 and then
@@ -450,7 +459,7 @@ feature {NONE} -- Proceeding features
 						value_2.value.as_string_8, value_3.value.as_string_8, value_4.value.as_string_8,
 							data_1, data_2))
 				end
-				i := 1
+				i := i + 1
 				a_rpt := rpt + i.out
 				a_rppin := rppin + i.out + "-"
 				a_rpepin := rpepin + i.out + "-"

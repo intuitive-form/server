@@ -105,6 +105,7 @@ feature -- Commands
 			lol: SUBMIT_DATA
 			db: DB_HANDLER
 		do
+			io.put_string ("Processing POST%N")
 			create output.make_empty
 			create lol.make(request)
 			across request.form_parameters as ic
@@ -116,6 +117,7 @@ feature -- Commands
 
 			create db.make
 			if lol.is_correct then
+				io.put_string ("Data is correct%N")
 				db.insert (lol)
 			end
 			across db.unit_names as it
