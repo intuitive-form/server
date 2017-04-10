@@ -505,11 +505,6 @@ feature {NONE} -- Proceeding features
 					b_rccn := a_rccn + j.out
 				end
 				if
-					data_1.count = 0
-				then
-					data_1.sequence_put ("")
-				end
-				if
 					attached {WSF_STRING} request.form_parameter (a_rcc) as value_1
 				then
 					if
@@ -563,28 +558,6 @@ feature {NONE} -- Proceeding features
 				a_rccn := rccn + i.out + "-"
 				a_rcna := rcna + i.out
 			end
-			if
-				s3_research_collaborations.count = 0
-			then
-				create data_1.make (1)
-				from
-					j := 1
-					b_rccn := a_rccn + j.out
-				until
-					not attached {WSF_STRING} request.form_parameter (b_rccn) as value
-				loop
-					data_1.sequence_put (value.value.as_string_8)
-					j := j + 1
-					b_rccn := a_rccn + j.out
-				end
-				if
-					data_1.count = 0
-				then
-					data_1.sequence_put ("")
-				end
-				s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (
-					"", "", "", data_1))
-			end
 		end
 
 	proceed_s3_conference_publications(request: WSF_REQUEST)
@@ -616,36 +589,11 @@ feature {NONE} -- Proceeding features
 					j := j + 1
 					b_cpa := a_cpa + j.out
 				end
-				if
-					data_1.count = 0
-				then
-					data_1.sequence_put ("")
-				end
 				s3_conference_publications.sequence_put (create {PUBLICATION}.make (value_1.value.as_string_8,
 					 data_1))
 				i := i + 1
 				a_cpt := cpt + i.out
 				a_cpa := cpa + i.out + "-"
-			end
-			if
-				s3_conference_publications.count = 0
-			then
-				from
-					j := 1
-					b_cpa := a_cpa + j.out
-				until
-					not attached {WSF_STRING} request.form_parameter(b_cpa) as value
-				loop
-					data_1.sequence_put (value.value.as_string_8)
-					j := j + 1
-					b_cpa := a_cpa + j.out
-				end
-				if
-					data_1.count = 0
-				then
-					data_1.sequence_put ("")
-				end
-				s3_conference_publications.sequence_put (create {PUBLICATION}.make ("", data_1))
 			end
 		end
 
@@ -659,7 +607,7 @@ feature {NONE} -- Proceeding features
 		do
 			create s3_journal_publications.make (1)
 			cpt := "journal-publications-title-"
-			cpa := "journal-publications-author-1-"
+			cpa := "journal-publications-author-"
 			from
 				i := 1
 				a_cpt := cpt + i.out
@@ -678,36 +626,11 @@ feature {NONE} -- Proceeding features
 					j := j + 1
 					b_cpa := a_cpa + j.out
 				end
-				if
-					data_1.count = 0
-				then
-					data_1.sequence_put ("")
-				end
-				s3_conference_publications.sequence_put (create {PUBLICATION}.make (value_1.value.as_string_8,
+				s3_journal_publications.sequence_put (create {PUBLICATION}.make (value_1.value.as_string_8,
 					 data_1))
 				i := i + 1
 				a_cpt := cpt + i.out
 				a_cpa := cpa + i.out + "-"
-			end
-			if
-				s3_conference_publications.count = 0
-			then
-				from
-					j := 1
-					b_cpa := a_cpa + j.out
-				until
-					not attached {WSF_STRING} request.form_parameter(b_cpa) as value
-				loop
-					data_1.sequence_put (value.value.as_string_8)
-					j := j + 1
-					b_cpa := a_cpa + j.out
-				end
-				if
-					data_1.count = 0
-				then
-					data_1.sequence_put ("")
-				end
-				s3_conference_publications.sequence_put (create {PUBLICATION}.make ("", data_1))
 			end
 		end
 
