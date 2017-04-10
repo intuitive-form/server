@@ -46,9 +46,9 @@ feature {NONE}
 			q.execute
 			create q.make ("CREATE TABLE collabs_contacts (id INTEGER PRIMARY KEY, collab INTEGER, name TEXT);", db)
 			q.execute
-			create q.make ("CREATE TABLE conference_publications (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT);", db)
+			create q.make ("CREATE TABLE conference_publications (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, date INTEGER);", db)
 			q.execute
-			create q.make ("CREATE TABLE journal_publications (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT);", db)
+			create q.make ("CREATE TABLE journal_publications (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, date INTEGER);", db)
 			q.execute
 			create q.make ("CREATE TABLE conference_publications_authors (id INTEGER PRIMARY KEY, conf_pub INTEGER, name TEXT);", db)
 			q.execute
@@ -155,11 +155,11 @@ feature
 				end
 			end
 
-			create q_insert.make ("INSERT INTO conference_publications (unit, title) VALUES (?1, ?2);", db);
+			create q_insert.make ("INSERT INTO conference_publications (unit, title, date) VALUES (?1, ?2, ?3);", db);
 			create q_insert_2.make ("INSERT INTO conference_publications_authors (conf_pub, name) VALUES (?1, ?2);", db);
 			check attached data.s3_conference_publications as pubs then
 				across pubs as p loop
-					q_insert.execute_with_arguments (<<unit_id, p.item.title>>)
+					q_insert.execute_with_arguments (<<unit_id, p.item.title, p.item.date.days>>)
 					pub_id := q_insert.last_row_id
 					across p.item.authors as author loop
 						q_insert_2.execute_with_arguments (<<pub_id, author.item>>)
@@ -167,11 +167,11 @@ feature
 				end
 			end
 
-			create q_insert.make ("INSERT INTO journal_publications (unit, title) VALUES (?1, ?2);", db);
+			create q_insert.make ("INSERT INTO journal_publications (unit, title, date) VALUES (?1, ?2, ?3);", db);
 			create q_insert_2.make ("INSERT INTO journal_publications_authors (journal_pub, name) VALUES (?1, ?2);", db);
 			check attached data.s3_journal_publications as pubs then
 				across pubs as p loop
-					q_insert.execute_with_arguments (<<unit_id, p.item.title>>)
+					q_insert.execute_with_arguments (<<unit_id, p.item.title, p.item.date.days>>)
 					pub_id := q_insert.last_row_id
 					across p.item.authors as author loop
 						q_insert_2.execute_with_arguments (<<pub_id, author.item>>)
@@ -188,9 +188,28 @@ feature
 		do
 			create q_select.make ("SELECT name FROM units;", db)
 			create {LINKED_LIST[STRING]} Result.make
+
 			check attached {LINKED_LIST[STRING]} Result as list then
 				across q_select.execute_new as it loop
 					list.put_front (it.item.string_value(1))
+				end
+			end
+		end
+
+	publications(year: INTEGER): ITERABLE[STRING]
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+			date_1, date_2: DATE
+		do
+			create q_select.make ("SELECT title FROM conference_publications WHERE year BETWEEN ?1 and ?2;", db)
+			create date_1.make (year, 1, 1)
+			create date_2.make (year + 1, 1, 1)
+			date_2.day_back
+			create {LINKED_LIST[STRING]} Result.make
+
+			check attached {LINKED_LIST[STRING]} Result as list then
+				across q_select.execute_new_with_arguments (<<date_1.days, date_2.days>>) as i loop
+					list.put_front(i.item.string_value (1))
 				end
 			end
 		end

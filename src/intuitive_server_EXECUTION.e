@@ -24,12 +24,40 @@ feature -- Execution
 
 	execute
 		-- Process and answer an inbound query
+		local
+			db: DB_HANDLER
+			path: STRING_8
 		do
 			if request.is_get_request_method then
+				path := request.path_info.as_string_8
+				if path ~ "/units" then
+					create db.make
+					answer_with_array(db.unit_names)
+				elseif path.starts_with ("/pubs/") and path.substring (7, path.count - 1).is_integer then
+					create db.make
+					answer_with_array(db.publications (path.substring (7, path.count - 1).to_integer))
+				end
 				answer_get
 			elseif request.is_post_request_method then
 				process_data
 			end
+		end
+
+
+feature {NONE}
+
+	answer_with_array(arr: ITERABLE[STRING])
+		local
+			mesg: WSF_PAGE_RESPONSE
+		do
+			create mesg.make
+			mesg.header.put_content_type_text_plain
+			mesg.set_body ("")
+			across arr as s loop
+				mesg.body.append (s.item)
+				mesg.body.append ("%N")
+			end
+			response.send (mesg)
 		end
 
 	answer_get

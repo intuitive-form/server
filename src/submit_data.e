@@ -565,18 +565,21 @@ feature {NONE} -- Proceeding features
 		local
 			data_1: ARRAYED_LIST[STRING]
 			i, j: INTEGER
-			cpt, cpa: STRING
-			a_cpt, a_cpa, b_cpa: STRING
+			cpt, cpa, cpd: STRING
+			a_cpt, a_cpa, b_cpa, a_cpd: STRING
 		do
 			create s3_conference_publications.make (1)
 			cpt := "conference-publications-title-"
 			cpa := "conference-publications-author-"
+			cpd := "conference-publications-date-"
 			from
 				i := 1
 				a_cpt := cpt + i.out
 				a_cpa := cpa + i.out + "-"
+				a_cpd := cpd + i.out
 			until
-				not attached {WSF_STRING} request.form_parameter(a_cpt) as value_1
+				not attached {WSF_STRING} request.form_parameter(a_cpt) as value_1 or
+				not attached {WSF_STRING} request.form_parameter (a_cpd) as value_date
 			loop
 				create data_1.make (1)
 				from
@@ -589,11 +592,15 @@ feature {NONE} -- Proceeding features
 					j := j + 1
 					b_cpa := a_cpa + j.out
 				end
-				s3_conference_publications.sequence_put (create {PUBLICATION}.make (value_1.value.as_string_8,
-					 data_1))
+				s3_conference_publications.sequence_put (create {PUBLICATION}.make (
+					value_1.value.as_string_8,
+					value_date.value.as_string_8,
+					data_1)
+				)
 				i := i + 1
 				a_cpt := cpt + i.out
 				a_cpa := cpa + i.out + "-"
+				a_cpd := cpd + i.out
 			end
 		end
 
@@ -602,18 +609,21 @@ feature {NONE} -- Proceeding features
 		local
 			data_1: ARRAYED_LIST[STRING]
 			i, j: INTEGER
-			cpt, cpa: STRING
-			a_cpt, a_cpa, b_cpa: STRING
+			cpt, cpa, cpd: STRING
+			a_cpt, a_cpa, b_cpa, a_cpd: STRING
 		do
 			create s3_journal_publications.make (1)
 			cpt := "journal-publications-title-"
 			cpa := "journal-publications-author-"
+			cpd := "journal-publications-date-"
 			from
 				i := 1
 				a_cpt := cpt + i.out
 				a_cpa := cpa + i.out + "-"
+				a_cpd := cpd + i.out
 			until
-				not attached {WSF_STRING} request.form_parameter(a_cpt) as value_1
+				not attached {WSF_STRING} request.form_parameter(a_cpt) as value_1 or
+				not attached {WSF_STRING} request.form_parameter (a_cpd) as value_date
 			loop
 				create data_1.make (1)
 				from
@@ -626,11 +636,15 @@ feature {NONE} -- Proceeding features
 					j := j + 1
 					b_cpa := a_cpa + j.out
 				end
-				s3_journal_publications.sequence_put (create {PUBLICATION}.make (value_1.value.as_string_8,
-					 data_1))
+				s3_journal_publications.sequence_put (create {PUBLICATION}.make (
+					value_1.value.as_string_8,
+					value_date.value.as_string_8,
+					data_1)
+				)
 				i := i + 1
 				a_cpt := cpt + i.out
 				a_cpa := cpa + i.out + "-"
+				a_cpd := cpd + i.out
 			end
 		end
 
