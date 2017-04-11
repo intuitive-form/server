@@ -473,9 +473,10 @@ feature {NONE} -- Proceeding features
 							not value.value.as_string_8.is_empty
 						then
 							data_1.sequence_put (value.value.as_string_8)
-							j := j + 1
-							b_rppin := a_rppin + j.out
 						end
+						j := j + 1
+						b_rppin := a_rppin + j.out
+
 					end
 					from
 						j := 1
@@ -487,9 +488,9 @@ feature {NONE} -- Proceeding features
 							not value.value.as_string_8.is_empty
 						then
 							data_2.sequence_put (value.value.as_string_8)
-							j := j + 1
-							b_rpepin := a_rpepin + j.out
 						end
+						j := j + 1
+						b_rpepin := a_rpepin + j.out
 					end
 					s3_research_projects.sequence_put (create {RESEARCH_PROJECT}.make (value_1.value.as_string_8,
 						value_2.value.as_string_8, value_3.value.as_string_8, value_4.value.as_string_8,
@@ -545,9 +546,9 @@ feature {NONE} -- Proceeding features
 							not value.value.as_string_8.is_empty
 						then
 							data_1.sequence_put (value.value.as_string_8)
-							j := j + 1
-							b_rccn := a_rccn + j.out
 						end
+						j := j + 1
+						b_rccn := a_rccn + j.out
 					end
 					if
 						attached {WSF_STRING} request.form_parameter (a_rcc) as value_1
@@ -642,9 +643,9 @@ feature {NONE} -- Proceeding features
 							not value.value.as_string_8.is_empty
 						then
 							data_1.sequence_put (value.value.as_string_8)
-							j := j + 1
-							b_cpa := a_cpa + j.out
 						end
+						j := j + 1
+						b_cpa := a_cpa + j.out
 					end
 					s3_conference_publications.sequence_put (create {PUBLICATION}.make (
 						value_1.value.as_string_8,
@@ -695,9 +696,9 @@ feature {NONE} -- Proceeding features
 							not value.value.as_string_8.is_empty
 						then
 							data_1.sequence_put (value.value.as_string_8)
-							j := j + 1
-							b_cpa := a_cpa + j.out
 						end
+						j := j + 1
+						b_cpa := a_cpa + j.out
 					end
 					s3_journal_publications.sequence_put (create {PUBLICATION}.make (
 						value_1.value.as_string_8,
