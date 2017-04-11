@@ -105,8 +105,10 @@ feature {NONE}
 			mesg.set_body ("")
 			mesg.set_status_code (200)
 			across arr as s loop
-				mesg.body.append (s.item)
-				mesg.body.append ("%N")
+				if s.item /= void then
+					mesg.body.append (s.item)
+					mesg.body.append ("%N")
+				end
 			end
 			response.send (mesg)
 		end
