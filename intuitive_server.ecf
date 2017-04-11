@@ -26,31 +26,27 @@
 			<concurrency support="scoop"/>
 			<void_safety support="none"/>
 		</capability>
-		<library name="sqlite" location="$ISE_LIBRARY\unstable\library\persistency\database\sqlite3\sqlite.ecf"/>
 		<library name="standalone" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\connector\standalone-safe.ecf"/>
 		<library name="time" location="$ISE_LIBRARY\library\time\time.ecf"/>
+		<library name="sqlite" location="$ISE_LIBRARY\unstable\library\persistency\database\sqlite3\sqlite.ecf"/>
 		<cluster name="launcher" location=".\launcher\">
 			<cluster name="any_launcher" location="$|any\"/>
 		</cluster>
-		<cluster name="src" location=".\src\" recursive="true">
-			<file_rule>
-				<exclude>^data$</exclude>
-			</file_rule>
-			<file_rule>
-				<exclude>^data$</exclude>
-			</file_rule>
-			<file_rule>
-				<exclude>^data$</exclude>
-			</file_rule>
+		<cluster name="src" location=".\src\">
+			<cluster name="data" location="$|data\"/>
 		</cluster>
 	</target>
 	<target name="intuitive_server_standalone" extends="common">
 		<root class="INTUITIVE_SERVER" feature="make_and_launch"/>
 		<variable name="httpd_ssl_disabled" value="true"/>
 		<library name="default_standalone" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\default\standalone-safe.ecf"/>
+		<library name="time" location="$ISE_LIBRARY\library\time\time.ecf"/>
+		<library name="sqlite" location="$ISE_LIBRARY\unstable\library\persistency\database\sqlite3\sqlite.ecf"/>
 		<cluster name="launcher" location=".\launcher\">
 			<cluster name="any_launcher" location="$|any\"/>
 		</cluster>
-		<cluster name="src" location=".\src\" recursive="true"/>
+		<cluster name="src" location=".\src\">
+			<cluster name="data" location="$|data\"/>
+		</cluster>
 	</target>
 </system>
