@@ -6,182 +6,284 @@ create
 
 feature {NONE}
 	db: SQLITE_DATABASE
-
-feature {NONE}
-	make
-		do
+		local
+			q: SQLITE_MODIFY_STATEMENT
+		once
 			if (create {RAW_FILE}.make_with_name("db.sqlite")).exists then
-				create db.make_open_read_write ("db.sqlite")
+				create Result.make_open_read_write ("db.sqlite")
 			else
-				init_db
+				create Result.make_create_read_write ("db.sqlite")
+				across db_schema as query loop
+					create q.make (query.item, Result)
+					q.execute
+				end
 			end
 			db.set_busy_handler (agent handler)
 		end
 
+	db_schema: ARRAY[STRING]
+		once
+			Result := <<
+				"CREATE TABLE units (id INTEGER PRIMARY KEY, name TEXT UNIQUE, head TEXT, start_date INTEGER, end_date INTEGER);",
+				"CREATE TABLE courses (id INTEGER PRIMARY KEY, unit INTEGER, name TEXT, semester TEXT, level TEXT, students INTEGER, start_date INTEGER, end_date INTEGER, CONSTRAINT course_unique UNIQUE (name, semester));",
+				"CREATE TABLE exams (id INTEGER PRIMARY KEY, unit INTEGER, course INTEGER, type TEXT, students INTEGER);",
+				"CREATE TABLE supervisions (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, work TEXT);",
+				"CREATE TABLE reports (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, title TEXT, publication TEXT);",
+				"CREATE TABLE phd_theses (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, title TEXT, publication TEXT);",
+				"CREATE TABLE grants (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, granter TEXT, start_date INTEGER, end_date INTEGER, continuing TEXT, amount INTEGER);",
+				"CREATE TABLE researches (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, start_date INTEGER, end_date INTEGER, financing TEXT);",
+				"CREATE TABLE research_personnel (id INTEGER PRIMARY KEY, research INTEGER, name TEXT);",
+				"CREATE TABLE research_extra_personnel (id INTEGER PRIMARY KEY, research INTEGER, name TEXT);",
+				"CREATE TABLE research_collabs (id INTEGER PRIMARY KEY, unit INTEGER, country TEXT, institution TEXT, nature TEXT);",
+				"CREATE TABLE collabs_contacts (id INTEGER PRIMARY KEY, collab INTEGER, name TEXT);",
+				"CREATE TABLE conference_publications (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, date INTEGER);",
+				"CREATE TABLE journal_publications (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, date INTEGER);",
+				"CREATE TABLE conference_publications_authors (id INTEGER PRIMARY KEY, conf_pub INTEGER, name TEXT);",
+				"CREATE TABLE journal_publications_authors (id INTEGER PRIMARY KEY, journal_pub INTEGER, name TEXT);"
+			>>
+		end
+	make
+		do
+		end
+
 	handler(i: NATURAL): BOOLEAN
 		do
+			io.put_string ("handler call: ")
+			io.put_natural (i)
+			io.new_line
 			Result := true
 		end
 
-	init_db
+feature
+	-- Insert helpers
+	last_added_id: INTEGER_64
+
+	unit_exists(p_name: STRING): BOOLEAN
 		local
-			q: SQLITE_MODIFY_STATEMENT
+			q_select: SQLITE_QUERY_STATEMENT
 		do
-			create db.make_create_read_write ("db.sqlite")
-			create q.make ("CREATE TABLE units (id INTEGER PRIMARY KEY, name TEXT UNIQUE, head TEXT, start_date INTEGER, end_date INTEGER);", db)
-			q.execute
-			create q.make ("CREATE TABLE courses (id INTEGER PRIMARY KEY, unit INTEGER, name TEXT, semester TEXT, level TEXT, students INTEGER, start_date INTEGER, end_date INTEGER, CONSTRAINT course_unique UNIQUE (name, semester));", db)
-			q.execute
-			create q.make ("CREATE TABLE exams (id INTEGER PRIMARY KEY, unit INTEGER, course INTEGER, type TEXT, students INTEGER);", db)
-			q.execute
-			create q.make ("CREATE TABLE supervisions (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, work TEXT);", db)
-			q.execute
-			create q.make ("CREATE TABLE reports (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, title TEXT, publication TEXT);", db)
-			q.execute
-			create q.make ("CREATE TABLE phd_theses (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, title TEXT, publication TEXT);", db)
-			q.execute
-			create q.make ("CREATE TABLE grants (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, granter TEXT, start_date INTEGER, end_date INTEGER, continuing TEXT, amount INTEGER);", db)
-			q.execute
-			create q.make ("CREATE TABLE researches (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, start_date INTEGER, end_date INTEGER, financing TEXT);", db)
-			q.execute
-			create q.make ("CREATE TABLE research_personnel (id INTEGER PRIMARY KEY, research INTEGER, name TEXT);", db)
-			q.execute
-			create q.make ("CREATE TABLE research_extra_personnel (id INTEGER PRIMARY KEY, research INTEGER, name TEXT);", db)
-			q.execute
-			create q.make ("CREATE TABLE research_collabs (id INTEGER PRIMARY KEY, unit INTEGER, country TEXT, institution TEXT, nature TEXT);", db)
-			q.execute
-			create q.make ("CREATE TABLE collabs_contacts (id INTEGER PRIMARY KEY, collab INTEGER, name TEXT);", db)
-			q.execute
-			create q.make ("CREATE TABLE conference_publications (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, date INTEGER);", db)
-			q.execute
-			create q.make ("CREATE TABLE journal_publications (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, date INTEGER);", db)
-			q.execute
-			create q.make ("CREATE TABLE conference_publications_authors (id INTEGER PRIMARY KEY, conf_pub INTEGER, name TEXT);", db)
-			q.execute
-			create q.make ("CREATE TABLE journal_publications_authors (id INTEGER PRIMARY KEY, journal_pub INTEGER, name TEXT);", db)
-			q.execute
+			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
+			Result := not q_select.execute_new_with_arguments (<<p_name>>).after
+		end
+
+	insert_unit(p_unit: UNIT)
+		require
+			not unit_exists(p_unit.name)
+		local
+			q_insert: SQLITE_INSERT_STATEMENT
+		do
+			create q_insert.make ("INSERT INTO units (name, head, start_date, end_date) VALUES (?1, ?2, ?3, ?4);", db)
+			q_insert.execute_with_arguments (<<p_unit.name, p_unit.head, p_unit.start_date.days, p_unit.end_date.days>>)
+			last_added_id := q_insert.last_row_id
+		ensure
+			unit_exists(p_unit.name)
+		end
+
+	get_course_id(p_name: STRING; p_semester: STRING): INTEGER_64
+		-- returns -1 if course does not exist or course id if it exists
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+			q_it: SQLITE_STATEMENT_ITERATION_CURSOR
+		do
+			create q_select.make ("SELECT id FROM courses WHERE name = ?1 AND semester = ?2;", db)
+			q_it := q_select.execute_new_with_arguments (<<p_name, p_semester>>)
+			if q_it.after then
+				Result := -1
+			else
+				Result := q_it.item.integer_value (1)
+			end
+		end
+
+	insert_course(p_course: COURSE; unit_id: INTEGER_64)
+		require
+			does_not_exist: get_course_id(p_course.name, p_course.semester) = -1
+		local
+			q_insert: SQLITE_INSERT_STATEMENT
+		do
+			create q_insert.make ("INSERT INTO courses (unit, name, semester, level, students, start_date, end_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);", db)
+			q_insert.execute_with_arguments (<<unit_id, p_course.name, p_course.semester, p_course.level, p_course.students, p_course.start_date.days, p_course.end_date.days>>)
+			last_added_id := q_insert.last_row_id
+		ensure
+			exists: get_course_id(p_course.name, p_course.semester) /= -1
+		end
+
+	insert_exam(p_exam: EXAM; unit_id: INTEGER_64)
+		require
+			course_exists: get_course_id(p_exam.course_name, p_exam.semester) /= -1
+		local
+			q_insert: SQLITE_INSERT_STATEMENT
+		do
+			create q_insert.make ("INSERT INTO exams (unit, course, type, students) VALUES (?1, ?2, ?3, ?4);", db)
+			q_insert.execute_with_arguments (<<unit_id, get_course_id(p_exam.course_name, p_exam.semester), p_exam.kind, p_exam.students>>)
+			last_added_id := q_insert.last_row_id
+		end
+
+	insert_supervision(p_student: STUDENT; unit_id: INTEGER_64)
+		local
+			q_insert: SQLITE_INSERT_STATEMENT
+		do
+			create q_insert.make ("INSERT INTO supervisions (unit, student, work) VALUES (?1, ?2, ?3);", db);
+			q_insert.execute_with_arguments (<<unit_id, p_student.name, p_student.nature_of_work>>)
+			last_added_id := q_insert.last_row_id
+		end
+
+	insert_report(p_rep: STUDENT_REPORT; unit_id: INTEGER_64)
+		local
+			q_insert: SQLITE_INSERT_STATEMENT
+		do
+			create q_insert.make ("INSERT INTO reports (unit, student, title, publication) VALUES (?1, ?2, ?3, ?4);", db);
+			q_insert.execute_with_arguments (<<unit_id, p_rep.student_name, p_rep.title, p_rep.plans>>)
+			last_added_id := q_insert.last_row_id
+		end
+
+	insert_phd_thesis(p_phd: PHD_THESIS; unit_id: INTEGER_64)
+		local
+			q_insert: SQLITE_INSERT_STATEMENT
+		do
+			create q_insert.make ("INSERT INTO phd_theses (unit, student, title, publication) VALUES (?1, ?2, ?3, ?4);", db);
+			q_insert.execute_with_arguments (<<unit_id, p_phd.student_name, p_phd.title, p_phd.plans>>)
+			last_added_id := q_insert.last_row_id
+		end
+
+	insert_grant(p_grant: GRANT; unit_id: INTEGER_64)
+		local
+			q_insert: SQLITE_INSERT_STATEMENT
+		do
+			create q_insert.make ("INSERT INTO grants (unit, title, granter, start_date, end_date, continuing, amount) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);", db);
+			q_insert.execute_with_arguments (<<unit_id, p_grant.title, p_grant.agency, p_grant.period_start.days, p_grant.period_end.days, p_grant.continuation, p_grant.amount>>)
+			last_added_id := q_insert.last_row_id
+		end
+
+	insert_research(p_research: RESEARCH_PROJECT; unit_id: INTEGER_64)
+		local
+			q1, q2, q3: SQLITE_INSERT_STATEMENT
+		do
+			create q1.make ("INSERT INTO researches (unit, title, start_date, end_date, financing) VALUES (?1, ?2, ?3, ?4, ?5);", db);
+			create q2.make ("INSERT INTO research_personnel (research, name) VALUES (?1, ?2);", db);
+			create q3.make ("INSERT INTO research_extra_personnel (research, name) VALUES (?1, ?2);", db);
+			q1.execute_with_arguments (<<unit_id, p_research.title, p_research.date_start.days, p_research.date_end.days, p_research.sources_of_financing>>)
+			last_added_id := q1.last_row_id
+			across p_research.personnel as p loop
+				q2.execute_with_arguments (<<last_added_id, p.item>>)
+			end
+			across p_research.extra_personnel as p loop
+				q3.execute_with_arguments (<<last_added_id, p.item>>)
+			end
+		end
+
+	insert_research_collab(p_collab: RESEARCH_COLLABORATION; unit_id: INTEGER_64)
+		local
+			q1, q2: SQLITE_INSERT_STATEMENT
+		do
+			create q1.make ("INSERT INTO research_collabs (unit, country, institution, nature) VALUES (?1, ?2, ?3, ?4);", db);
+			create q2.make ("INSERT INTO collabs_contacts (collab, name) VALUES (?1, ?2);", db);
+			q1.execute_with_arguments (<<unit_id, p_collab.institution_country, p_collab.institution_name, p_collab.nature>>)
+			last_added_id := q1.last_row_id
+			across p_collab.contracts as c loop
+				q2.execute_with_arguments (<<last_added_id, c.item>>)
+			end
+		end
+
+	insert_conference_pub(p_pub: PUBLICATION; unit_id: INTEGER_64)
+		local
+			q1, q2: SQLITE_INSERT_STATEMENT
+		do
+			create q1.make ("INSERT INTO conference_publications (unit, title, date) VALUES (?1, ?2, ?3);", db);
+			create q2.make ("INSERT INTO conference_publications_authors (conf_pub, name) VALUES (?1, ?2);", db);
+			q1.execute_with_arguments (<<unit_id, p_pub.title, p_pub.date.days>>)
+			last_added_id := q1.last_row_id
+			across p_pub.authors as a loop
+				q2.execute_with_arguments (<<last_added_id, a.item>>)
+			end
+		end
+
+	insert_journal_pub(p_pub: PUBLICATION; unit_id: INTEGER_64)
+		local
+			q1, q2: SQLITE_INSERT_STATEMENT
+		do
+			create q1.make ("INSERT INTO journal_publications (unit, title, date) VALUES (?1, ?2, ?3);", db);
+			create q2.make ("INSERT INTO journal_publications_authors (journal_pub, name) VALUES (?1, ?2);", db);
+			q1.execute_with_arguments (<<unit_id, p_pub.title, p_pub.date.days>>)
+			last_added_id := q1.last_row_id
+			across p_pub.authors as a loop
+				q2.execute_with_arguments (<<last_added_id, a.item>>)
+			end
 		end
 
 feature
+
 	insert(data: SUBMIT_DATA)
 		require
 			data.is_correct
 		local
-			q_insert, q_insert_2, q_insert_3: SQLITE_INSERT_STATEMENT
-			q_select: SQLITE_QUERY_STATEMENT
-			it: SQLITE_RESULT_ROW
-			unit_id, course_id, research_id, collab_id, pub_id: INTEGER_64
+			unit_id: INTEGER_64
 		do
 			io.put_string ("Inserting in DB%N")
-			create q_insert.make ("INSERT INTO units (name, head, start_date, end_date) VALUES (?1, ?2, ?3, ?4);", db)
-			check attached data.s1_general as tuple and then
-				attached {STRING} tuple.item (1) as i1 and then
-				attached {STRING} tuple.item (2) as i2 and then
-				attached {DATE} tuple.item (3) as i3 and then
-				attached {DATE} tuple.item (4) as i4 then
-				q_insert.execute_with_arguments (<<i1, i2, i3.days, i4.days>>)
-				unit_id := q_insert.last_row_id
+			check attached data.s1_general as unit then
+				insert_unit(unit)
+				unit_id := last_added_id
 			end
 
-			create q_insert.make ("INSERT INTO courses (unit, name, semester, level, students, start_date, end_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);", db)
 			check attached data.s2_courses as crss then
 				across crss as c loop
-					q_insert.execute_with_arguments (<<unit_id, c.item.name, c.item.semester, c.item.level, c.item.students, c.item.start_date.days, c.item.end_date.days>>)
+					insert_course(c.item, unit_id)
 				end
 			end
 
-			create q_insert.make ("INSERT INTO exams (unit, course, type, students) VALUES (?1, ?2, ?3, ?4);", db)
 			check attached data.s2_examinations as exams then
 				across exams as e loop
-					create q_select.make ("SELECT id FROM courses WHERE name = ?1 AND semester = ?2;", db)
-					check attached q_select.execute_new_with_arguments (<<e.item.course_name, e.item.semester>>) as ic then
-						if not ic.after then
-							course_id := ic.item.integer_64_value (1)
-							q_insert.execute_with_arguments (<<unit_id, course_id, e.item.kind, e.item.students>>)
-						end
-					end
+					insert_exam(e.item, unit_id)
 				end
 			end
 
-			create q_insert.make ("INSERT INTO supervisions (unit, student, work) VALUES (?1, ?2, ?3);", db);
 			check attached data.s2_students as supervisions then
 				across supervisions as sv loop
-					q_insert.execute_with_arguments (<<unit_id, sv.item.name, sv.item.nature_of_work>>)
+					insert_supervision(sv.item, unit_id)
 				end
 			end
 
-			create q_insert.make ("INSERT INTO reports (unit, student, title, publication) VALUES (?1, ?2, ?3, ?4);", db);
+
 			check attached data.s2_student_reports as reports then
 				across reports as r loop
-					q_insert.execute_with_arguments (<<unit_id, r.item.student_name, r.item.title, r.item.plans>>)
+					insert_report(r.item, unit_id)
 				end
 			end
 
-			create q_insert.make ("INSERT INTO phd_theses (unit, student, title, publication) VALUES (?1, ?2, ?3, ?4);", db);
+
 			check attached data.s2_phd as theses then
 				across theses as t loop
-					q_insert.execute_with_arguments (<<unit_id, t.item.student_name, t.item.title, t.item.plans>>)
+					insert_phd_thesis(t.item, unit_id)
 				end
 			end
 
-			create q_insert.make ("INSERT INTO grants (unit, title, granter, start_date, end_date, continuing, amount) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);", db);
+
 			check attached data.s3_grants as grants then
 				across grants as g loop
-					q_insert.execute_with_arguments (<<unit_id, g.item.title, g.item.agency, g.item.period_start.days, g.item.period_end.day, g.item.continuation, g.item.amount>>)
+					insert_grant(g.item, unit_id)
 				end
 			end
 
-			create q_insert.make ("INSERT INTO researches (unit, title, start_date, end_date, financing) VALUES (?1, ?2, ?3, ?4, ?5);", db);
-			create q_insert_2.make ("INSERT INTO research_personnel (research, name) VALUES (?1, ?2);", db);
-			create q_insert_3.make ("INSERT INTO research_extra_personnel (research, name) VALUES (?1, ?2);", db);
 			check attached data.s3_research_projects as researches then
 				across researches as r loop
-					q_insert.execute_with_arguments (<<unit_id, r.item.title, r.item.date_start.days, r.item.date_end.days, r.item.sources_of_financing>>)
-					research_id := q_insert.last_row_id
-
-					across r.item.personnel as p loop
-						q_insert_2.execute_with_arguments (<<research_id, p.item>>)
-					end
-
-					across r.item.extra_personnel as p loop
-						q_insert_3.execute_with_arguments (<<research_id, p.item>>)
-					end
+					insert_research(r.item, unit_id)
 				end
 			end
 
-			create q_insert.make ("INSERT INTO research_collabs (unit, country, institution, nature) VALUES (?1, ?2, ?3, ?4);", db);
-			create q_insert_2.make ("INSERT INTO collabs_contacts (collab, name) VALUES (?1, ?2);", db);
 			check attached data.s3_research_collaborations as collabs then
 				across collabs as c loop
-					q_insert.execute_with_arguments (<<unit_id, c.item.institution_country, c.item.institution_name, c.item.nature>>)
-					collab_id := q_insert.last_row_id
-					across c.item.contracts as contact loop
-						q_insert_2.execute_with_arguments (<<collab_id, contact.item>>)
-					end
+					insert_research_collab(c.item, unit_id)
 				end
 			end
 
-			create q_insert.make ("INSERT INTO conference_publications (unit, title, date) VALUES (?1, ?2, ?3);", db);
-			create q_insert_2.make ("INSERT INTO conference_publications_authors (conf_pub, name) VALUES (?1, ?2);", db);
 			check attached data.s3_conference_publications as pubs then
 				across pubs as p loop
-					q_insert.execute_with_arguments (<<unit_id, p.item.title, p.item.date.days>>)
-					pub_id := q_insert.last_row_id
-					across p.item.authors as author loop
-						q_insert_2.execute_with_arguments (<<pub_id, author.item>>)
-					end
+					insert_conference_pub(p.item, unit_id)
 				end
 			end
 
-			create q_insert.make ("INSERT INTO journal_publications (unit, title, date) VALUES (?1, ?2, ?3);", db);
-			create q_insert_2.make ("INSERT INTO journal_publications_authors (journal_pub, name) VALUES (?1, ?2);", db);
 			check attached data.s3_journal_publications as pubs then
 				across pubs as p loop
-					q_insert.execute_with_arguments (<<unit_id, p.item.title, p.item.date.days>>)
-					pub_id := q_insert.last_row_id
-					across p.item.authors as author loop
-						q_insert_2.execute_with_arguments (<<pub_id, author.item>>)
-					end
+					insert_journal_pub(p.item, unit_id)
 				end
 			end
 

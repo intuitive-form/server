@@ -44,10 +44,7 @@ feature {NONE} -- Initialization
 			then
 				is_correct := True
 
-				create s1_date_start.make_from_string (a_date_start.value, "yyyy-[0]mm-[0]dd")
-				create s1_date_end.make_from_string (a_date_end.value, "yyyy-[0]mm-[0]dd")
-
-				s1_general := [a_unit_name.value.to_string_8, a_head_name.value.to_string_8, s1_date_start, s1_date_end]
+				create s1_general.make (a_unit_name.value.to_string_8, a_head_name.value.to_string_8, a_date_start.value, a_date_end.value)
 
 				io.put_string ("SUBMIT_DATA: Processing coures%N")
 				proceed_s2_courses (request)
@@ -81,7 +78,7 @@ feature -- Attributes
 	is_correct: BOOLEAN
 		-- True if the submitted form is correct
 
-	s1_general: detachable TUPLE[STRING_8, STRING_8, DATE, DATE]
+	s1_general: detachable UNIT
 		-- Section #1 General: Name of unit / Name of head unit / Start of the reporting period /
 		-- /End of the reporting period
 
