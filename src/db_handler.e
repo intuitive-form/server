@@ -1,9 +1,6 @@
 class
 	DB_HANDLER
 
-create
-	make
-
 feature {NONE}
 	db: SQLITE_DATABASE
 		local
@@ -18,7 +15,7 @@ feature {NONE}
 					q.execute
 				end
 			end
-			db.set_busy_handler (agent handler)
+			Result.set_busy_handler (agent handler)
 		end
 
 	db_schema: ARRAY[STRING]
@@ -42,67 +39,47 @@ feature {NONE}
 				"CREATE TABLE journal_publications_authors (id INTEGER PRIMARY KEY, journal_pub INTEGER, name TEXT);"
 			>>
 		end
-	make
-		do
-		end
 
 	handler(i: NATURAL): BOOLEAN
 		do
-			io.put_string ("handler call: ")
-			io.put_natural (i)
-			io.new_line
 			Result := true
 		end
 
-feature
+feature {NONE}
 	-- Insert helpers
 	last_added_id: INTEGER_64
 
-	unit_exists(p_name: STRING): BOOLEAN
-		local
-			q_select: SQLITE_QUERY_STATEMENT
-		do
-			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
-			Result := not q_select.execute_new_with_arguments (<<p_name>>).after
+	insert_unit_query: SQLITE_INSERT_STATEMENT
+		once
+			create Result.make ("INSERT INTO units (name, head, start_date, end_date) VALUES (?1, ?2, ?3, ?4);", db)
+		end
+
+	insert_course_query: SQLITE_INSERT_STATEMENT
+		once
+			create Result.make ("INSERT INTO courses (unit, name, semester, level, students, start_date, end_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);", db)
+		end
+
+	insert_exam_query: SQLITE_INSERT_STATEMENT
+		once
+			create Result.make ("INSERT INTO exams (unit, course, type, students) VALUES (?1, ?2, ?3, ?4);", db)
 		end
 
 	insert_unit(p_unit: UNIT)
 		require
 			not unit_exists(p_unit.name)
-		local
-			q_insert: SQLITE_INSERT_STATEMENT
 		do
-			create q_insert.make ("INSERT INTO units (name, head, start_date, end_date) VALUES (?1, ?2, ?3, ?4);", db)
-			q_insert.execute_with_arguments (<<p_unit.name, p_unit.head, p_unit.start_date.days, p_unit.end_date.days>>)
-			last_added_id := q_insert.last_row_id
+			insert_unit_query.execute_with_arguments (<<p_unit.name, p_unit.head, p_unit.start_date.days, p_unit.end_date.days>>)
+			last_added_id := insert_unit_query.last_row_id
 		ensure
 			unit_exists(p_unit.name)
-		end
-
-	get_course_id(p_name: STRING; p_semester: STRING): INTEGER_64
-		-- returns -1 if course does not exist or course id if it exists
-		local
-			q_select: SQLITE_QUERY_STATEMENT
-			q_it: SQLITE_STATEMENT_ITERATION_CURSOR
-		do
-			create q_select.make ("SELECT id FROM courses WHERE name = ?1 AND semester = ?2;", db)
-			q_it := q_select.execute_new_with_arguments (<<p_name, p_semester>>)
-			if q_it.after then
-				Result := -1
-			else
-				Result := q_it.item.integer_value (1)
-			end
 		end
 
 	insert_course(p_course: COURSE; unit_id: INTEGER_64)
 		require
 			does_not_exist: get_course_id(p_course.name, p_course.semester) = -1
-		local
-			q_insert: SQLITE_INSERT_STATEMENT
 		do
-			create q_insert.make ("INSERT INTO courses (unit, name, semester, level, students, start_date, end_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);", db)
-			q_insert.execute_with_arguments (<<unit_id, p_course.name, p_course.semester, p_course.level, p_course.students, p_course.start_date.days, p_course.end_date.days>>)
-			last_added_id := q_insert.last_row_id
+			insert_course_query.execute_with_arguments (<<unit_id, p_course.name, p_course.semester, p_course.level, p_course.students, p_course.start_date.days, p_course.end_date.days>>)
+			last_added_id := insert_course_query.last_row_id
 		ensure
 			exists: get_course_id(p_course.name, p_course.semester) /= -1
 		end
@@ -110,12 +87,9 @@ feature
 	insert_exam(p_exam: EXAM; unit_id: INTEGER_64)
 		require
 			course_exists: get_course_id(p_exam.course_name, p_exam.semester) /= -1
-		local
-			q_insert: SQLITE_INSERT_STATEMENT
 		do
-			create q_insert.make ("INSERT INTO exams (unit, course, type, students) VALUES (?1, ?2, ?3, ?4);", db)
-			q_insert.execute_with_arguments (<<unit_id, get_course_id(p_exam.course_name, p_exam.semester), p_exam.kind, p_exam.students>>)
-			last_added_id := q_insert.last_row_id
+			insert_exam_query.execute_with_arguments (<<unit_id, get_course_id(p_exam.course_name, p_exam.semester), p_exam.kind, p_exam.students>>)
+			last_added_id := insert_exam_query.last_row_id
 		end
 
 	insert_supervision(p_student: STUDENT; unit_id: INTEGER_64)
@@ -219,75 +193,68 @@ feature
 			unit_id: INTEGER_64
 		do
 			io.put_string ("Inserting in DB%N")
-			check attached data.s1_general as unit then
-				insert_unit(unit)
-				unit_id := last_added_id
+
+			insert_unit(data.s1_general)
+			unit_id := last_added_id
+
+			across data.s2_courses as c loop
+				insert_course(c.item, unit_id)
 			end
-
-			check attached data.s2_courses as crss then
-				across crss as c loop
-					insert_course(c.item, unit_id)
-				end
+			across data.s2_examinations as e loop
+				insert_exam(e.item, unit_id)
 			end
-
-			check attached data.s2_examinations as exams then
-				across exams as e loop
-					insert_exam(e.item, unit_id)
-				end
+			across data.s2_students as sv loop
+				insert_supervision(sv.item, unit_id)
 			end
-
-			check attached data.s2_students as supervisions then
-				across supervisions as sv loop
-					insert_supervision(sv.item, unit_id)
-				end
+			across data.s2_student_reports as r loop
+				insert_report(r.item, unit_id)
 			end
-
-
-			check attached data.s2_student_reports as reports then
-				across reports as r loop
-					insert_report(r.item, unit_id)
-				end
+			across data.s2_phd as t loop
+				insert_phd_thesis(t.item, unit_id)
 			end
-
-
-			check attached data.s2_phd as theses then
-				across theses as t loop
-					insert_phd_thesis(t.item, unit_id)
-				end
+			across data.s3_grants as g loop
+				insert_grant(g.item, unit_id)
 			end
-
-
-			check attached data.s3_grants as grants then
-				across grants as g loop
-					insert_grant(g.item, unit_id)
-				end
+			across data.s3_research_projects as r loop
+				insert_research(r.item, unit_id)
 			end
-
-			check attached data.s3_research_projects as researches then
-				across researches as r loop
-					insert_research(r.item, unit_id)
-				end
+			across data.s3_research_collaborations as c loop
+				insert_research_collab(c.item, unit_id)
 			end
-
-			check attached data.s3_research_collaborations as collabs then
-				across collabs as c loop
-					insert_research_collab(c.item, unit_id)
-				end
+			across data.s3_conference_publications as p loop
+				insert_conference_pub(p.item, unit_id)
 			end
-
-			check attached data.s3_conference_publications as pubs then
-				across pubs as p loop
-					insert_conference_pub(p.item, unit_id)
-				end
-			end
-
-			check attached data.s3_journal_publications as pubs then
-				across pubs as p loop
-					insert_journal_pub(p.item, unit_id)
-				end
+			across data.s3_journal_publications as p loop
+				insert_journal_pub(p.item, unit_id)
 			end
 
 			io.put_string ("Inserted in DB%N")
+		end
+
+feature
+	-- Select Queries
+
+	unit_exists(p_name: STRING): BOOLEAN
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+		do
+			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
+			Result := not q_select.execute_new_with_arguments (<<p_name>>).after
+		end
+
+	get_course_id(p_name: STRING; p_semester: STRING): INTEGER_64
+		-- returns -1 if course does not exist or course id if it exists
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+			q_it: SQLITE_STATEMENT_ITERATION_CURSOR
+		do
+			create q_select.make ("SELECT id FROM courses WHERE name = ?1 AND semester = ?2;", db)
+			q_it := q_select.execute_new_with_arguments (<<p_name, p_semester>>)
+			if q_it.after then
+				Result := -1
+			else
+				Result := q_it.item.integer_value (1)
+			end
 		end
 
 	unit_names: LINKED_LIST[STRING]
@@ -391,7 +358,7 @@ feature
 			end
 		end
 
-	grants_of_unit(unit: STRING): LINKED_LIST[STRING]
+	grants_of_unit(unit: STRING): LINKED_LIST[grant]
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 			it: SQLITE_STATEMENT_ITERATION_CURSOR
@@ -402,33 +369,16 @@ feature
 			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
 			it := q_select.execute_new_with_arguments(<<unit>>)
 			if not it.after and then attached it.item.integer_value (1) as unit_id then
-				create q_select.make ("SELECT title, granter, continuing, amount FROM grants WHERE unit = ?1;", db)
+				create q_select.make ("SELECT title, granter, start_date, end_date, continuing, amount FROM grants WHERE unit = ?1;", db)
 				across q_select.execute_new_with_arguments (<<unit_id>>) as i loop
-					Result.put_front(i.item.string_value (4))
-					Result.put_front(i.item.string_value (3))
-					Result.put_front(i.item.string_value (2))
-					Result.put_front(i.item.string_value (1))
-				end
-			end
-		end
-
-	grants_of_unit_between_dates(unit: STRING; date1, date2: DATE): LINKED_LIST[STRING]
-		local
-			q_select: SQLITE_QUERY_STATEMENT
-			it: SQLITE_STATEMENT_ITERATION_CURSOR
-		do
-			io.put_string (unit)
-			io.new_line
-			create Result.make
-			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
-			it := q_select.execute_new_with_arguments(<<unit>>)
-			if not it.after and then attached it.item.integer_value (1) as unit_id then
-				create q_select.make ("SELECT title, granter, continuing, amount FROM grants WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)
-				across q_select.execute_new_with_arguments (<<unit_id, date1.days, date2.days>>) as i loop
-					Result.put_front(i.item.string_value (4))
-					Result.put_front(i.item.string_value (3))
-					Result.put_front(i.item.string_value (2))
-					Result.put_front(i.item.string_value (1))
+					Result.put_front (create {GRANT}.make_ready (
+						i.item.string_value(1),
+						i.item.string_value(2),
+						create {DATE}.make_by_days (i.item.integer_value(3)),
+						create {DATE}.make_by_days (i.item.integer_value(4)),
+						i.item.string_value(5),
+						i.item.integer_value(6)
+					))
 				end
 			end
 		end
