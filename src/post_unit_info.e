@@ -29,11 +29,11 @@ feature -- Execution
 			create j.make_empty
 			if not attached {WSF_STRING} req.form_parameter ("unit") as unit then
 				j.put (create {JSON_STRING}.make_from_string ("no input"), "error")
-			elseif not db.unit_exists (unit.value) then
+			elseif not db.selector.unit_exists (unit.value) then
 				j.put (create {JSON_STRING}.make_from_string ("no such unit"), "error")
 			else
-				j.put (create {JSON_STRING}.make_from_string (db.head_name (unit.value)), "head")
-				grants := db.grants_of_unit (unit.value)
+				j.put (create {JSON_STRING}.make_from_string (db.selector.head_name (unit.value)), "head")
+				grants := db.selector.grants_of_unit (unit.value)
 				create j_arr.make (grants.count)
 				across grants as g loop
 					create j_obj.make

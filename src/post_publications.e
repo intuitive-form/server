@@ -35,13 +35,13 @@ feature -- Execution
 			then
 				j.put (create {JSON_STRING}.make_from_string ("wrong input"), "error")
 			else
-				list := db.journal_pubs (y)
+				list := db.selector.journal_pubs (y)
 				create j_arr.make (list.count)
 				across list as v loop
 					j_arr.add (create {JSON_STRING}.make_from_string (v.item))
 				end
 				j.put (j_arr, "journal_pubs")
-				list := db.conf_pubs (y)
+				list := db.selector.conf_pubs (y)
 				create j_arr.make (list.count)
 				across list as v loop
 					j_arr.add (create {JSON_STRING}.make_from_string (v.item))

@@ -33,7 +33,7 @@ feature -- Execution
 				attached {WSF_STRING} req.form_parameter ("period_end") as date2)
 			then
 				j.put (create {JSON_STRING}.make_from_string ("unsufficient inputs"), "error")
-			elseif not db.unit_exists (unit.value) then
+			elseif not db.selector.unit_exists (unit.value) then
 				j.put (create {JSON_STRING}.make_from_string ("no such unit"), "error")
 			elseif not
 				(checker.date_valid (date1.value, "yyyy-[0]mm-[0]dd") and
@@ -43,7 +43,7 @@ feature -- Execution
 			else
 				create d1.make_from_string (date1.value, "yyyy-[0]mm-[0]dd")
 				create d2.make_from_string (date2.value, "yyyy-[0]mm-[0]dd")
-				list := db.courses_of_unit_between_dates (unit.value, d1, d2)
+				list := db.selector.courses_of_unit_between_dates (unit.value, d1, d2)
 				create j_arr.make (list.count)
 				across list as course loop
 					create j_obj.make

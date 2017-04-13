@@ -22,7 +22,6 @@ feature -- Execution
 		local
 			j: JSON_OBJECT
 			data: SUBMIT_DATA
-			msg: WSF_PAGE_RESPONSE
 		do
 			create j.make
 			create data.make (req)
