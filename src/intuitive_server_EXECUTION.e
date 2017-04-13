@@ -9,6 +9,9 @@ create
 
 feature {NONE}
 	db: DB_HANDLER
+		once
+			create Result.make
+		end
 
 feature -- Router
 
@@ -17,8 +20,6 @@ feature -- Router
 		local
 			fhdl: WSF_FILE_SYSTEM_HANDLER
 		do
-			io.putstring ("Setup router%N")
-			create db.make
 			create fhdl.make_hidden ("www")
 			fhdl.set_directory_index (<<"index.html">>)
 

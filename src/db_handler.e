@@ -10,7 +10,7 @@ feature {NONE}
 	make
 		local
 			q: SQLITE_MODIFY_STATEMENT
-		once
+		do
 			io.put_string ("Make DB_HANDLER%N")
 			if (create {RAW_FILE}.make_with_name("db.sqlite")).exists then
 				create db.make_open_read_write ("db.sqlite")
