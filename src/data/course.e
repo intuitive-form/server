@@ -2,7 +2,8 @@ class
 	COURSE
 
 create
-	make
+	make,
+	make_ready
 
 feature -- Fields
 
@@ -27,6 +28,16 @@ feature {NONE} -- Constructor
 			students := number_of_students.to_integer
 			create start_date.make_from_string(p_start_date, "yyyy-[0]mm-[0]dd")
 			create end_date.make_from_string(p_end_date, "yyyy-[0]mm-[0]dd")
+		end
+
+	make_ready(p_name, p_semester, p_level: STRING; p_students: INTEGER; p_start_date, p_end_date: DATE)
+		do
+			name := p_name
+			semester := p_semester
+			level := p_level
+			students := p_students
+			start_date := p_start_date
+			end_date := p_end_date
 		end
 
 

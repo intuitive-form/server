@@ -322,7 +322,7 @@ feature
 			end
 		end
 
-	courses_of_unit(unit: STRING): LINKED_LIST[STRING]
+	courses_of_unit(unit: STRING): LINKED_LIST[COURSE]
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 			it: SQLITE_STATEMENT_ITERATION_CURSOR
@@ -333,14 +333,21 @@ feature
 			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
 			it := q_select.execute_new_with_arguments(<<unit>>)
 			if not it.after and then attached it.item.integer_value (1) as unit_id then
-				create q_select.make ("SELECT name FROM courses WHERE unit = ?1;", db)
+				create q_select.make ("SELECT name, semester, level, students, start_date, end_date FROM courses WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)
 				across q_select.execute_new_with_arguments (<<unit_id>>) as i loop
-					Result.put_front(i.item.string_value (1))
+					Result.put_front(create {COURSE}.make_ready (
+						i.item.string_value(1),
+						i.item.string_value(2),
+						i.item.string_value(3),
+						i.item.integer_value(4),
+						create {DATE}.make_by_days (i.item.integer_value(5)),
+						create {DATE}.make_by_days (i.item.integer_value(6))
+					))
 				end
 			end
 		end
 
-	courses_of_unit_between_dates(unit: STRING; date1, date2: DATE): LINKED_LIST[STRING]
+	courses_of_unit_between_dates(unit: STRING; date1, date2: DATE): LINKED_LIST[COURSE]
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 			it: SQLITE_STATEMENT_ITERATION_CURSOR
@@ -351,14 +358,21 @@ feature
 			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
 			it := q_select.execute_new_with_arguments(<<unit>>)
 			if not it.after and then attached it.item.integer_value (1) as unit_id then
-				create q_select.make ("SELECT name FROM courses WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)
+				create q_select.make ("SELECT name, semester, level, students, start_date, end_date FROM courses WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)
 				across q_select.execute_new_with_arguments (<<unit_id, date1.days, date2.days>>) as i loop
-					Result.put_front(i.item.string_value (1))
+					Result.put_front(create {COURSE}.make_ready (
+						i.item.string_value(1),
+						i.item.string_value(2),
+						i.item.string_value(3),
+						i.item.integer_value(4),
+						create {DATE}.make_by_days (i.item.integer_value(5)),
+						create {DATE}.make_by_days (i.item.integer_value(6))
+					))
 				end
 			end
 		end
 
-	grants_of_unit(unit: STRING): LINKED_LIST[grant]
+	grants_of_unit(unit: STRING): LINKED_LIST[GRANT]
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 			it: SQLITE_STATEMENT_ITERATION_CURSOR
