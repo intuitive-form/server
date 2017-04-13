@@ -20,31 +20,19 @@ feature -- Execution
 
 	execute (a_start_path: READABLE_STRING_8; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
-			output: STRING
+			j: JSON_OBJECT
 			data: SUBMIT_DATA
 			msg: WSF_PAGE_RESPONSE
 		do
-			io.put_string ("Processing POST%N")
-			create output.make_empty
-			create data.make(req)
-			across req.form_parameters as ic
-			loop
-				output.append (ic.item.key)
-				output.append ("%N")
-			end
-			output.append ("%N")
-
+			create j.make
+			create data.make (req)
 			if data.is_correct then
-				io.put_string ("Data is correct%N")
 				db.insert (data)
+				j.put (create {JSON_STRING}.make_from_string ("ok"), "status")
+			else
+				j.put (create {JSON_STRING}.make_from_string ("error"), "status")
 			end
-			across db.unit_names as it
-			loop
-				output.append (it.item)
-				output.append("%N")
-			end
-			create msg.make_with_body (output)
-			res.send (msg)
+			res.send (create {WSF_PAGE_RESPONSE}.make_with_body (j.representation))
 		end
 
 end

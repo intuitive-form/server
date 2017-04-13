@@ -1,21 +1,27 @@
 class
 	DB_HANDLER
 
+create
+	make
+
 feature {NONE}
 	db: SQLITE_DATABASE
+
+	make
 		local
 			q: SQLITE_MODIFY_STATEMENT
 		once
+			io.put_string ("Make DB_HANDLER%N")
 			if (create {RAW_FILE}.make_with_name("db.sqlite")).exists then
-				create Result.make_open_read_write ("db.sqlite")
+				create db.make_open_read_write ("db.sqlite")
 			else
-				create Result.make_create_read_write ("db.sqlite")
+				create db.make_create_read_write ("db.sqlite")
 				across db_schema as query loop
-					create q.make (query.item, Result)
+					create q.make (query.item, db)
 					q.execute
 				end
 			end
-			Result.set_busy_handler (agent handler)
+			db.set_busy_handler (agent handler)
 		end
 
 	db_schema: ARRAY[STRING]
