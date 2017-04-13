@@ -8,72 +8,43 @@ feature {NONE} -- Initialization
 	make(request: WSF_REQUEST)
 		-- Constructor
 		local
-			s1_date_start, s1_date_end: DATE
+			parser: JSON_PARSER
+			sections: ARRAYED_LIST[JSON_OBJECT]
+			name, iterator: STRING
+			i: INTEGER
 		do
 			if
-				-- Section #1
-				attached {WSF_STRING} request.form_parameter ("unit-name") as a_unit_name and then
-				attached {WSF_STRING} request.form_parameter ("head-name")as a_head_name and then
-				attached {WSF_STRING} request.form_parameter ("reporting-period-start") as a_date_start and then
-				attached {WSF_STRING} request.form_parameter ("reporting-period-end") as a_date_end and then
-
-				-- Section #2
-				attached {WSF_STRING} request.form_parameter ("courses-course-name-1") and then
-				attached {WSF_STRING} request.form_parameter ("courses-students-number-1") and then
-
-				attached {WSF_STRING} request.form_parameter ("examinations-course-name-1") and then
-				attached {WSF_STRING} request.form_parameter ("examinations-students-number-1") and then
-
-				attached {WSF_STRING} request.form_parameter ("students-supervised-name-1") and then
-				attached {WSF_STRING} request.form_parameter ("students-supervised-work-nature-1") and then
-
-				attached {WSF_STRING} request.form_parameter ("completed-student-reports-name-1") and then
-				attached {WSF_STRING} request.form_parameter ("completed-student-reports-title-1") and then
-
-				-- Section #3
-				attached {WSF_STRING} request.form_parameter ("grants-title-1") and then
-				attached {WSF_STRING} request.form_parameter ("grants-granting-agency-1") and then
-				attached {WSF_STRING} request.form_parameter ("period-start-1") and then
-				attached {WSF_STRING} request.form_parameter ("period-end-1") and then
-				attached {WSF_STRING} request.form_parameter ("grants-amount-1") and then
-
-				attached {WSF_STRING} request.form_parameter ("research-projects-title-1")and then
-				attached {WSF_STRING} request.form_parameter ("research-projects-personnel-involved-name-1-1") and then
-				attached {WSF_STRING} request.form_parameter ("research-projects-start-date-1") and then
-				attached {WSF_STRING} request.form_parameter ("research-projects-end-date-1")
+				attached {WSF_STRING} request.form_parameter ("value") as json_content
 			then
-				is_correct := True
-
-				create s1_general.make (a_unit_name.value.to_string_8, a_head_name.value.to_string_8, a_date_start.value, a_date_end.value)
-
-				io.put_string ("SUBMIT_DATA: Processing coures%N")
-				proceed_s2_courses (request)
-				io.put_string ("SUBMIT_DATA: Processing exams%N")
-				proceed_s2_examinations(request)
-				io.put_string ("SUBMIT_DATA: Processing students%N")
-				proceed_s2_students (request)
-				io.put_string ("SUBMIT_DATA: Processing reports%N")
-				proceed_s2_students_reports (request)
-				io.put_string ("SUBMIT_DATA: Processing PhDs%N")
-				proceed_s2_phd (request)
-				io.put_string ("SUBMIT_DATA: Processing Section 3, grants%N")
-				proceed_s3_grants (request)
-				io.put_string ("SUBMIT_DATA: Processing research projects%N")
-				proceed_s3_research_projects (request)
-				io.put_string ("SUBMIT_DATA: Processing research collabs%N")
-				proceed_s3_research_collaborations (request)
-				io.put_string ("SUBMIT_DATA: Processing conf pubs%N")
-				proceed_s3_conference_publications (request)
-				io.put_string ("SUBMIT_DATA: Processing journal pubs%N")
-				proceed_s3_journal_publications (request)
+				create parser.make_with_string (json_content.value.as_string_8)
+				if
+					parser.is_valid and then
+					attached {JSON_OBJECT} parser.parsed_json_object as json_object
+				then
+					create sections.make (1)
+						-- Creating a list of Sections
+					from
+						name := "section"
+						i := 1
+						iterator := name + i.out
+					until
+						not attached {JSON_OBJECT} json_object.item (create {JSON_STRING}.make_from_string (iterator)) as section
+					loop
+						sections.sequence_put (section)
+						i := i + 1
+						iterator := name + i.out
+					end
+						-- Filling the list
+				end
 			else
 				is_correct := False
 			end
-
-
 		end
 
 feature -- Attributes
+
+	exception: BOOLEAN
+		-- True if something went wrong
 
 	is_correct: BOOLEAN
 		-- True if the submitted form is correct
@@ -109,604 +80,108 @@ feature -- Attributes
 		-- Section #3 Research collaborations: Country of institution / Name of institution /
 		-- /Contracts / Nature of collaboration
 
-	s3_conference_publications: detachable ARRAYED_LIST [PUBLICATION]
+	s3_conference_publications: detachable ARRAYED_LIST[PUBLICATION]
 		-- Section #3 Conference publicaitions: Title / Authors
 
 	s3_journal_publications: detachable ARRAYED_LIST[PUBLICATION]
 		-- Section #2 Journal publications: Title / Authors
 
+
 feature {NONE} -- Proceeding features
 
-	proceed_s2_courses(request: WSF_REQUEST)
-		-- Proceeds data from Section #2 Courses
-		local
-			i: INTEGER
-			ccn, cs, cl, csn, csd, ced: STRING
-			a_ccn, a_cs, a_cl, a_csn, a_csd, a_ced: STRING
+	add_into_list(a_list: ARRAYED_LIST[ANY]; values: ARRAYED_LIST[STRING]; list_values: ARRAYED_LIST[ARRAYED_LIST[STRING]])
+		-- Adds to 'a_list' object of some type with 'values'
 		do
-			create s2_courses.make (1)
-			ccn := "courses-course-name-"
-			cs := "courses-semester-"
-			cl := "courses-level-"
-			csn := "courses-students-number-"
-			csd := "courses-start-date-"
-			ced := "courses-end-date-"
-			from
-				i := 1
-				a_ccn := ccn + i.out
-				a_cs := cs + i.out
-				a_cl := cl + i.out
-				a_csn := csn + i.out
-				a_csd := csd + i.out
-				a_ced := ced + i.out
-			until
-				not	attached {WSF_STRING} request.form_parameter(a_ccn) as value_1 or else
-				not	attached {WSF_STRING} request.form_parameter(a_cs) as value_2 or else
-				not	attached {WSF_STRING} request.form_parameter(a_cl) as value_3 or else
-				not	attached {WSF_STRING} request.form_parameter(a_csn) as value_4 or else
-				not	attached {WSF_STRING} request.form_parameter (a_csd) as value_date_s or else
-				not	attached {WSF_STRING} request.form_parameter (a_ced) as value_date_e
-			loop
-				if
-					not value_1.value.as_string_8.is_empty and then
-					not value_2.value.as_string_8.is_empty and then
-					not value_3.value.as_string_8.is_empty and then
-					not value_4.value.as_string_8.is_empty and then
-					not value_date_s.value.as_string_8.is_empty and then
-					not value_date_e.value.as_string_8.is_empty
-				then
-					s2_courses.sequence_put (create {COURSE}.make(value_1.value.as_string_8, value_2.value.as_string_8,
-							value_3.value.as_string_8, value_4.value.as_string_8, value_date_s.value.as_string_8,
-								value_date_e.value.as_string_8))
-				end
-				i := i + 1
-				a_ccn := ccn + i.out
-				a_cs := cs + i.out
-				a_cl := cl + i.out
-				a_csn := csn + i.out
-				a_csd := csd + i.out
-				a_ced := ced + i.out
+			if
+				attached {ARRAYED_LIST[COURSE]} a_list as courses
+			then
+				courses.sequence_put (create {COURSE}.make (values.i_th (1), values.i_th (2), values.i_th (3),
+					values.i_th (4), values.i_th (5), values.i_th (6)))
+			elseif
+				attached {ARRAYED_LIST[EXAM]} a_list as exams
+			then
+				exams.sequence_put (create {EXAM}.make (values.i_th (1), values.i_th (2), values.i_th (3),
+					values.i_th (4)))
+			elseif
+				attached {ARRAYED_LIST[STUDENT]} a_list as students
+			then
+				students.sequence_put (create {STUDENT}.make (values.i_th (1), values.i_th (2)))
+			elseif
+				attached {ARRAYED_LIST[STUDENT_REPORT]} a_list as student_reports
+			then
+				student_reports.sequence_put (create {STUDENT_REPORT}.make (values.i_th (1), values.i_th (2), values.i_th (30)))
+			elseif
+				attached {ARRAYED_LIST[PHD_THESIS]} a_list as phd
+			then
+				phd.sequence_put (create {PHD_THESIS}.make (values.i_th (1), values.i_th (2), values.i_th (3)))
+			elseif
+				attached {ARRAYED_LIST[GRANT]} a_list as grants
+			then
+				grants.sequence_put (create {GRANT}.make (values.i_th (1), values.i_th (2), values.i_th (3),
+					values.i_th (4), values.i_th (5), values.i_th (6)))
+			elseif
+				attached {ARRAYED_LIST[RESEARCH_PROJECT]} a_list as research_projects
+			then
+				research_projects.sequence_put (create {RESEARCH_PROJECT}.make (values.i_th (1), values.i_th (2),
+					values.i_th (3), values.i_th (4), list_values.i_th (1), list_values.i_th (2)))
+			elseif
+				attached {ARRAYED_LIST[RESEARCH_COLLABORATION]} a_list as research_collaborations
+			then
+				research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (values.i_th (1), values.i_th (2),
+					values.i_th (3), list_values.i_th (1)))
+			elseif
+				attached {ARRAYED_LIST[PUBLICATION]} a_list as publications
+			then
+				publications.sequence_put (create {PUBLICATION}.make (values.i_th (1), values.i_th (2),
+					 list_values.i_th (1)))
 			end
 		end
 
-	proceed_s2_examinations(request: WSF_REQUEST)
-		-- Proceeds data from Section #2 Examinations
+	proceed_json_object(json_object: JSON_OBJECT; a_keys: ARRAY[TUPLE[STRING, BOOLEAN]]): ARRAYED_LIST[STRING]
+		-- Returns values of 'a_keys' from 'json_object'
 		local
 			i: INTEGER
-			ecn, es, eek, esn: STRING
-			a_ecn, a_es, a_eek, a_esn: STRING
 		do
-			create s2_examinations.make (1)
-			ecn := "examinations-course-name-"
-			es := "examinations-semester-"
-			eek := "examinations-exam-kind-"
-			esn := "examinations-students-number-"
+			create Result.make(1)
 			from
 				i := 1
-				a_ecn := ecn + i.out
-				a_es := es + i.out
-				a_eek := eek + i.out
-				a_esn := esn + i.out
 			until
-				not attached {WSF_STRING} request.form_parameter (a_ecn) as value_1 or else
-				not	attached {WSF_STRING} request.form_parameter (a_es) as value_2 or else
-				not	attached {WSF_STRING} request.form_parameter (a_eek) as value_3 or else
-				not	attached {WSF_STRING} request.form_parameter (a_esn) as value_4
+				i > a_keys.count
 			loop
 				if
-					not value_1.value.as_string_8.is_empty and then
-					not value_2.value.as_string_8.is_empty and then
-					not value_3.value.as_string_8.is_empty and then
-					not value_4.value.as_string_8.is_empty
-				then
-					s2_examinations.sequence_put (create {EXAM}.make (value_1.value.as_string_8, value_2.value.as_string_8,
-						value_3.value.as_string_8, value_4.value.as_string_8))
-				end
-				i :=  i + 1
-				a_ecn := ecn + i.out
-				a_es := es + i.out
-				a_eek := eek + i.out
-				a_esn := esn + i.out
-			end
-		end
-
-	proceed_s2_students(request: WSF_REQUEST)
-		-- Proceeds data from Section #2 Students
-		local
-			i: INTEGER
-			ssn, sswn: STRING
-			a_ssn, a_sswn: STRING
-		do
-			create s2_students.make (1)
-			ssn := "students-supervised-name-"
-			sswn := "students-supervised-work-nature-"
-			from
-				i := 1
-				a_ssn := ssn + i.out
-				a_sswn := sswn + i.out
-			until
-				not attached {WSF_STRING} request.form_parameter (a_ssn) as value_1 or else
-				not	attached {WSF_STRING} request.form_parameter (a_sswn) as value_2
-			loop
-				if
-					not value_1.value.as_string_8.is_empty and then
-					not value_2.value.as_string_8.is_empty
-				then
-					s2_students.sequence_put (create {STUDENT}.make (value_1.value.as_string_8, value_2.value.as_string_8))
-				end
-				i := i + 1
-				a_ssn := ssn + i.out
-				a_sswn := sswn + i.out
-			end
-		end
-
-	proceed_s2_students_reports(request: WSF_REQUEST)
-		-- Proceeds data from Section #2 Student reports
-		local
-			i: INTEGER
-			csrn, csrt, csrpp: STRING
-			a_csrn, a_csrt, a_csrpp: STRING
-		do
-			create s2_student_reports.make(1)
-			csrn := "completed-student-reports-name-"
-			csrt := "completed-student-reports-title-"
-			csrpp := "completed-student-reports-publication-plans-"
-			from
-				i := 1
-				a_csrn := csrn + i.out
-				a_csrt := csrt + i.out
-				a_csrpp := csrpp + i.out
-			until
-				not attached {WSF_STRING} request.form_parameter (a_csrn) as value_1 or else
-				not	attached {WSF_STRING} request.form_parameter (a_csrt) as value_2
-			loop
-				if
-					not value_1.value.is_empty and then
-					not value_2.value.is_empty
+					attached {STRING} a_keys.at(i).at(1) as string and then
+					attached {BOOLEAN} a_keys.at (i).at(2) as boolean and then
+					attached {JSON_STRING} json_object.item (string) as value
 				then
 					if
-						attached {WSF_STRING} request.form_parameter (a_csrpp) as value_3
+						value.item.is_empty implies (boolean)
 					then
-						s2_student_reports.sequence_put (create {STUDENT_REPORT}.make (value_1.value.as_string_8,
-							value_2.value.as_string_8, value_3.value.as_string_8))
+						Result.sequence_put(value.item)
 					else
-						s2_student_reports.sequence_put (create {STUDENT_REPORT}.make (value_1.value.as_string_8,
-							value_2.value.as_string_8, ""))
+						exception := True
 					end
+
 				end
 				i := i + 1
-				a_csrn := csrn + i.out
-				a_csrt := csrt + i.out
-				a_csrpp := csrpp + i.out
 			end
 		end
 
-	proceed_s2_phd(request: WSF_REQUEST)
-		-- Proceeds data from Section #2 Phd theses
+	proceed_json_array(json_array: JSON_ARRAY; a_keys: ARRAY[TUPLE[STRING, BOOLEAN]]): ARRAYED_LIST[ARRAYED_LIST[STRING]]
+		-- Returns values of 'a_keys' from every item of 'json_array'
 		local
 			i: INTEGER
-			cptn, cptt, cptpp: STRING
-			a_cptn, a_cptt, a_cptpp: STRING
+			temp_array: ARRAYED_LIST[JSON_VALUE]
+			values: ARRAYED_LIST[STRING]
 		do
-			create s2_phd.make (1)
-			cptn := "completed-PhD-theses-name-"
-			cptt := "completed-PhD-theses-title-"
-			cptpp := "completed-PhD-theses-publication-plans-"
-			from
-				i := 1
-				a_cptn := cptn + i.out
-				a_cptt := cptt + i.out
-				a_cptpp := cptpp + i.out
-			until
-				not (attached {WSF_STRING} request.form_parameter (a_cptn) or
-				attached {WSF_STRING} request.form_parameter (a_cptt) or
-				attached {WSF_STRING} request.form_parameter (a_cptpp))
+			create Result.make(1)
+			temp_array := json_array.array_representation
+			across temp_array as iter
 			loop
 				if
-					(attached {WSF_STRING} request.form_parameter (a_cptn) as value_1 and then not value_1.value.as_string_8.is_empty) or else
-					(attached {WSF_STRING} request.form_parameter (a_cptt) as value_2 and then not value_2.value.as_string_8.is_empty) or else
-					(attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3 and then not value_3.value.as_string_8.is_empty)
+					attached {JSON_OBJECT} iter.item as json_object
 				then
-					if
-						attached {WSF_STRING} request.form_parameter (a_cptn) as value_1
-					then
-						if
-							attached {WSF_STRING} request.form_parameter (a_cptt) as value_2
-						then
-							if
-								attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
-							then
-								s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
-									value_2.value.as_string_8, value_3.value.as_string_8))
-							else
-								s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
-														value_2.value.as_string_8, ""))
-							end
-						else
-							if
-								attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
-							then
-								s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
-									"", value_3.value.as_string_8))
-							else
-								s2_phd.sequence_put (create {PHD_THESIS}.make (value_1.value.as_string_8,
-														"", ""))
-							end
-						end
-					else
-						if
-							attached {WSF_STRING} request.form_parameter (a_cptt) as value_2
-						then
-							if
-								attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
-							then
-								s2_phd.sequence_put (create {PHD_THESIS}.make ("",
-									value_2.value.as_string_8, value_3.value.as_string_8))
-							else
-								s2_phd.sequence_put (create {PHD_THESIS}.make ("",
-															value_2.value.as_string_8, ""))
-							end
-						else
-							if
-								attached {WSF_STRING} request.form_parameter (a_cptpp) as value_3
-							then
-								s2_phd.sequence_put (create {PHD_THESIS}.make ("",
-									"", value_3.value.as_string_8))
-							end
-						end
-					end
+					Result.sequence_put(proceed_json_object (json_object, a_keys))
 				end
-				i := i + 1
-				a_cptn := cptn + i.out
-				a_cptt := cptt + i.out
-				a_cptpp := cptpp + i.out
-			end
-		end
-
-
-	proceed_s3_grants(request: WSF_REQUEST)
-		-- Proceeds data from Section #3 Grants
-		local
-			i: INTEGER
-			gt, gga, ps, pe, gc, ga: STRING
-			a_gt, a_gga, a_ps, a_pe, a_gc, a_ga: STRING
-		do
-			create s3_grants.make(1)
-			gt := "grants-title-"
-			gga := "grants-granting-agency-"
-			ps := "period-start-"
-			pe := "period-end-"
-			gc := "grants-continuation-"
-			ga := "grants-amount-"
-			from
-				i := 1
-				a_gt := gt + i.out
-				a_gga := gga + i.out
-				a_ps := ps + i.out
-				a_pe := pe + i.out
-				a_gc := gc + i.out
-				a_ga := ga + i.out
-			until
-				not attached {WSF_STRING} request.form_parameter (a_gt) as value_1 or else
-				not	attached {WSF_STRING} request.form_parameter (a_gga) as value_2 or else
-				not	attached {WSF_STRING} request.form_parameter (a_ps) as value_3 or else
-				not	attached {WSF_STRING} request.form_parameter (a_pe) as value_4 or else
-				not	attached {WSF_STRING} request.form_parameter (a_ga) as value_6
-			loop
-				if
-					not value_1.value.as_string_8.is_empty and then
-					not value_2.value.as_string_8.is_empty and then
-					not value_3.value.as_string_8.is_empty and then
-					not value_4.value.as_string_8.is_empty and then
-					not value_6.value.as_string_8.is_empty
-				then
-					if
-						attached {WSF_STRING} request.form_parameter (a_gc) as value_5
-					then
-						s3_grants.sequence_put (create {GRANT}.make (value_1.value.as_string_8,
-							value_2.value.as_string_8, value_3.value.as_string_8, value_4.value.as_string_8,
-								value_5.value.as_string_8, value_6.value.as_string_8))
-					else
-						s3_grants.sequence_put (create {GRANT}.make (value_1.value.as_string_8,
-							value_2.value.as_string_8, value_3.value.as_string_8, value_4.value.as_string_8,
-								"", value_6.value.as_string_8))
-					end
-				end
-				i := i + 1
-				a_gt := gt + i.out
-				a_gga := gga + i.out
-				a_ps := ps + i.out
-				a_pe := pe + i.out
-				a_gc := gc + i.out
-				a_ga := ga + i.out
-			end
-		end
-
-	proceed_s3_research_projects(request: WSF_REQUEST)
-		-- Proceeds data from Section #3 Researh Projects
-		local
-			data_1: ARRAYED_LIST[STRING]
-			data_2: ARRAYED_LIST[STRING]
-			i, j: INTEGER
-			rpt, rppin, rpepin, rpsd, rped, rpfs: STRING
-			a_rpt, a_rppin, b_rppin, a_rpepin, b_rpepin, a_rpsd, a_rped, a_rpfs: STRING
-		do
-			create s3_research_projects.make(1)
-			rpt := "research-projects-title-"
-			rppin := "research-projects-personnel-involved-name-"
-			rpepin := "research-projects-extra-personnel-involved-name-"
-			rpsd := "research-projects-start-date-"
-			rped := "research-projects-end-date-"
-			rpfs := "research-projects-financing-sources-"
-			from
-				i := 1
-				a_rpt := rpt + i.out
-				a_rppin := rppin + i.out + "-"
-				a_rpepin := rpepin + i.out + "-"
-				a_rpsd := rpsd + i.out
-				a_rped := rped + i.out
-				a_rpfs := rpfs + i.out
-			until
-				not attached {WSF_STRING} request.form_parameter (a_rpt) as value_1 or else
-				not	attached {WSF_STRING} request.form_parameter (a_rpsd) as value_2 or else
-				not	attached {WSF_STRING} request.form_parameter (a_rped) as value_3 or else
-				not	attached {WSF_STRING} request.form_parameter (a_rpfs) as value_4
-			loop
-				if
-					not value_1.value.as_string_8.is_empty and then
-					not value_2.value.as_string_8.is_empty and then
-					not value_3.value.as_string_8.is_empty and then
-					not value_4.value.as_string_8.is_empty
-				then
-					create data_1.make (1)
-					create data_2.make (1)
-					from
-						j := 1
-						b_rppin := a_rppin + j.out
-					until
-						not attached {WSF_STRING} request.form_parameter (b_rppin) as value
-					loop
-						if
-							not value.value.as_string_8.is_empty
-						then
-							data_1.sequence_put (value.value.as_string_8)
-						end
-						j := j + 1
-						b_rppin := a_rppin + j.out
-
-					end
-					from
-						j := 1
-						b_rpepin := a_rpepin + j.out
-					until
-						not attached {WSF_STRING} request.form_parameter (b_rpepin) as value
-					loop
-						if
-							not value.value.as_string_8.is_empty
-						then
-							data_2.sequence_put (value.value.as_string_8)
-						end
-						j := j + 1
-						b_rpepin := a_rpepin + j.out
-					end
-					s3_research_projects.sequence_put (create {RESEARCH_PROJECT}.make (value_1.value.as_string_8,
-						value_2.value.as_string_8, value_3.value.as_string_8, value_4.value.as_string_8,
-						data_1, data_2))
-				end
-				i := i + 1
-				a_rpt := rpt + i.out
-				a_rppin := rppin + i.out + "-"
-				a_rpepin := rpepin + i.out + "-"
-				a_rpsd := rpsd + i.out
-				a_rped := rped + i.out
-				a_rpfs := rpfs + i.out
-			end
-		end
-
-	proceed_s3_research_collaborations(request: WSF_REQUEST)
-		-- Proceed data from Section #3 Research Collaborations
-		local
-			data_1: ARRAYED_LIST[STRING]
-			i, j: INTEGER
-			rcc, rcn, rccn, rcna: STRING
-			a_rcc, a_rcn, a_rccn, b_rccn, a_rcna: STRING
-		do
-			create s3_research_collaborations.make (1)
-			rcc := "research-collaboration-country-"
-			rcn := "research-collaboration-name-"
-			rccn := "research-collaboration-contracts-name-"
-			rcna := "research-collaboration-nature-"
-			from
-				i := 1
-				a_rcc := rcc + i.out
-				a_rcn := rcn + i.out
-				a_rccn := rccn + i.out + "-"
-				a_rcna := rcna + i.out
-			until
-				not (attached {WSF_STRING} request.form_parameter (a_rcc) or
-					attached {WSF_STRING} request.form_parameter (a_rcn) or
-					attached {WSF_STRING} request.form_parameter (a_rccn))
-			loop
-				if
-					(attached {WSF_STRING} request.form_parameter (a_rcc) as value_1 and then not value_1.value.is_empty) or else
-					(attached {WSF_STRING} request.form_parameter (a_rcn) as value_2 and then not value_2.value.is_empty) or else
-					(attached {WSF_STRING} request.form_parameter (a_rccn) as value_3 and then not value_3.value.is_empty)
-				then
-					create data_1.make (1)
-					from
-						j := 1
-						b_rccn := a_rccn + j.out
-					until
-						not attached {WSF_STRING} request.form_parameter (b_rccn) as value
-					loop
-						if
-							not value.value.as_string_8.is_empty
-						then
-							data_1.sequence_put (value.value.as_string_8)
-						end
-						j := j + 1
-						b_rccn := a_rccn + j.out
-					end
-					if
-						attached {WSF_STRING} request.form_parameter (a_rcc) as value_1
-					then
-						if
-							attached {WSF_STRING} request.form_parameter (a_rcn) as value_2
-						then
-							if
-								attached {WSF_STRING} request.form_parameter (a_rccn) as value_3
-							then
-								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (value_1.value.as_string_8,
-									 value_2.value.as_string_8, value_3.value.as_string_8, data_1))
-							else
-								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (value_1.value.as_string_8,
-									 value_2.value.as_string_8, "", data_1))
-							end
-						else
-							if
-								attached {WSF_STRING} request.form_parameter (a_rccn) as value_3
-							then
-								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (value_1.value.as_string_8,
-									 "", value_3.value.as_string_8, data_1))
-							else
-								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (value_1.value.as_string_8,
-									 "", "", data_1))
-							end
-						end
-					else
-						if
-							attached {WSF_STRING} request.form_parameter (a_rcn) as value_2
-						then
-							if
-								attached {WSF_STRING} request.form_parameter (a_rccn) as value_3
-							then
-								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make ("",
-									 value_2.value.as_string_8, value_3.value.as_string_8, data_1))
-							else
-								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make ("",
-									 value_2.value.as_string_8, "", data_1))
-							end
-						else
-							if
-								attached {WSF_STRING} request.form_parameter (a_rccn) as value_3
-							then
-								s3_research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make ("",
-									 "", value_3.value.as_string_8, data_1))
-							end
-						end
-					end
-				end
-				i := i + 1
-				a_rcc := rcc + i.out
-				a_rcn := rcn + i.out
-				a_rccn := rccn + i.out + "-"
-				a_rcna := rcna + i.out
-			end
-		end
-
-	proceed_s3_conference_publications(request: WSF_REQUEST)
-		-- Proceeds data from Section #3 Conference puplications
-		local
-			data_1: ARRAYED_LIST[STRING]
-			i, j: INTEGER
-			cpt, cpa, cpd: STRING
-			a_cpt, a_cpa, b_cpa, a_cpd: STRING
-		do
-			create s3_conference_publications.make (1)
-			cpt := "conference-publications-title-"
-			cpa := "conference-publications-author-"
-			cpd := "conference-publications-date-"
-			from
-				i := 1
-				a_cpt := cpt + i.out
-				a_cpa := cpa + i.out + "-"
-				a_cpd := cpd + i.out
-			until
-				not attached {WSF_STRING} request.form_parameter(a_cpt) as value_1 or else
-				not attached {WSF_STRING} request.form_parameter (a_cpd) as value_date
-			loop
-				if
-					not value_1.value.as_string_8.is_empty and then
-					not value_date.value.as_string_8.is_empty
-				then
-					create data_1.make (1)
-					from
-						j := 1
-						b_cpa := a_cpa + j.out
-					until
-						not attached {WSF_STRING} request.form_parameter(b_cpa) as value
-					loop
-						if
-							not value.value.as_string_8.is_empty
-						then
-							data_1.sequence_put (value.value.as_string_8)
-						end
-						j := j + 1
-						b_cpa := a_cpa + j.out
-					end
-					s3_conference_publications.sequence_put (create {PUBLICATION}.make (
-						value_1.value.as_string_8,
-						value_date.value.as_string_8,
-						data_1)
-					)
-				end
-				i := i + 1
-				a_cpt := cpt + i.out
-				a_cpa := cpa + i.out + "-"
-				a_cpd := cpd + i.out
-			end
-		end
-
-	proceed_s3_journal_publications(request: WSF_REQUEST)
-		-- Proceeds data from Section #3 Journal puplications
-		local
-			data_1: ARRAYED_LIST[STRING]
-			i, j: INTEGER
-			cpt, cpa, cpd: STRING
-			a_cpt, a_cpa, b_cpa, a_cpd: STRING
-		do
-			create s3_journal_publications.make (1)
-			cpt := "journal-publications-title-"
-			cpa := "journal-publications-author-"
-			cpd := "journal-publications-date-"
-			from
-				i := 1
-				a_cpt := cpt + i.out
-				a_cpa := cpa + i.out + "-"
-				a_cpd := cpd + i.out
-			until
-				not attached {WSF_STRING} request.form_parameter(a_cpt) as value_1 or else
-				not attached {WSF_STRING} request.form_parameter (a_cpd) as value_date
-			loop
-				if
-					not value_1.value.as_string_8.is_empty and then
-					not value_date.value.as_string_8.is_empty
-				then
-					create data_1.make (1)
-					from
-						j := 1
-						b_cpa := a_cpa + j.out
-					until
-						not attached {WSF_STRING} request.form_parameter(b_cpa) as value
-					loop
-						if
-							not value.value.as_string_8.is_empty
-						then
-							data_1.sequence_put (value.value.as_string_8)
-						end
-						j := j + 1
-						b_cpa := a_cpa + j.out
-					end
-					s3_journal_publications.sequence_put (create {PUBLICATION}.make (
-						value_1.value.as_string_8,
-						value_date.value.as_string_8,
-						data_1)
-					)
-				end
-				i := i + 1
-				a_cpt := cpt + i.out
-				a_cpa := cpa + i.out + "-"
-				a_cpd := cpd + i.out
 			end
 		end
 
