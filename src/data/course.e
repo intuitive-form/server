@@ -41,7 +41,10 @@ feature {NONE} -- Constructor
 		do
 			key := "courses"
 			keys := <<	["name", False], ["semester", False], ["level", False],
-						 ["students", False], ["start_date", False], ["start-date", False]>>
+						["students", False], ["start_date", False], ["start-date", False]>>
+			create parser
+			create checker
+				-- Initialiazing
 			values := parser.parse_json_object (json_value, keys)
 			if
 				not parser.parsed
@@ -62,7 +65,7 @@ feature {NONE} -- Constructor
 		end
 
 	make(p_name, p_semester, p_level, p_students, p_start_date, p_end_date: STRING)
-		-- Fills the fieds
+		-- Fills the fields
 		do
 			if
 				valid_semester (p_semester) and then
