@@ -26,12 +26,17 @@ feature {NONE}
 			db.set_busy_handler (agent handler)
 			create inserter.make (Current)
 			create selector.make (Current)
+		ensure
+			not db.is_closed
+			db.is_readable
+			db.is_writable
+			db.is_accessible
 		end
 
 	db_schema: ARRAY[STRING]
 		once
 			Result := <<
-				"CREATE TABLE units (id INTEGER PRIMARY KEY, name TEXT UNIQUE, head TEXT, start_date INTEGER, end_date INTEGER);",
+				"CREATE TABLE units (id INTEGER PRIMARY KEY, name TEXT UNIQUE, head TEXT, start_date INTEGER, end_date INTEGER, misc_info TEXT);",
 				"CREATE TABLE courses (id INTEGER PRIMARY KEY, unit INTEGER, name TEXT, semester TEXT, level TEXT, students INTEGER, start_date INTEGER, end_date INTEGER, CONSTRAINT course_unique UNIQUE (name, semester));",
 				"CREATE TABLE exams (id INTEGER PRIMARY KEY, unit INTEGER, course INTEGER, type TEXT, students INTEGER);",
 				"CREATE TABLE supervisions (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, work TEXT);",
@@ -46,7 +51,15 @@ feature {NONE}
 				"CREATE TABLE conference_publications (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, date INTEGER);",
 				"CREATE TABLE journal_publications (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, date INTEGER);",
 				"CREATE TABLE conference_publications_authors (id INTEGER PRIMARY KEY, conf_pub INTEGER, name TEXT);",
-				"CREATE TABLE journal_publications_authors (id INTEGER PRIMARY KEY, journal_pub INTEGER, name TEXT);"
+				"CREATE TABLE journal_publications_authors (id INTEGER PRIMARY KEY, journal_pub INTEGER, name TEXT);",
+				"CREATE TABLE patents (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, country TEXT);",
+				"CREATE TABLE intellectual_propery_licences (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT);",
+				"CREATE TABLE paper_awards (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, awarder TEXT, award_wording TEXT, date INTEGER);",
+				"CREATE TABLE paper_authors (id INTEGER PRIMARY KEY, paper INTEGER, name TEXT);",
+				"CREATE TABLE academia_memberships (id INTEGER PRIMARY KEY, unit INTEGER, name TEXT, organization TEXT, date INTEGER);",
+				"CREATE TABLE prizes (id INTEGER PRIMARY KEY, unit INTEGER, recipient TEXT, name TEXT, granter TEXT, date INTEGER);",
+				"CREATE TABLE patents (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, country TEXT);",
+				"CREATE TABLE industry_collabs (id INTEGER PRIMARY KEY, unit INTEGER, company TEXT, nature TEXT);"
 			>>
 		end
 
