@@ -37,7 +37,7 @@ feature {NONE} -- Initialization
 						iterator := name + i.out
 					end
 					create_all_fields
-						-- Initializing the fields
+						-- Filling the list
 					all_fields := <<<<s2_courses>>>>
 					all_keys := <<<<create {COURSE}>>>>
 					i := 1
@@ -117,29 +117,18 @@ feature {NONE} -- Proceeding features
 			until
 				i > keys.count
 			loop
-				if
-					attached {JSON_VALUE} json_section.item (keys.at (i).key) as json_value
-				then
-					proceed_field (fields.at(i), keys.at (i), json_value)
-				end
+				proceed_field (fields.at(i), keys.at (i), json_section)
 				i := i + 1
 			end
 		end
 
-	proceed_field(field: ARRAYED_LIST[FIELD]; key: FIELD; json_section: JSON_VALUE)
+	proceed_field(field: ARRAYED_LIST[FIELD]; key: FIELD; json_section: JSON_OBJECT)
 		-- Proceeds one field
 		local
-			temp_array: ARRAYED_LIST[JSON_VALUE]
+			temp: like key
 		do
-			if
-				attached {JSON_ARRAY} json_section as json_array
-			then
-				temp_array := json_array.array_representation
-				across temp_array as iter
-				loop
-					field.sequence_put (create {like key}.make_from_json(iter.item))
-				end
-			end
+			create temp.make_from_json(json_section.item (key.key))
+			field.sequence_put (temp)
 		end
 invariant
 	is_correct implies (
