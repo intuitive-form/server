@@ -10,6 +10,8 @@ feature {NONE} -- Initialization
 		local
 			parser: JSON_PARSER
 			sections: ARRAYED_LIST[JSON_OBJECT]
+			all_fields: ARRAY[ARRAY[ARRAYED_LIST[FIELD]]]
+			all_keys: ARRAY[ARRAY[FIELD]]
 			name, iterator: STRING
 			i: INTEGER
 		do
@@ -34,11 +36,27 @@ feature {NONE} -- Initialization
 						i := i + 1
 						iterator := name + i.out
 					end
+					create_all_fields
 						-- Filling the list
+					all_fields := <<<<s2_courses>>>>
+					all_keys := <<<<create {COURSE}>>>>
+					i := 1
+					across sections as iter
+					loop
+						proceed_section (all_fields.at (i), all_keys.at(i), iter.item)
+						i := i + 1
+					end
 				end
 			else
 				is_correct := False
 			end
+		end
+
+	create_all_fields
+		-- Initialize all the fields
+		do
+			create s2_courses.make(1)
+
 		end
 
 feature -- Attributes
@@ -89,102 +107,29 @@ feature -- Attributes
 
 feature {NONE} -- Proceeding features
 
-	add_into_list(a_list: ARRAYED_LIST[ANY]; values: ARRAYED_LIST[STRING]; list_values: ARRAYED_LIST[ARRAYED_LIST[STRING]])
-		-- Adds to 'a_list' object of some type with 'values'
-		do
-			if
-				attached {ARRAYED_LIST[COURSE]} a_list as courses
-			then
-				courses.sequence_put (create {COURSE}.make (values.i_th (1), values.i_th (2), values.i_th (3),
-					values.i_th (4), values.i_th (5), values.i_th (6)))
-			elseif
-				attached {ARRAYED_LIST[EXAM]} a_list as exams
-			then
-				exams.sequence_put (create {EXAM}.make (values.i_th (1), values.i_th (2), values.i_th (3),
-					values.i_th (4)))
-			elseif
-				attached {ARRAYED_LIST[STUDENT]} a_list as students
-			then
-				students.sequence_put (create {STUDENT}.make (values.i_th (1), values.i_th (2)))
-			elseif
-				attached {ARRAYED_LIST[STUDENT_REPORT]} a_list as student_reports
-			then
-				student_reports.sequence_put (create {STUDENT_REPORT}.make (values.i_th (1), values.i_th (2), values.i_th (30)))
-			elseif
-				attached {ARRAYED_LIST[PHD_THESIS]} a_list as phd
-			then
-				phd.sequence_put (create {PHD_THESIS}.make (values.i_th (1), values.i_th (2), values.i_th (3)))
-			elseif
-				attached {ARRAYED_LIST[GRANT]} a_list as grants
-			then
-				grants.sequence_put (create {GRANT}.make (values.i_th (1), values.i_th (2), values.i_th (3),
-					values.i_th (4), values.i_th (5), values.i_th (6)))
-			elseif
-				attached {ARRAYED_LIST[RESEARCH_PROJECT]} a_list as research_projects
-			then
-				research_projects.sequence_put (create {RESEARCH_PROJECT}.make (values.i_th (1), values.i_th (2),
-					values.i_th (3), values.i_th (4), list_values.i_th (1), list_values.i_th (2)))
-			elseif
-				attached {ARRAYED_LIST[RESEARCH_COLLABORATION]} a_list as research_collaborations
-			then
-				research_collaborations.sequence_put (create {RESEARCH_COLLABORATION}.make (values.i_th (1), values.i_th (2),
-					values.i_th (3), list_values.i_th (1)))
-			elseif
-				attached {ARRAYED_LIST[PUBLICATION]} a_list as publications
-			then
-				publications.sequence_put (create {PUBLICATION}.make (values.i_th (1), values.i_th (2),
-					 list_values.i_th (1)))
-			end
-		end
-
-	proceed_json_object(json_object: JSON_OBJECT; a_keys: ARRAY[TUPLE[STRING, BOOLEAN]]): ARRAYED_LIST[STRING]
-		-- Returns values of 'a_keys' from 'json_object'
+	proceed_section(fields: ARRAY[ARRAYED_LIST[FIELD]]; keys: ARRAY[FIELD]; json_section: JSON_OBJECT)
+		-- Proceeds one section
 		local
 			i: INTEGER
 		do
-			create Result.make(1)
 			from
 				i := 1
 			until
-				i > a_keys.count
+				i > keys.count
 			loop
-				if
-					attached {STRING} a_keys.at(i).at(1) as string and then
-					attached {BOOLEAN} a_keys.at (i).at(2) as boolean and then
-					attached {JSON_STRING} json_object.item (string) as value
-				then
-					if
-						value.item.is_empty implies (boolean)
-					then
-						Result.sequence_put(value.item)
-					else
-						exception := True
-					end
-
-				end
+				proceed_field (fields.at(i), keys.at (i), json_section)
 				i := i + 1
 			end
 		end
 
-	proceed_json_array(json_array: JSON_ARRAY; a_keys: ARRAY[TUPLE[STRING, BOOLEAN]]): ARRAYED_LIST[ARRAYED_LIST[STRING]]
-		-- Returns values of 'a_keys' from every item of 'json_array'
+	proceed_field(field: ARRAYED_LIST[FIELD]; key: FIELD; json_section: JSON_OBJECT)
+		-- Proceeds one field
 		local
-			i: INTEGER
-			temp_array: ARRAYED_LIST[JSON_VALUE]
-			values: ARRAYED_LIST[STRING]
+			temp: like key
 		do
-			create Result.make(1)
-			temp_array := json_array.array_representation
-			across temp_array as iter
-			loop
-				if
-					attached {JSON_OBJECT} iter.item as json_object
-				then
-					Result.sequence_put(proceed_json_object (json_object, a_keys))
-				end
-			end
+			create temp.make_from_json(json_section.item (key.key))
+			field.sequence_put (temp)
 		end
-
 invariant
 	is_correct implies (
 	attached s1_general and
