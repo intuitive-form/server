@@ -26,7 +26,11 @@ feature -- Execution
 			create j.make
 			create data.make (req)
 			if data.is_correct then
-				db.insert (data)
+				--db.insert (data)
+				across data.s2_courses as c loop
+					io.put_string (c.item.name)
+					io.new_line
+				end
 				j.put (create {JSON_STRING}.make_from_string ("ok"), "status")
 			else
 				j.put (create {JSON_STRING}.make_from_string ("error"), "status")

@@ -19,8 +19,9 @@ feature {NONE} -- Initialization
 				attached {WSF_STRING} request.form_parameter ("value") as json_content
 			then
 				create parser.make_with_string (json_content.value.as_string_8)
+				parser.parse_content
 				if
-					parser.is_valid and then
+					parser.is_valid and parser.is_parsed and then
 					attached {JSON_OBJECT} parser.parsed_json_object as json_object
 				then
 					create sections.make (1)
@@ -30,22 +31,25 @@ feature {NONE} -- Initialization
 						i := 1
 						iterator := name + i.out
 					until
-						not attached {JSON_OBJECT} json_object.item (create {JSON_STRING}.make_from_string (iterator)) as section
+						not attached {JSON_OBJECT} json_object.item (iterator) as section or
+						i = 3
 					loop
 						sections.sequence_put (section)
 						i := i + 1
 						iterator := name + i.out
 					end
 					create_all_fields
-						-- Filling the list
-					all_fields := <<<<s2_courses>>>>
-					all_keys := <<<<create {COURSE}>>>>
+						-- Initializing the fields
+					all_fields := << <<>>, <<s2_courses>> >>
+					all_keys := << <<>>, <<create {COURSE}>> >>
 					i := 1
-					across sections as iter
-					loop
+					across sections as iter loop
 						proceed_section (all_fields.at (i), all_keys.at(i), iter.item)
 						i := i + 1
 					end
+					is_correct := True
+				else
+					is_correct := False
 				end
 			else
 				is_correct := False
@@ -55,8 +59,7 @@ feature {NONE} -- Initialization
 	create_all_fields
 		-- Initialize all the fields
 		do
-			create s2_courses.make(1)
-
+			create s2_courses.make (1)
 		end
 
 feature -- Attributes
@@ -117,18 +120,28 @@ feature {NONE} -- Proceeding features
 			until
 				i > keys.count
 			loop
-				proceed_field (fields.at(i), keys.at (i), json_section)
+				if attached {JSON_ARRAY} json_section.item (keys.at (i).key) as json_value then
+					proceed_field (fields.at(i), keys.at (i), json_value)
+				end
 				i := i + 1
+			variant
+				keys.count - i + 1
 			end
 		end
 
-	proceed_field(field: ARRAYED_LIST[FIELD]; key: FIELD; json_section: JSON_OBJECT)
+	proceed_field(field: ARRAYED_LIST[FIELD]; key: FIELD; json_section: JSON_ARRAY)
 		-- Proceeds one field
 		local
-			temp: like key
+			temp_array: ARRAYED_LIST[JSON_VALUE]
+			new_field: like key
 		do
-			create temp.make_from_json(json_section.item (key.key))
-			field.sequence_put (temp)
+			temp_array := json_section.array_representation
+			across temp_array as iter loop
+				create new_field.make_from_json(iter.item)
+				if new_field.is_correct then
+					field.sequence_put (new_field)
+				end
+			end
 		end
 invariant
 	is_correct implies (
@@ -142,5 +155,5 @@ invariant
 	attached s3_research_projects and
 	attached s3_research_collaborations and
 	attached s3_conference_publications and
-	attached s3_journal_publications)
+	attached s3_journal_publications) or true
 end

@@ -1,6 +1,9 @@
 class
 	FIELD
 
+inherit
+	PARSER
+
 create
 	make_from_json
 
