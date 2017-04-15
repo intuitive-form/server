@@ -11,6 +11,8 @@ feature {NONE}
 	q_unit, q_course, q_exam, q_supervision, q_report, q_phd, q_grant: SQLITE_INSERT_STATEMENT
 	q_research, q_res_personnel, q_res_extra_personnel, q_res_collab, q_res_collab_contact: SQLITE_INSERT_STATEMENT
 	q_conf_pub, q_conf_pub_author, q_journal_pub, q_journal_pub_author: SQLITE_INSERT_STATEMENT
+	q_patent, q_ip_licence: SQLITE_INSERT_STATEMENT
+	q_paper_award, q_paper_author, q_membership, q_prize: SQLITE_INSERT_STATEMENT
 
 	make (p_handler: DB_HANDLER)
 		require
@@ -20,7 +22,7 @@ feature {NONE}
 		do
 			handler := p_handler
 			db := handler.db
-			create q_unit.make ("INSERT INTO units (name, head, start_date, end_date) VALUES (?1, ?2, ?3, ?4);", db)
+			create q_unit.make ("INSERT INTO units (name, head, start_date, end_date, misc_info) VALUES (?1, ?2, ?3, ?4, NULL);", db)
 			create q_course.make ("INSERT INTO courses (unit, name, semester, level, students, start_date, end_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);", db)
 			create q_exam.make ("INSERT INTO exams (unit, course, type, students) VALUES (?1, ?2, ?3, ?4);", db)
 			create q_supervision.make ("INSERT INTO supervisions (unit, student, work) VALUES (?1, ?2, ?3);", db);
@@ -36,6 +38,13 @@ feature {NONE}
 			create q_conf_pub_author.make ("INSERT INTO conference_publications_authors (conf_pub, name) VALUES (?1, ?2);", db);
 			create q_journal_pub.make ("INSERT INTO journal_publications (unit, title, date) VALUES (?1, ?2, ?3);", db);
 			create q_journal_pub_author.make ("INSERT INTO journal_publications_authors (journal_pub, name) VALUES (?1, ?2);", db);
+			create q_patent.make ("INSERT INTO patents (unit, title, country) VALUES (?1, ?2, ?3);", db)
+			create q_ip_licence.make ("INSERT INTO intellectual_propery_licences (unit, title) VALUES (?1, ?2);", db)
+			create q_paper_award.make ("INSERT INTO paper_awards (unit, title, awarder, award_wording, date) VALUES (?1, ?2, ?3, ?4, ?5);", db)
+			create q_paper_author.make ("INSERT INTO paper_authors (paper, name) VALUES (?1, ?2);", db)
+			create q_membership.make ("INSERT INTO academia_memberships (unit, name, organization, date) VALUES (?1, ?2, ?3, ?4);", db)
+			create q_prize.make ("INSERT INTO prizes (unit, recipient, name, granter, date) VALUES (?1, ?2, ?3, ?4, ?5);", db)
+
 		end
 
 feature {DB_HANDLER}
@@ -130,6 +139,27 @@ feature {DB_HANDLER}
 			last_added_id := q_journal_pub.last_row_id
 			across p_pub.authors as a loop
 				q_journal_pub_author.execute_with_arguments (<<last_added_id, a.item>>)
+			end
+		end
+
+	insert_patent(p_patent: PATENT; unit_id: INTEGER_64)
+		do
+			q_patent.execute_with_arguments (<<unit_id, p_patent.title, p_patent.country>>)
+			last_added_id := q_patent.last_row_id
+		end
+
+	insert_ip_licence(p_licence: IP_LICENCE; unit_id: INTEGER_64)
+		do
+			q_ip_licence.execute_with_arguments (<<unit_id, p_licence.title>>)
+			last_added_id := q_ip_licence.last_row_id
+		end
+
+	insert_paper_award(p_paper: PAPER_AWARD; unit_id: INTEGER_64)
+		do
+			q_paper_award.execute_with_arguments (<<unit_id, p_paper.title, p_paper.awarder, p_paper.award_wording, p_paper.date.days>>)
+			last_added_id := q_paper_award.last_row_id
+			across p_paper.authors as a loop
+				q_paper_author.execute_with_arguments (<<last_added_id, a.item>>)
 			end
 		end
 end

@@ -6,9 +6,10 @@ create
 
 feature {DB_INSERTER, DB_SELECTOR}
 	db: SQLITE_DATABASE
-	inserter: DB_INSERTER
 
 feature {NONE}
+	inserter: DB_INSERTER
+
 	make
 		local
 			q: SQLITE_MODIFY_STATEMENT
@@ -58,7 +59,6 @@ feature {NONE}
 				"CREATE TABLE paper_authors (id INTEGER PRIMARY KEY, paper INTEGER, name TEXT);",
 				"CREATE TABLE academia_memberships (id INTEGER PRIMARY KEY, unit INTEGER, name TEXT, organization TEXT, date INTEGER);",
 				"CREATE TABLE prizes (id INTEGER PRIMARY KEY, unit INTEGER, recipient TEXT, name TEXT, granter TEXT, date INTEGER);",
-				"CREATE TABLE patents (id INTEGER PRIMARY KEY, unit INTEGER, title TEXT, country TEXT);",
 				"CREATE TABLE industry_collabs (id INTEGER PRIMARY KEY, unit INTEGER, company TEXT, nature TEXT);"
 			>>
 		end
