@@ -5,7 +5,7 @@ create
 
 feature {NONE} -- Initialization
 
-	make(request: WSF_REQUEST)
+	make(input: STRING)
 		-- Constructor
 		local
 			parser: JSON_PARSER
@@ -15,42 +15,36 @@ feature {NONE} -- Initialization
 			name, iterator: STRING
 			i: INTEGER
 		do
+			create parser.make_with_string (input)
+			parser.parse_content
 			if
-				attached {WSF_STRING} request.form_parameter ("value") as json_content
+				parser.is_valid and parser.is_parsed and then
+				attached {JSON_OBJECT} parser.parsed_json_object as json_object
 			then
-				create parser.make_with_string (json_content.value.as_string_8)
-				parser.parse_content
-				if
-					parser.is_valid and parser.is_parsed and then
-					attached {JSON_OBJECT} parser.parsed_json_object as json_object
-				then
-					create sections.make (1)
-						-- Creating a list of Sections
-					from
-						name := "section"
-						i := 1
-						iterator := name + i.out
-					until
-						not attached {JSON_OBJECT} json_object.item (iterator) as section or
-						i = 3
-					loop
-						sections.sequence_put (section)
-						i := i + 1
-						iterator := name + i.out
-					end
-					create_all_fields
-						-- Initializing the fields
-					all_fields := << <<>>, <<s2_courses>> >>
-					all_keys := << <<>>, <<create {COURSE}>> >>
+				create sections.make (1)
+					-- Creating a list of Sections
+				from
+					name := "section"
 					i := 1
-					across sections as iter loop
-						proceed_section (all_fields.at (i), all_keys.at(i), iter.item)
-						i := i + 1
-					end
-					is_correct := True
-				else
-					is_correct := False
+					iterator := name + i.out
+				until
+					not attached {JSON_OBJECT} json_object.item (iterator) as section or
+					i = 3
+				loop
+					sections.sequence_put (section)
+					i := i + 1
+					iterator := name + i.out
 				end
+				create_all_fields
+					-- Initializing the fields
+				all_fields := << <<>>, <<s2_courses>> >>
+				all_keys := << <<>>, <<create {COURSE}>> >>
+				i := 1
+				across sections as iter loop
+					proceed_section (all_fields.at (i), all_keys.at(i), iter.item)
+					i := i + 1
+				end
+				is_correct := True
 			else
 				is_correct := False
 			end

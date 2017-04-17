@@ -24,14 +24,14 @@ feature -- Execution
 			data: SUBMIT_DATA
 		do
 			create j.make
-			create data.make (req)
-			if data.is_correct then
-				--db.insert (data)
-				across data.s2_courses as c loop
-					io.put_string (c.item.name)
-					io.new_line
+			if attached {WSF_STRING} req.form_parameter ("value") as json_content then
+				create data.make (json_content.value.as_string_8)
+				if data.is_correct then
+					--db.insert (data)
+					j.put (create {JSON_STRING}.make_from_string ("ok"), "status")
+				else
+					j.put (create {JSON_STRING}.make_from_string ("error"), "status")
 				end
-				j.put (create {JSON_STRING}.make_from_string ("ok"), "status")
 			else
 				j.put (create {JSON_STRING}.make_from_string ("error"), "status")
 			end
