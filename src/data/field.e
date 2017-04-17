@@ -21,7 +21,7 @@ feature	-- Fields
 	exception_reasons: ARRAY[STRING]
 		-- Reasons of exceptions
 		once
-			 Result := << "json is not parsed", "values and keys are not correlated", "some values are not valid">>
+			 Result := << "default_create", "json is not parsed", "some values are not valid">>
 		end
 
 feature {NONE} -- Constructors

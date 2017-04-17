@@ -27,41 +27,36 @@ feature {NONE} -- Constructor
 		-- Default constructor
 		do
 			key := "courses"
-			is_correct := True
-			create exception_reason.make_empty
+			is_correct := False
+			exception_reason := exception_reasons.at (1)
 		end
 
 	make_from_json(json_value: JSON_VALUE)
-		-- Constructs field from json_object
-		local
-			keys: ARRAY[TUPLE[STRING, BOOLEAN]]
+		-- Constructs field from json_value
 		do
-			io.put_string (json_value.representation)
-			io.new_line
 			key := "courses"
 			keys := << ["name", False], ["semester", False], ["level", False],
 						 ["students_number", False], ["start_date", False], ["end_date", False] >>
-			parse_json_object (json_value, keys)
-			if not parsed then
+			parse_json_object (json_value)
+			if
+				not parsed
+			then
 				is_correct := False
-				exception_reason := exception_reasons.at (1)
+				exception_reason := exception_reasons.at (2)
 			else
 				is_correct := True
 				create exception_reason.make_empty
 				make(parsed_string_array.at (1), parsed_string_array.at (2), parsed_string_array.at (3),
 					parsed_string_array.at (4), parsed_string_array.at (5), parsed_string_array.at (6))
 			end
-			io.put_boolean (is_correct)
-			io.new_line
 		end
 
 	make(p_name, p_semester, p_level, p_students, p_start_date, p_end_date: STRING)
 		-- Fills the fields
 		require
-			p_name /= Void
-			p_semester /= Void
-			p_level /= Void
-			p_students /= Void
+			fields_exist: 	(p_name /= Void) and then (p_semester /= Void) and then
+							(p_level /= Void) and then (p_students /= Void) and then
+							(p_start_date /= Void) and then (p_end_date /= Void)
 		do
 			if
 				valid_semester (p_semester) and then
@@ -108,5 +103,7 @@ feature -- Checkers
 			Result := l ~ "Bachelor" or
 				l ~ "Master"
 		end
-
+invariant
+	is_correct implies (valid_semester (semester) and then valid_level (level) and then
+						students >= 0)
 end
