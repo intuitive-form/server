@@ -35,6 +35,7 @@
 		</cluster>
 		<cluster name="src" location=".\src\">
 			<cluster name="data" location="$|data\"/>
+			<cluster name="handlers" location="$|handlers\"/>
 		</cluster>
 	</target>
 	<target name="intuitive_server_standalone" extends="common">
@@ -49,6 +50,7 @@
 		</cluster>
 		<cluster name="src" location=".\src\">
 			<cluster name="data" location="$|data\"/>
+			<cluster name="handlers" location="$|handlers\"/>
 		</cluster>
 	</target>
 </system>
