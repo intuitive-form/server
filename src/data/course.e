@@ -64,9 +64,6 @@ feature {NONE} -- Constructor
 				p_students.is_integer and then
 				p_students.to_integer >= 0
 			then
-				is_correct := True
-				create exception_reason.make_empty
-
 				name := p_name
 				semester := p_semester
 				level := p_level

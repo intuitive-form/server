@@ -31,7 +31,7 @@ feature {NONE} -- Constructor
 		-- Constructs field from 'json_value' by 'keys'
 		do
 			key := "phd_reports"
-			keys := <<["student_name", True], ["title", True], ["plans", True]>>
+			keys := <<["student_name", False], ["title", False], ["plans", True]>>
 			parse_json_object(json_value)
 			if
 				not parsed

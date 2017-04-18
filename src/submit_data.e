@@ -37,8 +37,24 @@ feature {NONE} -- Initialization
 				end
 				create_all_fields
 					-- Initializing the fields
-				all_fields := << <<>>, <<s2_courses>> >>
-				all_keys := << <<>>, <<create {COURSE}>> >>
+				all_fields := 	<<
+									<<>>,
+									<<
+										s2_courses, s2_examinations, s2_students, s2_student_reports, s2_phd
+									>>,
+									<<
+										s3_grants, s3_research_projects, s3_research_collaborations, s3_conference_publications, s3_research_collaborations
+									>>
+								>>
+				all_keys := 	<<
+									<<>>,
+									<<
+										create {COURSE}, create {EXAM}, create {STUDENT}, create {STUDENT_REPORT}, create {PHD_THESIS}
+									>>,
+									<<
+										create {GRANT}, create {RESEARCH_PROJECT}, create {RESEARCH_COLLABORATION}, create {CONFERENCE_PUBLICATION}, create {JOURNAL_PUBLICATION}
+									>>
+								>>
 				i := 1
 				across sections as iter loop
 					proceed_section (all_fields.at (i), all_keys.at(i), iter.item)
@@ -54,6 +70,15 @@ feature {NONE} -- Initialization
 		-- Initialize all the fields
 		do
 			create s2_courses.make (1)
+			create s2_examinations.make (1)
+			create s2_students.make (1)
+			create s2_student_reports.make (1)
+			create s2_phd.make (1)
+			create s3_grants.make (1)
+			create s3_research_projects.make (1)
+			create s3_research_collaborations.make (1)
+			create s3_conference_publications.make (1)
+			create s3_journal_publications.make (1)
 		end
 
 feature -- Attributes
