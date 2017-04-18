@@ -35,6 +35,7 @@ feature {NONE} -- Initialization
 					i := i + 1
 					iterator := name + i.out
 				end
+				create s1_general.make_from_json(sections.at (1))
 				create_all_fields
 					-- Initializing the fields
 				all_fields := 	<<
