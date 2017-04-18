@@ -88,5 +88,5 @@ feature -- Checkers
 
 invariant
 	is_correct implies (valid_semester (semester) and then valid_kind (kind) and then
-						students >= 0)
+						students >= 0 and then course_name /= Void and then date /= Void)
 end

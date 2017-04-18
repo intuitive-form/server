@@ -105,5 +105,6 @@ feature -- Checkers
 		end
 invariant
 	is_correct implies (valid_semester (semester) and then valid_level (level) and then
-						students >= 0)
+						students >= 0 and then start_date /= Void and then
+						end_date /= Void and then name /= Void)
 end
