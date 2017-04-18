@@ -23,6 +23,16 @@ feature
 			Result := not q_select.execute_new_with_arguments (<<p_name>>).after
 		end
 
+	unit_id(p_name: STRING): INTEGER_64
+		require
+			unit_exists (p_name)
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+		do
+			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
+			Result := q_select.execute_new_with_arguments (<<p_name>>).item.integer_64_value (1)
+		end
+
 	get_course_id(p_name: STRING; p_semester: STRING): INTEGER_64
 		-- returns -1 if course does not exist or course id if it exists
 		local
@@ -51,6 +61,8 @@ feature
 		end
 
 	head_name(unit: STRING): STRING
+		require
+			unit_exists (unit)
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 		do
@@ -104,48 +116,60 @@ feature
 		end
 
 	courses_of_unit(unit: STRING): LINKED_LIST[COURSE]
+		require
+			unit_exists (unit)
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 			it: SQLITE_STATEMENT_ITERATION_CURSOR
 		do
 			create Result.make
-			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
-			it := q_select.execute_new_with_arguments(<<unit>>)
-			if not it.after and then attached it.item.integer_value (1) as unit_id then
-				create q_select.make ("SELECT name, semester, level, students, start_date, end_date FROM courses WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)
-				across q_select.execute_new_with_arguments (<<unit_id>>) as i loop
-					Result.put_front(create {COURSE}.make_ready (
-						i.item.string_value(1),
-						i.item.string_value(2),
-						i.item.string_value(3),
-						i.item.integer_value(4),
-						create {DATE}.make_by_days (i.item.integer_value(5)),
-						create {DATE}.make_by_days (i.item.integer_value(6))
-					))
-				end
+			create q_select.make ("SELECT name, semester, level, students, start_date, end_date FROM courses WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)
+			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as i loop
+				Result.put_front(create {COURSE}.make_ready (
+					i.item.string_value(1),
+					i.item.string_value(2),
+					i.item.string_value(3),
+					i.item.integer_value(4),
+					create {DATE}.make_by_days (i.item.integer_value(5)),
+					create {DATE}.make_by_days (i.item.integer_value(6))
+				))
 			end
 		end
 
 	courses_of_unit_between_dates(unit: STRING; date1, date2: DATE): LINKED_LIST[COURSE]
+		require
+			unit_exists (unit)
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 			it: SQLITE_STATEMENT_ITERATION_CURSOR
 		do
 			create Result.make
-			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
-			it := q_select.execute_new_with_arguments(<<unit>>)
-			if not it.after and then attached it.item.integer_value (1) as unit_id then
-				create q_select.make ("SELECT name, semester, level, students, start_date, end_date FROM courses WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)
-				across q_select.execute_new_with_arguments (<<unit_id, date1.days, date2.days>>) as i loop
-					Result.put_front(create {COURSE}.make_ready (
-						i.item.string_value(1),
-						i.item.string_value(2),
-						i.item.string_value(3),
-						i.item.integer_value(4),
-						create {DATE}.make_by_days (i.item.integer_value(5)),
-						create {DATE}.make_by_days (i.item.integer_value(6))
-					))
-				end
+			create q_select.make ("SELECT name, semester, level, students, start_date, end_date FROM courses WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)
+			across q_select.execute_new_with_arguments (<<unit_id (unit), date1.days, date2.days>>) as i loop
+				Result.put_front(create {COURSE}.make_ready (
+					i.item.string_value(1),
+					i.item.string_value(2),
+					i.item.string_value(3),
+					i.item.integer_value(4),
+					create {DATE}.make_by_days (i.item.integer_value(5)),
+					create {DATE}.make_by_days (i.item.integer_value(6))
+				))
+			end
+		end
+
+	supervised_students(unit: STRING): LINKED_LIST[STUDENT]
+		require
+			unit_exists (unit)
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+		do
+			create Result.make
+			create q_select.make ("SELECT student, work FROM supervisions WHERE unit = ?1;", db)
+			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as iter loop
+				Result.put_front (create {STUDENT}.make (
+					iter.item.string_value (1),
+					iter.item.string_value (2)
+				))
 			end
 		end
 
@@ -153,7 +177,6 @@ feature
 		local
 			q_select, q_course: SQLITE_QUERY_STATEMENT
 			it: SQLITE_STATEMENT_ITERATION_CURSOR
-			exam: EXAM
 		do
 			create Result.make
 			create q_select.make ("SELECT course, type, students, date FROM units WHERE date >= ?1 AND date <= ?2;", db)
@@ -161,38 +184,35 @@ feature
 			across q_select.execute_new_with_arguments (<<date1.days, date2.days>>) as iter loop
 				it := q_course.execute_new_with_arguments (<<iter.item.integer_value(1)>>)
 				if not it.after then
-					create exam.make_ready (
+					Result.put_front (create {EXAM}.make_ready (
 						it.item.string_value (1),
 						it.item.string_value (2),
 						iter.item.string_value (2),
 						iter.item.integer_value (3),
 						create {DATE}.make_by_days (iter.item.integer_value (4))
-					)
-					Result.put_front (exam)
+					))
 				end
 			end
 		end
 
 	grants_of_unit(unit: STRING): LINKED_LIST[GRANT]
+		require
+			unit_exists (unit)
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 			it: SQLITE_STATEMENT_ITERATION_CURSOR
 		do
 			create Result.make
-			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
-			it := q_select.execute_new_with_arguments(<<unit>>)
-			if not it.after and then attached it.item.integer_value (1) as unit_id then
-				create q_select.make ("SELECT title, granter, start_date, end_date, continuing, amount FROM grants WHERE unit = ?1;", db)
-				across q_select.execute_new_with_arguments (<<unit_id>>) as i loop
-					Result.put_front (create {GRANT}.make_ready (
-						i.item.string_value(1),
-						i.item.string_value(2),
-						create {DATE}.make_by_days (i.item.integer_value(3)),
-						create {DATE}.make_by_days (i.item.integer_value(4)),
-						i.item.string_value(5),
-						i.item.integer_value(6)
-					))
-				end
+			create q_select.make ("SELECT title, granter, start_date, end_date, continuing, amount FROM grants WHERE unit = ?1;", db)
+			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as i loop
+				Result.put_front (create {GRANT}.make_ready (
+					i.item.string_value(1),
+					i.item.string_value(2),
+					create {DATE}.make_by_days (i.item.integer_value(3)),
+					create {DATE}.make_by_days (i.item.integer_value(4)),
+					i.item.string_value(5),
+					i.item.integer_value(6)
+				))
 			end
 		end
 end

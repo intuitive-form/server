@@ -27,8 +27,9 @@ feature -- Execution
 			checker: DATE_VALIDITY_CHECKER
 		do
 			create j.make_empty
-			if not attached {WSF_STRING} req.form_parameter ("start_date") as start_date or
-				not attached {WSF_STRING} req.form_parameter ("end_date") as end_date
+			if not
+				(attached {WSF_STRING} req.form_parameter ("start_date") as start_date and
+				attached {WSF_STRING} req.form_parameter ("end_date") as end_date)
 			then
 				j.put (create {JSON_STRING}.make_from_string ("no input"), "error")
 			elseif not
