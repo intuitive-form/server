@@ -39,7 +39,7 @@ feature {NONE}
 			Result := <<
 				"CREATE TABLE units (id INTEGER PRIMARY KEY, name TEXT UNIQUE, head TEXT, start_date INTEGER, end_date INTEGER, misc_info TEXT);",
 				"CREATE TABLE courses (id INTEGER PRIMARY KEY, unit INTEGER, name TEXT, semester TEXT, level TEXT, students INTEGER, start_date INTEGER, end_date INTEGER, CONSTRAINT course_unique UNIQUE (name, semester));",
-				"CREATE TABLE exams (id INTEGER PRIMARY KEY, unit INTEGER, course INTEGER, type TEXT, students INTEGER);",
+				"CREATE TABLE exams (id INTEGER PRIMARY KEY, unit INTEGER, course INTEGER, type TEXT, students INTEGER, date INTEGER);",
 				"CREATE TABLE supervisions (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, work TEXT);",
 				"CREATE TABLE reports (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, title TEXT, publication TEXT);",
 				"CREATE TABLE phd_theses (id INTEGER PRIMARY KEY, unit INTEGER, student TEXT, title TEXT, publication TEXT);",

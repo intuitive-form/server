@@ -108,8 +108,6 @@ feature
 			q_select: SQLITE_QUERY_STATEMENT
 			it: SQLITE_STATEMENT_ITERATION_CURSOR
 		do
-			io.put_string (unit)
-			io.new_line
 			create Result.make
 			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
 			it := q_select.execute_new_with_arguments(<<unit>>)
@@ -133,8 +131,6 @@ feature
 			q_select: SQLITE_QUERY_STATEMENT
 			it: SQLITE_STATEMENT_ITERATION_CURSOR
 		do
-			io.put_string (unit)
-			io.new_line
 			create Result.make
 			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
 			it := q_select.execute_new_with_arguments(<<unit>>)
@@ -153,13 +149,35 @@ feature
 			end
 		end
 
+	exams_between_dates(date1, date2: DATE): LINKED_LIST[EXAM]
+		local
+			q_select, q_course: SQLITE_QUERY_STATEMENT
+			it: SQLITE_STATEMENT_ITERATION_CURSOR
+			exam: EXAM
+		do
+			create Result.make
+			create q_select.make ("SELECT course, type, students, date FROM units WHERE date >= ?1 AND date <= ?2;", db)
+			create q_course.make ("SELECT name, semester FROM courses WHERE id = ?1;", db)
+			across q_select.execute_new_with_arguments (<<date1.days, date2.days>>) as iter loop
+				it := q_course.execute_new_with_arguments (<<iter.item.integer_value(1)>>)
+				if not it.after then
+					create exam.make_ready (
+						it.item.string_value (1),
+						it.item.string_value (2),
+						iter.item.string_value (2),
+						iter.item.integer_value (3),
+						create {DATE}.make_by_days (iter.item.integer_value (4))
+					)
+					Result.put_front (exam)
+				end
+			end
+		end
+
 	grants_of_unit(unit: STRING): LINKED_LIST[GRANT]
 		local
 			q_select: SQLITE_QUERY_STATEMENT
 			it: SQLITE_STATEMENT_ITERATION_CURSOR
 		do
-			io.put_string (unit)
-			io.new_line
 			create Result.make
 			create q_select.make ("SELECT id FROM units WHERE name = ?1;", db)
 			it := q_select.execute_new_with_arguments(<<unit>>)

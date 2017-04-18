@@ -27,6 +27,9 @@ feature -- Router
 			router.handle ("/pub", create {POST_PUBLICATIONS}.make(db), router.methods_post)
 			router.handle ("/unit", create {POST_UNIT_INFO}.make(db), router.methods_post)
 			router.handle ("/courses", create {POST_COURSES}.make(db), router.methods_post)
+			router.handle ("/exams", create {POST_EXAMS}.make(db), router.methods_post)
+			router.handle ("/grants", create {POST_GRANTS}.make(db), router.methods_post)
+
 			router.handle ("/units", create {GET_UNITS}.make(db), router.methods_get)
 			router.handle ("/courses", create {GET_COURSES}.make(db), router.methods_get)
 			router.handle ("", fhdl, router.methods_get)

@@ -9,6 +9,7 @@ inherit
 
 create
 	default_create,
+	make_ready,
 	make_from_json
 
 feature -- Fields
@@ -69,6 +70,18 @@ feature {NONE} -- Constructor
 				is_correct := False
 				exception_reason := exception_reasons.at(3)
 			end
+		end
+
+	make_ready(p_course_name, p_semester, p_kind: STRING; p_students: INTEGER; p_date: DATE)
+		require
+			valid_semester(p_semester)
+			valid_kind(p_kind)
+		do
+			course_name := p_course_name
+			semester := p_semester
+			kind := p_kind
+			students := p_students
+			date := p_date
 		end
 
 feature -- Checkers

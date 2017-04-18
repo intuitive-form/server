@@ -24,7 +24,7 @@ feature {NONE}
 			db := handler.db
 			create q_unit.make ("INSERT INTO units (name, head, start_date, end_date, misc_info) VALUES (?1, ?2, ?3, ?4, NULL);", db)
 			create q_course.make ("INSERT INTO courses (unit, name, semester, level, students, start_date, end_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);", db)
-			create q_exam.make ("INSERT INTO exams (unit, course, type, students) VALUES (?1, ?2, ?3, ?4);", db)
+			create q_exam.make ("INSERT INTO exams (unit, course, type, students, date) VALUES (?1, ?2, ?3, ?4, ?5);", db)
 			create q_supervision.make ("INSERT INTO supervisions (unit, student, work) VALUES (?1, ?2, ?3);", db);
 			create q_report.make ("INSERT INTO reports (unit, student, title, publication) VALUES (?1, ?2, ?3, ?4);", db);
 			create q_phd.make ("INSERT INTO phd_theses (unit, student, title, publication) VALUES (?1, ?2, ?3, ?4);", db);
@@ -75,7 +75,7 @@ feature {DB_HANDLER}
 		require
 			course_exists: handler.selector.get_course_id(p_exam.course_name, p_exam.semester) /= -1
 		do
-			q_exam.execute_with_arguments (<<unit_id, handler.selector.get_course_id(p_exam.course_name, p_exam.semester), p_exam.kind, p_exam.students>>)
+			q_exam.execute_with_arguments (<<unit_id, handler.selector.get_course_id(p_exam.course_name, p_exam.semester), p_exam.kind, p_exam.students, p_exam.date.days>>)
 			last_added_id := q_exam.last_row_id
 		end
 
