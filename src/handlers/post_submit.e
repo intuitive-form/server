@@ -44,6 +44,16 @@ feature -- Execution
 			then
 				j.put (create {JSON_STRING}.make_from_string ("error"), "status")
 				j.put (create {JSON_STRING}.make_from_string ("course exists"), "error")
+			elseif
+				not across data.s2_examinations as iter1 all
+					db.selector.get_course_id (iter1.item.course_name, iter1.item.semester) /= -1 or else
+					across data.s2_courses as iter2 some
+						iter1.item.course_name ~ iter2.item.name and iter1.item.semester ~ iter2.item.semester
+					end
+				end
+			then
+				j.put (create {JSON_STRING}.make_from_string ("error"), "status")
+				j.put (create {JSON_STRING}.make_from_string ("exam for non-existant course"), "error")
 			else
 				db.insert (data)
 				j.put (create {JSON_STRING}.make_from_string ("ok"), "status")

@@ -27,17 +27,19 @@ feature -- Execution
 			checker: DATE_VALIDITY_CHECKER
 		do
 			create j.make_empty
-			if not
-				(attached {WSF_STRING} req.form_parameter ("unit") as unit and
-				attached {WSF_STRING} req.form_parameter ("period_start") as date1 and
-				attached {WSF_STRING} req.form_parameter ("period_end") as date2)
+			if
+				not attached {WSF_STRING} req.form_parameter ("unit") as unit or else
+				not attached {WSF_STRING} req.form_parameter ("period_start") as date1 or else
+				not attached {WSF_STRING} req.form_parameter ("period_end") as date2
 			then
 				j.put (create {JSON_STRING}.make_from_string ("unsufficient inputs"), "error")
-			elseif not db.selector.unit_exists (unit.value) then
+			elseif
+				not db.selector.unit_exists (unit.value)
+			then
 				j.put (create {JSON_STRING}.make_from_string ("no such unit"), "error")
-			elseif not
-				(checker.date_valid (date1.value, "yyyy-[0]mm-[0]dd") and
-				checker.date_valid (date2.value, "yyyy-[0]mm-[0]dd"))
+			elseif
+				not checker.date_valid (date1.value, "yyyy-[0]mm-[0]dd") or else
+				not checker.date_valid (date2.value, "yyyy-[0]mm-[0]dd")
 			then
 				j.put (create {JSON_STRING}.make_from_string ("incorrect input format"), "error")
 			else

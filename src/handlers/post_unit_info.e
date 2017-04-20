@@ -26,9 +26,13 @@ feature -- Execution
 			grants: LIST[GRANT]
 		do
 			create j.make_empty
-			if not attached {WSF_STRING} req.form_parameter ("unit") as unit then
+			if
+				not attached {WSF_STRING} req.form_parameter ("unit") as unit
+			then
 				j.put (create {JSON_STRING}.make_from_string ("no input"), "error")
-			elseif not db.selector.unit_exists (unit.value) then
+			elseif
+				not db.selector.unit_exists (unit.value)
+			then
 				j.put (create {JSON_STRING}.make_from_string ("no such unit"), "error")
 			else
 				j.put (create {JSON_STRING}.make_from_string (db.selector.head_name (unit.value)), "head")

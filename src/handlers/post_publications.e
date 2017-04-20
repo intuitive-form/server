@@ -25,7 +25,9 @@ feature -- Execution
 			list: LIST[STRING]
 		do
 			create j.make_empty
-			if not attached {WSF_STRING} req.form_parameter ("year") as year then
+			if
+				not attached {WSF_STRING} req.form_parameter ("year") as year
+			then
 				j.put (create {JSON_STRING}.make_from_string ("no input"), "error")
 			elseif
 				not year.is_integer or else
