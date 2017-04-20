@@ -22,7 +22,7 @@ feature {NONE}
 		do
 			handler := p_handler
 			db := handler.db
-			create q_unit.make ("INSERT INTO units (name, head, start_date, end_date, misc_info) VALUES (?1, ?2, ?3, ?4, NULL);", db)
+			create q_unit.make ("INSERT INTO units (name, head, start_date, end_date, misc_info) VALUES (?1, ?2, ?3, ?4, ?5);", db)
 			create q_course.make ("INSERT INTO courses (unit, name, semester, level, students, start_date, end_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);", db)
 			create q_exam.make ("INSERT INTO exams (unit, course, type, students, date) VALUES (?1, ?2, ?3, ?4, ?5);", db)
 			create q_supervision.make ("INSERT INTO supervisions (unit, student, work) VALUES (?1, ?2, ?3);", db);
@@ -55,7 +55,7 @@ feature {DB_HANDLER}
 		require
 			not handler.selector.unit_exists(p_unit.name)
 		do
-			q_unit.execute_with_arguments (<<p_unit.name, p_unit.head, p_unit.start_date.days, p_unit.end_date.days>>)
+			q_unit.execute_with_arguments (<<p_unit.name, p_unit.head, p_unit.start_date.days, p_unit.end_date.days, p_unit.misc>>)
 			last_added_id := q_unit.last_row_id
 		ensure
 			handler.selector.unit_exists(p_unit.name)

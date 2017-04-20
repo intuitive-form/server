@@ -23,15 +23,14 @@ feature -- Execution
 			j: JSON_OBJECT
 			j_arr: JSON_ARRAY
 			list: LIST[STRING]
-			d: DATE
 		do
 			create j.make_empty
 			if not attached {WSF_STRING} req.form_parameter ("year") as year then
 				j.put (create {JSON_STRING}.make_from_string ("no input"), "error")
-			elseif not
-				(year.is_integer and then
-				attached year.integer_value as y and then
-				year.integer_value >= 1600 and year.integer_value <= 3000)
+			elseif
+				not year.is_integer or else
+				not attached year.integer_value as y or else
+				not (y >= 1600 and y <= 3000)
 			then
 				j.put (create {JSON_STRING}.make_from_string ("wrong input"), "error")
 			else

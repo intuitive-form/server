@@ -21,7 +21,6 @@ feature -- Execution
 	execute (a_start_path: READABLE_STRING_8; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			j: JSON_ARRAY
-			j_obj: JSON_OBJECT
 		do
 			create j.make_empty
 			across db.selector.courses as course loop

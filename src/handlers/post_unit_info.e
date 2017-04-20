@@ -24,7 +24,6 @@ feature -- Execution
 			j_arr: JSON_ARRAY
 			j_obj: JSON_OBJECT
 			grants: LIST[GRANT]
-			d: DATE
 		do
 			create j.make_empty
 			if not attached {WSF_STRING} req.form_parameter ("unit") as unit then

@@ -21,19 +21,32 @@ feature -- Execution
 	execute (a_start_path: READABLE_STRING_8; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			j: JSON_OBJECT
-			data: SUBMIT_DATA
 		do
 			create j.make
-			if attached {WSF_STRING} req.form_parameter ("value") as json_content then
-				create data.make (json_content.value.as_string_8)
-				if data.is_correct then
-					--db.insert (data)
-					j.put (create {JSON_STRING}.make_from_string ("ok"), "status")
-				else
-					j.put (create {JSON_STRING}.make_from_string ("error"), "status")
-				end
-			else
+			if
+				not attached {WSF_STRING} req.form_parameter ("value") as json_content or else
+				not attached (create {SUBMIT_DATA}.make (json_content.value.as_string_8)) as data
+			then
 				j.put (create {JSON_STRING}.make_from_string ("error"), "status")
+				j.put (create {JSON_STRING}.make_from_string ("no input"), "error")
+			elseif not data.is_correct then
+				j.put (create {JSON_STRING}.make_from_string ("error"), "status")
+				j.put (create {JSON_STRING}.make_from_string ("wrong format"), "error")
+			elseif
+				db.selector.unit_exists (data.s1_general.name)
+			then
+				j.put (create {JSON_STRING}.make_from_string ("error"), "status")
+				j.put (create {JSON_STRING}.make_from_string ("unit exists"), "error")
+			elseif
+				across data.s2_courses as iter some
+					db.selector.get_course_id (iter.item.name, iter.item.semester) = -1
+				end
+			then
+				j.put (create {JSON_STRING}.make_from_string ("error"), "status")
+				j.put (create {JSON_STRING}.make_from_string ("course exists"), "error")
+			else
+				db.insert (data)
+				j.put (create {JSON_STRING}.make_from_string ("ok"), "status")
 			end
 			res.send (create {WSF_PAGE_RESPONSE}.make_with_body (j.representation))
 		end
