@@ -1,5 +1,5 @@
 class
-	IP_LICENCE
+	COLLABORATION
 inherit
 	FIELD
 	redefine
@@ -13,14 +13,15 @@ create
 
 feature -- Fields
 
-	title: STRING
+	company: STRING
+	nature: STRING
 
-feature {NONE} -- Constructors
+feature -- Constructors
 
 	default_create
 		-- Default constructor
 		do
-			key := "licensing"
+			key := "collaborations"
 			is_correct := False
 			exception_reason := exception_reasons.at (1)
 		end
@@ -28,8 +29,8 @@ feature {NONE} -- Constructors
 	make_from_json(json_value: JSON_VALUE)
 		-- Constructs field from 'json_value' by 'keys'
 		do
-			key := "licensing"
-			keys := <<["title", False]>>
+			key := "collaborations"
+			keys := <<["company", False], ["nature", False]>>
 			parse_json_object (json_value)
 			if
 				not parsed
@@ -39,17 +40,18 @@ feature {NONE} -- Constructors
 			else
 				is_correct := True
 				create exception_reason.make_empty
-				make(parsed_string_array.at (1))
+				make(parsed_string_array.at (1), parsed_string_array.at (2))
 			end
 		end
 
-	make(p_title: STRING)
+	make(p_company, p_nature: STRING)
 		require
-			field_exist: p_title /= Void
+			fields_exist: 	(p_company /= Void) and then (p_nature /= Void)
 		do
-			title := p_title
+			company := p_company
+			nature := p_nature
 		end
 
 invariant
-	is_correct implies (title /= Void)
+	is_correct implies (company /= Void and then nature /= Void)
 end
