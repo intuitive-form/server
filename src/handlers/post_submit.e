@@ -39,7 +39,7 @@ feature -- Execution
 				j.put (create {JSON_STRING}.make_from_string ("unit exists"), "error")
 			elseif
 				across data.s2_courses as iter some
-					db.selector.get_course_id (iter.item.name, iter.item.semester) = -1
+					db.selector.get_course_id (iter.item.name, iter.item.semester) /= -1
 				end
 			then
 				j.put (create {JSON_STRING}.make_from_string ("error"), "status")

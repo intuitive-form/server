@@ -5,13 +5,17 @@ create
 	make
 
 feature {NONE}
+
 	handler: DB_HANDLER
 	db: SQLITE_DATABASE
+
+	q_courses: SQLITE_QUERY_STATEMENT
 
 	make (p_handler: DB_HANDLER)
 		do
 			handler := p_handler
 			db := handler.db
+			create q_courses.make ("SELECT name FROM courses;", db)
 		end
 
 feature
@@ -105,12 +109,9 @@ feature
 		end
 
 	courses: LINKED_LIST[STRING]
-		local
-			q_select: SQLITE_QUERY_STATEMENT
 		do
-			create q_select.make ("SELECT name FROM courses;", db)
 			create Result.make
-			across q_select.execute_new as i loop
+			across q_courses.execute_new as i loop
 				Result.put_front(i.item.string_value (1))
 			end
 		end
