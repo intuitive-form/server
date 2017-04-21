@@ -78,6 +78,8 @@ feature {NONE} -- Constructor
 
 	make_ready(p_name, p_semester, p_level: STRING; p_students: INTEGER; p_start_date, p_end_date: DATE)
 		do
+			is_correct := True
+			create exception_reason.make_empty
 			name := p_name
 			semester := p_semester
 			level := p_level

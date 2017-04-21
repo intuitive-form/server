@@ -21,10 +21,14 @@ feature -- Execution
 	execute (a_start_path: READABLE_STRING_8; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			j: JSON_ARRAY
+			j_obj: JSON_OBJECT
 		do
 			create j.make_empty
 			across db.selector.courses as course loop
-				j.add (create {JSON_STRING}.make_from_string (course.item))
+				create j_obj.make_with_capacity (2)
+				j_obj.put (create {JSON_STRING}.make_from_string (course.item.name), "title")
+				j_obj.put (create {JSON_STRING}.make_from_string (course.item.semester), "semester")
+				j.add (j_obj)
 			end
 			res.send (create {WSF_PAGE_RESPONSE}.make_with_body (j.representation))
 		end

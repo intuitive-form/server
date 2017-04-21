@@ -9,13 +9,10 @@ feature {NONE}
 	handler: DB_HANDLER
 	db: SQLITE_DATABASE
 
-	q_courses: SQLITE_QUERY_STATEMENT
-
 	make (p_handler: DB_HANDLER)
 		do
 			handler := p_handler
 			db := handler.db
-			create q_courses.make ("SELECT name FROM courses;", db)
 		end
 
 feature
@@ -108,11 +105,21 @@ feature
 			end
 		end
 
-	courses: LINKED_LIST[STRING]
+	courses: LINKED_LIST[COURSE]
+		local
+			q_select: SQLITE_QUERY_STATEMENT
 		do
 			create Result.make
-			across q_courses.execute_new as i loop
-				Result.put_front(i.item.string_value (1))
+			create q_select.make ("SELECT name, semester, level, students, start_date, end_date FROM courses;", db)
+			across q_select.execute_new as i loop
+				Result.put_front(create {COURSE}.make_ready (
+					i.item.string_value(1),
+					i.item.string_value(2),
+					i.item.string_value(3),
+					i.item.integer_value(4),
+					create {DATE}.make_by_days (i.item.integer_value(5)),
+					create {DATE}.make_by_days (i.item.integer_value(6))
+				))
 			end
 		end
 
