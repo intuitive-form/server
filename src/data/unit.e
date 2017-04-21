@@ -51,12 +51,22 @@ feature {NONE} -- Constructor
 		require
 			fields_exist: 	(p_name /= Void) and then (p_head /= Void) and then (p_start_date /= Void) and then
 							(p_end_date /= Void)
+		local
+			checker: DATE_VALIDITY_CHECKER
 		do
-			name := p_name
-			head := p_head
-			create start_date.make_from_string(p_start_date, "yyyy-[0]mm-[0]dd")
-			create end_date.make_from_string(p_end_date, "yyyy-[0]mm-[0]dd")
-			misc := p_misc
+			if
+				checker.date_valid (p_start_date, "yyyy-[0]mm-[0]dd") and then
+				checker.date_valid (p_end_date, "yyyy-[0]mm-[0]dd")
+			then
+				name := p_name
+				head := p_head
+				create start_date.make_from_string(p_start_date, "yyyy-[0]mm-[0]dd")
+				create end_date.make_from_string(p_end_date, "yyyy-[0]mm-[0]dd")
+				misc := p_misc
+			else
+				is_correct := False
+				exception_reason := exception_reasons.at (3)
+			end
 		end
 
 invariant

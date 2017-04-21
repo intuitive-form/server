@@ -57,12 +57,16 @@ feature {NONE} -- Constructor
 			fields_exist: 	(p_name /= Void) and then (p_semester /= Void) and then
 							(p_level /= Void) and then (p_students /= Void) and then
 							(p_start_date /= Void) and then (p_end_date /= Void)
+		local
+			checker: DATE_VALIDITY_CHECKER
 		do
 			if
 				valid_semester (p_semester) and then
 				valid_level(p_level) and then
 				p_students.is_integer and then
-				p_students.to_integer >= 0
+				p_students.to_integer >= 0 and then
+				checker.date_valid (p_start_date, "yyyy-[0]mm-[0]dd") and then
+				checker.date_valid (p_end_date, "yyyy-[0]mm-[0]dd")
 			then
 				name := p_name
 				semester := p_semester

@@ -39,8 +39,6 @@ feature {NONE} -- Constructor
 				is_correct := False
 				exception_reason := exception_reasons.at(2)
 			else
-				is_correct := True
-				create exception_reason.make_empty
 				make(parsed_string_array.at(1), parsed_string_array.at(2))
 			end
 		end
@@ -50,6 +48,8 @@ feature {NONE} -- Constructor
 			fields_exist:	(p_name /= Void) and then
 							(p_nature_of_work /= Void)
 		do
+			is_correct := True
+			create exception_reason.make_empty
 			name := p_name
 			nature_of_work := p_nature_of_work
 		end

@@ -7,6 +7,10 @@ inherit
 		make_from_json
 	end
 
+create
+	default_create,
+	make_from_json
+
 feature {NONE} -- Constructors
 
 	default_create

@@ -55,9 +55,13 @@ feature {NONE} -- Constuctor
 		require
 			fields_exist:	(p_title /= Void) and then (p_agency /= Void) and then (p_period_start /= Void)
 							(p_period_end /= Void) and then (p_continuation /= Void) and then (p_amount /= Void)
+		local
+			checker: DATE_VALIDITY_CHECKER
 		do
 			if
-				p_amount.is_integer and then p_amount.to_integer >= 0
+				p_amount.is_integer and then p_amount.to_integer >= 0 and then
+				checker.date_valid (p_period_start, "yyyy-[0]mm-[0]dd") and then
+				checker.date_valid (p_period_end, "yyyy-[0]mm-[0]dd")
 			then
 				title := p_title
 				agency := p_agency

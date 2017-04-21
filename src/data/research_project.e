@@ -66,9 +66,13 @@ feature {NONE} -- Constructor
 		require
 			fields_exist: 	(p_title /= Void) and then (p_date_start /= Void) and then (p_date_end /= Void) and then
 							(p_sources /= Void) and then (p_personnel /= Void) and then (p_extra_personnel /= Void)
+		local
+			checker: DATE_VALIDITY_CHECKER
 		do
 			if
-				p_personnel.count > 0
+				p_personnel.count > 0 and then
+				checker.date_valid (p_date_start, "yyyy-[0]mm-[0]dd") and then
+				checker.date_valid (p_date_end, "yyyy-[0]mm-[0]dd")
 			then
 				title := p_title
 				personnel := p_personnel

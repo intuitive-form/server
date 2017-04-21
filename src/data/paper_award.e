@@ -62,12 +62,22 @@ feature {NONE} -- Constructors
 		require
 			fields_exist: 	(p_title /= Void) and then (p_awarder /= Void) and then (p_award_wording /= Void) and then
 							(p_date /= Void) and then (p_authors /= Void)
+		local
+			checker: DATE_VALIDITY_CHECKER
 		do
-			title := p_title
-			awarder := p_awarder
-			award_wording := p_award_wording
-			authors := p_authors
-			create date.make_from_string(p_date, "yyyy-[0]mm-[0]dd")
+			if
+				checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
+			then
+				title := p_title
+				awarder := p_awarder
+				award_wording := p_award_wording
+				authors := p_authors
+				create date.make_from_string(p_date, "yyyy-[0]mm-[0]dd")
+			else
+				is_correct := False
+				exception_reason := exception_reasons.at (3)
+			end
+
 		end
 
 invariant

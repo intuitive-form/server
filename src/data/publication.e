@@ -59,9 +59,12 @@ feature {NONE} -- Constructor
 		require
 			fields_exuit:	(p_title /= Void) and then (p_date /= Void) and then
 							(p_authors /= Void)
+		local
+			checker: DATE_VALIDITY_CHECKER
 		do
 			if
-				p_authors.count > 0
+				p_authors.count > 0 and then
+				checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
 			then
 				title := p_title
 				authors := p_authors
@@ -71,7 +74,7 @@ feature {NONE} -- Constructor
 				exception_reason := exception_reasons.at (3)
 			end
 		end
-		
+
 invariant
 	is_correct implies (title /= Void and then authors.count > 0 and then date /= Void)
 end
