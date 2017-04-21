@@ -9,6 +9,7 @@ inherit
 
 create
 	default_create,
+	make,
 	make_from_json
 
 feature -- Fields
@@ -47,8 +48,6 @@ feature {NONE} -- Constructor
 					is_correct := False
 					exception_reason := exception_reasons.at (2)
 				else
-					is_correct := True
-					create exception_reason.make_empty
 					make(parsed_string_array.at (1), parsed_string_array.at (2), parsed_string_array.at (3), data)
 				end
 			else
@@ -62,6 +61,8 @@ feature {NONE} -- Constructor
 			fields_exist: (p_country /= Void and then p_name /= Void and then p_nature /= Void and then
 							p_contracts /= Void)
 		do
+			is_correct := True
+			create exception_reason.make_empty
 			institution_country := p_country
 			institution_name := p_name
 			contracts := p_contracts

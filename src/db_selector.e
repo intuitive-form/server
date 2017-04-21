@@ -208,7 +208,6 @@ feature
 			unit_exists (unit)
 		local
 			q_select: SQLITE_QUERY_STATEMENT
-			it: SQLITE_STATEMENT_ITERATION_CURSOR
 		do
 			create Result.make
 			create q_select.make ("SELECT title, granter, start_date, end_date, continuing, amount FROM grants WHERE unit = ?1;", db)
@@ -220,6 +219,30 @@ feature
 					create {DATE}.make_by_days (i.item.integer_value(4)),
 					i.item.string_value(5),
 					i.item.integer_value(6)
+				))
+			end
+		end
+
+	research_collaborations(unit: STRING): LINKED_LIST[RESEARCH_COLLABORATION]
+		require
+			unit_exists (unit)
+		local
+			q_select, q_select2: SQLITE_QUERY_STATEMENT
+			contacts: ARRAYED_LIST[STRING]
+		do
+			create Result.make
+			create q_select.make ("SELECT id, country, institution, nature FROM research_collabs WHERE unit = ?1;", db)
+			create q_select2.make ("SELECT name FROM collabs_contacts WHERE collab = ?1;", db)
+			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as i loop
+				create contacts.make (1)
+				across q_select2.execute_new_with_arguments (<<i.item.integer_value(1)>>) as i2 loop
+					contacts.sequence_put (i2.item.string_value (1))
+				end
+				Result.put_front (create {RESEARCH_COLLABORATION}.make (
+					i.item.string_value (1),
+					i.item.string_value (2),
+					i.item.string_value (3),
+					contacts
 				))
 			end
 		end

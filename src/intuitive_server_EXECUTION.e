@@ -24,12 +24,14 @@ feature -- Router
 			fhdl.set_directory_index (<<"index.html">>)
 
 			router.handle ("/submit", create {POST_SUBMIT}.make(db), router.methods_post)
-			router.handle ("/pub", create {POST_PUBLICATIONS}.make(db), router.methods_post)
-			router.handle ("/unit", create {POST_UNIT_INFO}.make(db), router.methods_post)
-			router.handle ("/courses", create {POST_COURSES}.make(db), router.methods_post)
-			router.handle ("/supervisions", create {POST_SUPERVISIONS}.make(db), router.methods_post)
-			router.handle ("/exams", create {POST_EXAMS}.make(db), router.methods_post)
-			router.handle ("/grants", create {POST_GRANTS}.make(db), router.methods_post)
+			
+			router.handle ("/pub", create {POST_PUBLICATIONS}.make(db), router.methods_post) -- query 1
+			router.handle ("/unit", create {POST_UNIT_INFO}.make(db), router.methods_post) -- query 2
+			router.handle ("/courses", create {POST_COURSES}.make(db), router.methods_post) -- query 3
+			router.handle ("/supervisions", create {POST_SUPERVISIONS}.make(db), router.methods_post) -- query 4
+			router.handle ("/res_collabs", create {POST_RESEARCH_COLLABS}.make(db), router.methods_post) -- query 5
+			router.handle ("/exams", create {POST_EXAMS}.make(db), router.methods_post) -- query 6
+			router.handle ("/grants", create {POST_GRANTS}.make(db), router.methods_post) -- query 7
 
 			router.handle ("/units", create {GET_UNITS}.make(db), router.methods_get)
 			router.handle ("/courses", create {GET_COURSES}.make(db), router.methods_get)
