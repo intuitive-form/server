@@ -187,9 +187,9 @@ feature
 			it: SQLITE_STATEMENT_ITERATION_CURSOR
 		do
 			create Result.make
-			create q_select.make ("SELECT course, type, students, date FROM units WHERE date >= ?1 AND date <= ?2;", db)
-			create q_course.make ("SELECT name, semester FROM courses WHERE id = ?1;", db)
+			create q_select.make ("SELECT course, type, students, date FROM exams WHERE date >= ?1 AND date <= ?2;", db)
 			across q_select.execute_new_with_arguments (<<date1.days, date2.days>>) as iter loop
+				create q_course.make ("SELECT name, semester FROM courses WHERE id = ?1;", db)
 				it := q_course.execute_new_with_arguments (<<iter.item.integer_value(1)>>)
 				if not it.after then
 					Result.put_front (create {EXAM}.make_ready (

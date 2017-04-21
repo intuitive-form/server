@@ -27,6 +27,7 @@ feature -- Execution
 			checker: DATE_VALIDITY_CHECKER
 		do
 			create j.make_empty
+			create checker
 			if
 				not attached {WSF_STRING} req.form_parameter ("unit") as unit or else
 				not attached {WSF_STRING} req.form_parameter ("period_start") as date1 or else

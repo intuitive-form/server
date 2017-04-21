@@ -9,33 +9,26 @@ feature {NONE} -- Initialization
 		-- Constructor
 		local
 			parser: JSON_PARSER
-			sections: ARRAYED_LIST[JSON_OBJECT]
 			all_fields: ARRAY[ARRAY[ARRAYED_LIST[FIELD]]]
 			all_keys: ARRAY[ARRAY[FIELD]]
-			name, iterator: STRING
 			i: INTEGER
 		do
 			create parser.make_with_string (input)
 			parser.parse_content
 			if
-				parser.is_valid and parser.is_parsed and then
-				attached {JSON_OBJECT} parser.parsed_json_object as json_object
+				not (parser.is_valid and parser.is_parsed) or else
+				not attached {JSON_OBJECT} parser.parsed_json_object as json_object
 			then
-				create sections.make (1)
-					-- Creating a list of Sections
-				from
-					name := "section"
-					i := 1
-					iterator := name + i.out
-				until
-					not attached {JSON_OBJECT} json_object.item (iterator) as section or
-					i = 7
-				loop
-					sections.sequence_put (section)
-					i := i + 1
-					iterator := name + i.out
-				end
+				is_correct := False
+			elseif
+				not attached {ARRAYED_LIST[JSON_OBJECT]} read_sections(json_object) as sections or else
+				sections.count < 6 or else
+				not attached {JSON_STRING} json_object.item ("section7") as misc
+			then
+				is_correct := False
+			else
 				create s1_general.make_from_json(sections.at (1))
+				s1_general.set_section7 (misc.item)
 				create_all_fields
 					-- Initializing the fields
 				all_fields := 	<<
@@ -57,19 +50,35 @@ feature {NONE} -- Initialization
 									<< 	create {PAPER_AWARD}, create {MEMBERSHIP}, create {PRIZE} >>,
 									<<	create {COLLABORATION} >>
 								>>
-				i := 1
-				across sections as iter loop
-					proceed_section (all_fields.at (i), all_keys.at(i), iter.item)
+				from
+					i := 2
+				until
+					i = 7
+				loop
+					proceed_section (all_fields.at (i), all_keys.at(i), sections.at (i))
 					i := i + 1
 				end
-				if
-					attached {JSON_STRING} json_object.item ("section7") as json_string
-				then
-					s1_general.set_section7 (json_string.item)
-				end
 				is_correct := True
-			else
-				is_correct := False
+			end
+		end
+
+	read_sections(object: JSON_OBJECT): ARRAYED_LIST[JSON_OBJECT]
+		local
+			name, iterator: STRING
+			i: INTEGER
+		do
+			create Result.make (6)
+			from
+				name := "section"
+				i := 1
+				iterator := name + i.out
+			until
+				not attached {JSON_OBJECT} object.item (iterator) as section or
+				i = 7
+			loop
+				Result.sequence_put (section)
+				i := i + 1
+				iterator := name + i.out
 			end
 		end
 
