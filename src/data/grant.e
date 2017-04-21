@@ -73,6 +73,8 @@ feature {NONE} -- Constuctor
 
 	make_ready(p_title, p_agency: STRING; p_start, p_end: DATE; p_continuation: STRING; p_amount: INTEGER)
 		do
+			is_correct := True
+			create exception_reason.make_empty
 			title := p_title
 			agency := p_agency
 			period_start := p_start

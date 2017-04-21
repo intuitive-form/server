@@ -29,7 +29,7 @@ feature {NONE} -- Initialization
 					iterator := name + i.out
 				until
 					not attached {JSON_OBJECT} json_object.item (iterator) as section or
-					i = 3
+					i = 4
 				loop
 					sections.sequence_put (section)
 					i := i + 1
