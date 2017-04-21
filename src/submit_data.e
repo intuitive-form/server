@@ -29,7 +29,7 @@ feature {NONE} -- Initialization
 					iterator := name + i.out
 				until
 					not attached {JSON_OBJECT} json_object.item (iterator) as section or
-					i = 4
+					i = 7
 				loop
 					sections.sequence_put (section)
 					i := i + 1
@@ -40,26 +40,32 @@ feature {NONE} -- Initialization
 					-- Initializing the fields
 				all_fields := 	<<
 									<<>>,
-									<<
-										s2_courses, s2_examinations, s2_students, s2_student_reports, s2_phd
-									>>,
-									<<
-										s3_grants, s3_research_projects, s3_research_collaborations, s3_conference_publications, s3_research_collaborations
-									>>
+									<< 	s2_courses, s2_examinations, s2_students, s2_student_reports, s2_phd>>,
+									<< 	s3_grants, s3_research_projects, s3_research_collaborations,
+										s3_conference_publications, s3_research_collaborations >>,
+									<<	s4_patents, s4_ip_licensing >>,
+									<<	s5_paper_awards, s5_memberships, s5_prizes >>,
+									<<	s6_collaborations>>
 								>>
 				all_keys := 	<<
 									<<>>,
-									<<
-										create {COURSE}, create {EXAM}, create {STUDENT}, create {STUDENT_REPORT}, create {PHD_THESIS}
-									>>,
-									<<
-										create {GRANT}, create {RESEARCH_PROJECT}, create {RESEARCH_COLLABORATION}, create {CONFERENCE_PUBLICATION}, create {JOURNAL_PUBLICATION}
-									>>
+									<<	create {COURSE}, create {EXAM}, create {STUDENT}, create {STUDENT_REPORT},
+										create {PHD_THESIS} >>,
+									<<	create {GRANT}, create {RESEARCH_PROJECT}, create {RESEARCH_COLLABORATION},
+										create {CONFERENCE_PUBLICATION}, create {JOURNAL_PUBLICATION} >>,
+									<<	create {PATENT}, create {IP_LICENCE} >>,
+									<< 	create {PAPER_AWARD}, create {MEMBERSHIP}, create {PRIZE} >>,
+									<<	create {COLLABORATION} >>
 								>>
 				i := 1
 				across sections as iter loop
 					proceed_section (all_fields.at (i), all_keys.at(i), iter.item)
 					i := i + 1
+				end
+				if
+					attached {JSON_STRING} json_object.item ("section7") as json_string
+				then
+					s1_general.set_section7 (json_string.item)
 				end
 				is_correct := True
 			else
@@ -80,6 +86,12 @@ feature {NONE} -- Initialization
 			create s3_research_collaborations.make (1)
 			create s3_conference_publications.make (1)
 			create s3_journal_publications.make (1)
+			create s4_patents.make (1)
+			create s4_ip_licensing.make (1)
+			create s5_paper_awards.make (1)
+			create s5_memberships.make (1)
+			create s5_prizes.make (1)
+			create s6_collaborations.make (1)
 		end
 
 feature -- Attributes
@@ -125,8 +137,27 @@ feature -- Attributes
 		-- Section #3 Conference publicaitions: Title / Authors
 
 	s3_journal_publications: detachable ARRAYED_LIST[PUBLICATION]
-		-- Section #2 Journal publications: Title / Authors
+		-- Section #3 Journal publications: Title / Authors
 
+	s4_patents: detachable ARRAYED_LIST[PATENT]
+		-- Section #4 Patents: Title / Country of patent
+
+	s4_ip_licensing: detachable ARRAYED_LIST[IP_LICENCE]
+		-- Section #4 IP Licensing: Title
+
+	s5_paper_awards: detachable ARRAYED_LIST[PAPER_AWARD]
+		-- Section #5 Paper Awards: Title / Authors / Awarding conference or journal /
+		-- /Exact wording of award / Date
+
+	s5_memberships: detachable ARRAYED_LIST[MEMBERSHIP]
+		-- Section #5 Memberships: Name of member / Academic organization or Institution /
+		-- /Date of membership
+
+	s5_prizes: detachable ARRAYED_LIST[PRIZE]
+		-- Section #5 Prizes: Recipient / Name of prize / Granting institution /
+		-- /Date
+	s6_collaborations: detachable ARRAYED_LIST[COLLABORATION]
+		-- Section #6 Collaborations: Company / Nature of collaboration
 
 feature {NONE} -- Proceeding features
 
@@ -175,5 +206,11 @@ invariant
 	attached s3_research_projects and
 	attached s3_research_collaborations and
 	attached s3_conference_publications and
-	attached s3_journal_publications) or true
+	attached s3_journal_publications and
+	attached s4_patents and
+	attached s4_ip_licensing and
+	attached s5_paper_awards and
+	attached s5_memberships and
+	attached s5_prizes and
+	attached s6_collaborations)
 end

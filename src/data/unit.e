@@ -32,7 +32,7 @@ feature {NONE} -- Constructor
 		do
 			key := "section1"
 			keys := <<	["unit_name", False], ["head_name", False], ["reporting_period_start", False],
-						["reporting_period_end", False]>>
+						["reporting_period_end", False] >>
 			parse_json_object (json_value)
 			if
 				not parsed
@@ -67,6 +67,16 @@ feature {NONE} -- Constructor
 				is_correct := False
 				exception_reason := exception_reasons.at (3)
 			end
+		end
+
+feature -- Setters
+
+	set_section7(p_misc: STRING)
+		-- Sets string
+		require
+			p_misc /= Void
+		do
+			misc := p_misc
 		end
 
 invariant
