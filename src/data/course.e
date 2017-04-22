@@ -81,6 +81,7 @@ feature {NONE} -- Constructor
 				students := p_students.to_integer
 				create start_date.make_from_string (p_start_date, "yyyy-[0]mm-[0]dd")
 				create end_date.make_from_string (p_end_date, "yyyy-[0]mm-[0]dd")
+				is_correct := start_date.is_less (end_date)
 			end
 		end
 
