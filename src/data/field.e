@@ -15,15 +15,6 @@ feature	-- Fields
 	is_correct: BOOLEAN
 		-- If the object parsed properly
 
-	exception_reason: STRING
-		-- Reason of exception
-
-	exception_reasons: ARRAY[STRING]
-		-- Reasons of exceptions
-		once
-			 Result := << "default_create", "json is not parsed", "some values are not valid">>
-		end
-
 feature {NONE} -- Constructors
 
 	make_from_json(json_value: JSON_VALUE)
@@ -31,6 +22,4 @@ feature {NONE} -- Constructors
 		do
 		end
 
-invariant
-	is_correct = exception_reason.is_empty
 end

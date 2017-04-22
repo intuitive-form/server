@@ -28,7 +28,6 @@ feature {NONE} -- Constuctor
 		do
 			key := "grants"
 			is_correct := False
-			exception_reason := exception_reasons.at (1)
 		end
 
 	make_from_json(json_value: JSON_VALUE)
@@ -37,17 +36,24 @@ feature {NONE} -- Constuctor
 			key := "grants"
 			keys := <<	["title", False], ["agency", False], ["period_start", False],
 						["period_end", False], ["continuation", True], ["amount", False] >>
-			parse_json_object(json_value)
 			if
-				not parsed
+				attached {JSON_OBJECT} json_value as json_object
 			then
-				is_correct := False
-				exception_reason := exception_reasons.at (2)
+				parse_json_object (json_object)
+				is_correct := parsed
+
+				if is_correct then
+					make (
+						parsed_string_array.at (1),
+						parsed_string_array.at (2),
+						parsed_string_array.at (3),
+						parsed_string_array.at (4),
+						parsed_string_array.at (5),
+						parsed_string_array.at (6)
+					)
+				end
 			else
-				is_correct := True
-				create exception_reason.make_empty
-				make(parsed_string_array.at (1), parsed_string_array.at (2), parsed_string_array.at (3),
-						parsed_string_array.at (4), parsed_string_array.at (5), parsed_string_array.at (6))
+				is_correct := False
 			end
 		end
 
@@ -72,14 +78,12 @@ feature {NONE} -- Constuctor
 				amount := p_amount.to_integer
 			else
 				is_correct := False
-				exception_reason := exception_reasons.at (3)
 			end
 		end
 
 	make_ready(p_title, p_agency: STRING; p_start, p_end: DATE; p_continuation: STRING; p_amount: INTEGER)
 		do
 			is_correct := True
-			create exception_reason.make_empty
 			title := p_title
 			agency := p_agency
 			period_start := p_start

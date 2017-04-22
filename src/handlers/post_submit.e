@@ -67,23 +67,8 @@ feature {NONE}
 		require
 			data.is_correct
 		do
-			Result := data.s1_general.is_correct and then
-			across data.s2_courses as iter all iter.item.is_correct end and data.s2_courses.count > 0 and then
-			across data.s2_examinations as iter all iter.item.is_correct end and data.s2_examinations.count > 0 and then
-			across data.s2_phd as iter all iter.item.is_correct end and then
-			across data.s2_student_reports as iter all iter.item.is_correct end and then
-			across data.s2_students as iter all iter.item.is_correct end and then
-			across data.s3_grants as iter all iter.item.is_correct end and then
-			across data.s3_research_projects as iter all iter.item.is_correct end and then
-			across data.s3_research_collaborations as iter all iter.item.is_correct end and then
-			across data.s3_conference_publications as iter all iter.item.is_correct end and then
-			across data.s3_journal_publications as iter all iter.item.is_correct end and then
-			across data.s4_patents as iter all iter.item.is_correct end and then
-			across data.s4_ip_licensing as iter all iter.item.is_correct end and then
-			across data.s5_paper_awards as iter all iter.item.is_correct end and then
-			across data.s5_memberships as iter all iter.item.is_correct end and then
-			across data.s5_prizes as iter all iter.item.is_correct end and then
-			across data.s6_collaborations as iter all iter.item.is_correct end
+			Result := data.s1_general.is_correct and
+				data.s2_courses.count > 0 and data.s2_examinations.count > 0
 		end
 
 end

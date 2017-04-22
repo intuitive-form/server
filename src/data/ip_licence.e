@@ -22,7 +22,6 @@ feature {NONE} -- Constructors
 		do
 			key := "licensing"
 			is_correct := False
-			exception_reason := exception_reasons.at (1)
 		end
 
 	make_from_json(json_value: JSON_VALUE)
@@ -30,16 +29,17 @@ feature {NONE} -- Constructors
 		do
 			key := "licensing"
 			keys := <<["title", False]>>
-			parse_json_object (json_value)
 			if
-				not parsed
+				attached {JSON_OBJECT} json_value as json_object
 			then
-				is_correct := False
-				exception_reason := exception_reasons.at (2)
+				parse_json_object (json_object)
+				is_correct := parsed
+
+				if is_correct then
+					make (parsed_string_array.at (1))
+				end
 			else
-				is_correct := True
-				create exception_reason.make_empty
-				make(parsed_string_array.at (1))
+				is_correct := False
 			end
 		end
 
@@ -47,6 +47,7 @@ feature {NONE} -- Constructors
 		require
 			field_exist: p_title /= Void
 		do
+			is_correct := True
 			title := p_title
 		end
 

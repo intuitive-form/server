@@ -25,7 +25,6 @@ feature {NONE} -- Constructors
 		do
 			key := "paper_awards"
 			is_correct := False
-			exception_reason := exception_reasons.at (1)
 		end
 
 	make_from_json(json_value: JSON_VALUE)
@@ -39,23 +38,21 @@ feature {NONE} -- Constructors
 				attached {JSON_OBJECT} json_value as json_object and then
 				attached {JSON_ARRAY} json_object.item ("authors") as json_authors
 			then
-				parse_json_array(json_authors)
+				parse_json_array (json_authors)
 				data := parsed_string_array
-				parse_json_object (json_value)
-				if
-					not parsed
-				then
-					is_correct := False
-					exception_reason := exception_reasons.at (2)
-				else
-					is_correct := True
-					create exception_reason.make_empty
-					make(parsed_string_array.at (1), parsed_string_array.at (2), parsed_string_array.at (3),
-							parsed_string_array.at (4), data)
+				parse_json_object (json_object)
+				is_correct := parsed
+				if is_correct then
+					make (
+						parsed_string_array.at (1),
+						parsed_string_array.at (2),
+						parsed_string_array.at (3),
+						parsed_string_array.at (4),
+						data
+					)
 				end
 			else
 				is_correct := False
-				exception_reason := exception_reasons.at (2)
 			end
 		end
 
@@ -67,17 +64,13 @@ feature {NONE} -- Constructors
 			checker: DATE_VALIDITY_CHECKER
 		do
 			create checker
-			if
-				checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
-			then
+			is_correct := checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
+			if is_correct then
 				title := p_title
 				awarder := p_awarder
 				award_wording := p_award_wording
 				authors := p_authors
 				create date.make_from_string(p_date, "yyyy-[0]mm-[0]dd")
-			else
-				is_correct := False
-				exception_reason := exception_reasons.at (3)
 			end
 
 		end

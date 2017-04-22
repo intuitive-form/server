@@ -24,7 +24,6 @@ feature {NONE} -- Constructor
 		-- Deafault constructor
 		do
 			is_correct := False
-			exception_reason := exception_reasons.at (1)
 		end
 
 	make_from_json(json_value: JSON_VALUE)
@@ -39,26 +38,18 @@ feature {NONE} -- Constructor
 			then
 				parse_json_array (json_authors)
 				data := parsed_string_array
-				is_correct := parsed and data.count > 0
+				is_correct := parsed
 
-				if
-					is_correct
-				then
-					parse_json_object (json_value)
+				if is_correct then
+					parse_json_object (json_object)
 					is_correct := parsed
 				end
 
-				if
-					is_correct
-				then
-					create exception_reason.make_empty
-					make(parsed_string_array.at (1), parsed_string_array.at (2), data)
-				else
-					exception_reason := exception_reasons.at (2)
+				if is_correct then
+					make (parsed_string_array.at (1), parsed_string_array.at (2), data)
 				end
 			else
 				is_correct := False
-				exception_reason := exception_reasons.at (2)
 			end
 
 		end
@@ -71,16 +62,11 @@ feature {NONE} -- Constructor
 			checker: DATE_VALIDITY_CHECKER
 		do
 			create checker
-			if
-				p_authors.count > 0 and then
-				checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
-			then
+			is_correct := p_authors.count > 0 and checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
+			if is_correct then
 				title := p_title
 				authors := p_authors
 				create date.make_from_string(p_date, "yyyy-[0]mm-[0]dd")
-			else
-				is_correct := False
-				exception_reason := exception_reasons.at (3)
 			end
 		end
 

@@ -24,7 +24,6 @@ feature {NONE} -- Constructors
 		do
 			key := "memberships"
 			is_correct := False
-			exception_reason := exception_reasons.at (1)
 		end
 
 	make_from_json(json_value: JSON_VALUE)
@@ -32,16 +31,20 @@ feature {NONE} -- Constructors
 		do
 			key := "memberships"
 			keys := <<["name", False],["organization", False],["date", False]>>
-			parse_json_object (json_value)
 			if
-				not parsed
+				attached {JSON_OBJECT} json_value as json_object
 			then
-				is_correct := False
-				exception_reason := exception_reasons.at (2)
+				parse_json_object (json_object)
+				is_correct := parsed
+				if is_correct then
+					make (
+						parsed_string_array.at (1),
+						parsed_string_array.at (2),
+						parsed_string_array.at (3)
+					)
+				end
 			else
-				is_correct := True
-				create exception_reason.make_empty
-				make(parsed_string_array.at (1), parsed_string_array.at (2), parsed_string_array.at (3))
+				is_correct := False
 			end
 		end
 
@@ -53,15 +56,11 @@ feature {NONE} -- Constructors
 			checker: DATE_VALIDITY_CHECKER
 		do
 			create checker
-			if
-				checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
-			then
+			is_correct := checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
+			if is_correct then
 				name := p_name
 				organization := p_organization
 				create date.make_from_string(p_date, "yyyy-[0]mm-[0]dd")
-			else
-				is_correct := False
-				exception_reason := exception_reasons.at (3)
 			end
 		end
 

@@ -27,7 +27,6 @@ feature {NONE} -- Constructor
 		do
 			key := "projects"
 			is_correct := False
-			exception_reason := exception_reasons.at (1)
 		end
 
 	make_from_json(json_value: JSON_VALUE)
@@ -46,38 +45,28 @@ feature {NONE} -- Constructor
 				data_1 := parsed_string_array
 				is_correct := parsed
 
-				if
-					is_correct
-				then
+				if is_correct then
 					parse_json_array (json_extra_personnel)
 					data_2 := parsed_string_array
 					is_correct := parsed
 				end
 
-				if
-					is_correct
-				then
-					parse_json_object (json_value)
+				if is_correct then
+					parse_json_object (json_object)
 					is_correct := parsed
 				end
 
-				if
-					is_correct
-				then
-					create exception_reason.make_empty
-					make(
+				if is_correct then
+					make (
 						parsed_string_array.at (1),
 						parsed_string_array.at (2),
 						parsed_string_array.at (3),
 						parsed_string_array.at (4),
 						data_1, data_2
 					)
-				else
-					exception_reason := exception_reasons.at (2)
 				end
 			else
 				is_correct := False
-				exception_reason := exception_reasons.at (2)
 			end
 		end
 
@@ -89,20 +78,17 @@ feature {NONE} -- Constructor
 			checker: DATE_VALIDITY_CHECKER
 		do
 			create checker
-			if
+			is_correct :=
 				p_personnel.count > 0 and then
 				checker.date_valid (p_date_start, "yyyy-[0]mm-[0]dd") and then
 				checker.date_valid (p_date_end, "yyyy-[0]mm-[0]dd")
-			then
+			if is_correct then
 				title := p_title
 				personnel := p_personnel
 				extra_personnel := p_extra_personnel
 				create date_start.make_from_string(p_date_start, "yyyy-[0]mm-[0]dd")
 				create date_end.make_from_string(p_date_end, "yyyy-[0]mm-[0]dd")
 				sources_of_financing := p_sources
-			else
-				is_correct := False
-				exception_reason := exception_reasons.at (3)
 			end
 		end
 

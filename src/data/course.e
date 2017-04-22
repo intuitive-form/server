@@ -28,7 +28,6 @@ feature {NONE} -- Constructor
 		do
 			key := "courses"
 			is_correct := False
-			exception_reason := exception_reasons.at (1)
 		end
 
 	make_from_json(json_value: JSON_VALUE)
@@ -37,17 +36,24 @@ feature {NONE} -- Constructor
 			key := "courses"
 			keys := << ["name", False], ["semester", False], ["level", False],
 						 ["students_number", False], ["start_date", False], ["end_date", False] >>
-			parse_json_object (json_value)
 			if
-				not parsed
+				attached {JSON_OBJECT} json_value as json_object
 			then
-				is_correct := False
-				exception_reason := exception_reasons.at (2)
+				parse_json_object (json_object)
+				is_correct := parsed
+
+				if is_correct then
+					make (
+						parsed_string_array.at (1),
+						parsed_string_array.at (2),
+						parsed_string_array.at (3),
+						parsed_string_array.at (4),
+						parsed_string_array.at (5),
+						parsed_string_array.at (6)
+					)
+				end
 			else
-				is_correct := True
-				create exception_reason.make_empty
-				make(parsed_string_array.at (1), parsed_string_array.at (2), parsed_string_array.at (3),
-					parsed_string_array.at (4), parsed_string_array.at (5), parsed_string_array.at (6))
+				is_correct := False
 			end
 		end
 
@@ -61,30 +67,26 @@ feature {NONE} -- Constructor
 			checker: DATE_VALIDITY_CHECKER
 		do
 			create checker
-			if
+			is_correct :=
 				valid_semester (p_semester) and then
 				valid_level(p_level) and then
 				p_students.is_integer and then
 				p_students.to_integer >= 0 and then
 				checker.date_valid (p_start_date, "yyyy-[0]mm-[0]dd") and then
 				checker.date_valid (p_end_date, "yyyy-[0]mm-[0]dd")
-			then
+			if is_correct then
 				name := p_name
 				semester := p_semester
 				level := p_level
 				students := p_students.to_integer
 				create start_date.make_from_string (p_start_date, "yyyy-[0]mm-[0]dd")
 				create end_date.make_from_string (p_end_date, "yyyy-[0]mm-[0]dd")
-			else
-				is_correct := False
-				exception_reason := exception_reasons.at (3)
 			end
 		end
 
 	make_ready(p_name, p_semester, p_level: STRING; p_students: INTEGER; p_start_date, p_end_date: DATE)
 		do
 			is_correct := True
-			create exception_reason.make_empty
 			name := p_name
 			semester := p_semester
 			level := p_level

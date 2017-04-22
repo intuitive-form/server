@@ -24,7 +24,6 @@ feature {NONE} -- Constructor
 		do
 			key := "students"
 			is_correct := False
-			exception_reason := exception_reasons.at(1)
 		end
 
 	make_from_json(json_value: JSON_VALUE)
@@ -32,14 +31,19 @@ feature {NONE} -- Constructor
 		do
 			key := "students"
 			keys := <<["name", False],["nature_of_work", False]>>
-			parse_json_object(json_value)
 			if
-				not parsed
+				attached {JSON_OBJECT} json_value as json_object
 			then
-				is_correct := False
-				exception_reason := exception_reasons.at(2)
+				parse_json_object (json_object)
+				is_correct := parsed
+				if is_correct then
+					make (
+						parsed_string_array.at (1),
+						parsed_string_array.at (2)
+					)
+				end
 			else
-				make(parsed_string_array.at(1), parsed_string_array.at(2))
+				is_correct := False
 			end
 		end
 
@@ -49,7 +53,6 @@ feature {NONE} -- Constructor
 							(p_nature_of_work /= Void)
 		do
 			is_correct := True
-			create exception_reason.make_empty
 			name := p_name
 			nature_of_work := p_nature_of_work
 		end

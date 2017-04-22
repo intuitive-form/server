@@ -24,7 +24,6 @@ feature {NONE} -- Constructor
 		do
 			key := "phd_reports"
 			is_correct := False
-			exception_reason := exception_reasons.at (1)
 		end
 
 	make_from_json(json_value: JSON_VALUE)
@@ -32,15 +31,21 @@ feature {NONE} -- Constructor
 		do
 			key := "phd_reports"
 			keys := <<["student_name", False], ["title", False], ["plans", True]>>
-			parse_json_object(json_value)
 			if
-				not parsed
+				attached {JSON_OBJECT} json_value as json_object
 			then
-				is_correct := False
-				exception_reason := exception_reasons.at (1)
+				parse_json_object (json_object)
+				is_correct := parsed
+
+				if is_correct then
+					make (
+						parsed_string_array.at (1),
+						parsed_string_array.at (2),
+						parsed_string_array.at (3)
+					)
+				end
 			else
-				is_correct := True
-				create exception_reason.make_empty
+				is_correct := False
 			end
 		end
 
@@ -49,6 +54,7 @@ feature {NONE} -- Constructor
 			fields_exist: 	(p_student_name /= Void) and then (p_title /= Void)
 							(p_plans /= Void)
 		do
+			is_correct := True
 			student_name := p_student_name
 			title := p_title
 			plans := p_plans

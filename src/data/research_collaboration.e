@@ -26,7 +26,6 @@ feature {NONE} -- Constructor
 		do
 			key := "collaborations"
 			is_correct := False
-			exception_reason := exception_reasons.at (1)
 		end
 
 	make_from_json(json_value: JSON_VALUE)
@@ -42,18 +41,22 @@ feature {NONE} -- Constructor
 			then
 				parse_json_array (json_contacts)
 				data := parsed_string_array
-				parse_json_object (json_value)
-				if
-					not parsed
-				then
-					is_correct := False
-					exception_reason := exception_reasons.at (2)
-				else
-					make(parsed_string_array.at (1), parsed_string_array.at (2), parsed_string_array.at (3), data)
+				is_correct := parsed
+
+				if is_correct then
+					parse_json_object (json_object)
+					is_correct := parsed
+				end
+				if is_correct then
+					make (
+						parsed_string_array.at (1),
+						parsed_string_array.at (2),
+						parsed_string_array.at (3),
+						data
+					)
 				end
 			else
 				is_correct := False
-				exception_reason := exception_reasons.at (2)
 			end
 		end
 
@@ -63,7 +66,6 @@ feature {NONE} -- Constructor
 							p_contracts /= Void)
 		do
 			is_correct := True
-			create exception_reason.make_empty
 			institution_country := p_country
 			institution_name := p_name
 			contracts := p_contracts
