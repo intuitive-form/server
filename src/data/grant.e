@@ -58,6 +58,7 @@ feature {NONE} -- Constuctor
 		local
 			checker: DATE_VALIDITY_CHECKER
 		do
+			create checker
 			if
 				p_amount.is_integer and then p_amount.to_integer >= 0 and then
 				checker.date_valid (p_period_start, "yyyy-[0]mm-[0]dd") and then

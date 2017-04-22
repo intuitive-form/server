@@ -64,7 +64,7 @@ feature -- Queries
 			parsed implies (parsed_string_array.count = keys.count)
 		end
 
-	parse_json_array(json_value: JSON_VALUE)
+	parse_json_array(json_value: JSON_ARRAY)
 		-- Extacts data from 'json_array' into 'parsed_string_value'
 		local
 			json_temp: ARRAYED_LIST[JSON_VALUE]

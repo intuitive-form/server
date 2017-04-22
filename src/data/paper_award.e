@@ -36,9 +36,10 @@ feature {NONE} -- Constructors
 			key := "paper_awards"
 			keys := <<["title", False], ["conference_journal", False], ["wording", False], ["date", False]>>
 			if
-				attached {JSON_OBJECT} json_value as json_object
+				attached {JSON_OBJECT} json_value as json_object and then
+				attached {JSON_ARRAY} json_object.item ("authors") as json_authors
 			then
-				parse_json_array(json_object.item ("authors"))
+				parse_json_array(json_authors)
 				data := parsed_string_array
 				parse_json_object (json_value)
 				if
@@ -65,6 +66,7 @@ feature {NONE} -- Constructors
 		local
 			checker: DATE_VALIDITY_CHECKER
 		do
+			create checker
 			if
 				checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
 			then

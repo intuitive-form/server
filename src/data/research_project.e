@@ -38,23 +38,42 @@ feature {NONE} -- Constructor
 			key := "projects"
 			keys := <<["title", False], ["start_date", False], ["end_date", False], ["financing", False]>>
 			if
-				attached {JSON_OBJECT} json_value as json_object
+				attached {JSON_OBJECT} json_value as json_object and then
+				attached {JSON_ARRAY} json_object.item ("personnel") as json_personnel and then
+				attached {JSON_ARRAY} json_object.item ("extra_personnel") as json_extra_personnel
 			then
-				parse_json_array (json_object.item ("personnel"))
+				parse_json_array (json_personnel)
 				data_1 := parsed_string_array
-				parse_json_array (json_object.item ("extra_personnel"))
-				data_2 := parsed_string_array
-				parse_json_object (json_value)
+				is_correct := parsed
+
 				if
-					not parsed
+					is_correct
 				then
-					is_correct := False
-					exception_reason := exception_reasons.at (2)
-				else
-					is_correct := True
+					parse_json_array (json_extra_personnel)
+					data_2 := parsed_string_array
+					is_correct := parsed
+				end
+
+				if
+					is_correct
+				then
+					parse_json_object (json_value)
+					is_correct := parsed
+				end
+
+				if
+					is_correct
+				then
 					create exception_reason.make_empty
-					make(parsed_string_array.at (1), parsed_string_array.at (2), parsed_string_array.at (3),
-						parsed_string_array.at (4), data_1, data_2)
+					make(
+						parsed_string_array.at (1),
+						parsed_string_array.at (2),
+						parsed_string_array.at (3),
+						parsed_string_array.at (4),
+						data_1, data_2
+					)
+				else
+					exception_reason := exception_reasons.at (2)
 				end
 			else
 				is_correct := False
@@ -69,6 +88,7 @@ feature {NONE} -- Constructor
 		local
 			checker: DATE_VALIDITY_CHECKER
 		do
+			create checker
 			if
 				p_personnel.count > 0 and then
 				checker.date_valid (p_date_start, "yyyy-[0]mm-[0]dd") and then

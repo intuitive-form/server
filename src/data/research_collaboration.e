@@ -37,9 +37,10 @@ feature {NONE} -- Constructor
 			key := "country"
 			keys := <<["country", False], ["name", False], ["nature", False]>>
 			if
-				attached {JSON_OBJECT} json_value as json_object
+				attached {JSON_OBJECT} json_value as json_object and then
+				attached {JSON_ARRAY} json_object.item ("contacts") as json_contacts
 			then
-				parse_json_array (json_object.item ("contacts"))
+				parse_json_array (json_contacts)
 				data := parsed_string_array
 				parse_json_object (json_value)
 				if

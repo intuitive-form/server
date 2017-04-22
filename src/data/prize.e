@@ -52,6 +52,7 @@ feature -- Constructors
 		local
 			checker: DATE_VALIDITY_CHECKER
 		do
+			create checker
 			if
 				checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
 			then

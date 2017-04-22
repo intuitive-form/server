@@ -34,25 +34,33 @@ feature {NONE} -- Constructor
 		do
 			keys := <<["title", False], ["date", False]>>
 			if
-				attached {JSON_OBJECT} json_value as json_object
+				attached {JSON_OBJECT} json_value as json_object and then
+				attached {JSON_ARRAY} json_object.item ("authors") as json_authors
 			then
-				parse_json_array (json_object)
+				parse_json_array (json_authors)
 				data := parsed_string_array
+				is_correct := parsed and data.count > 0
+
+				if
+					is_correct
+				then
+					parse_json_object (json_value)
+					is_correct := parsed
+				end
+
+				if
+					is_correct
+				then
+					create exception_reason.make_empty
+					make(parsed_string_array.at (1), parsed_string_array.at (2), data)
+				else
+					exception_reason := exception_reasons.at (2)
+				end
 			else
 				is_correct := False
 				exception_reason := exception_reasons.at (2)
 			end
-			parse_json_object (json_value)
-			if
-				not parsed
-			then
-				is_correct := False
-				exception_reason := exception_reasons.at (2)
-			else
-				is_correct := True
-				create exception_reason.make_empty
-				make(parsed_string_array.at (1), parsed_string_array.at (2), data)
-			end
+
 		end
 
 	make(p_title, p_date: STRING; p_authors: ARRAYED_LIST[STRING])
@@ -62,6 +70,7 @@ feature {NONE} -- Constructor
 		local
 			checker: DATE_VALIDITY_CHECKER
 		do
+			create checker
 			if
 				p_authors.count > 0 and then
 				checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")

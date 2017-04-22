@@ -60,6 +60,7 @@ feature {NONE} -- Constructor
 		local
 			checker: DATE_VALIDITY_CHECKER
 		do
+			create checker
 			if
 				valid_semester (p_semester) and then
 				valid_level(p_level) and then
