@@ -89,6 +89,7 @@ feature {NONE} -- Constructor
 				create date_start.make_from_string(p_date_start, "yyyy-[0]mm-[0]dd")
 				create date_end.make_from_string(p_date_end, "yyyy-[0]mm-[0]dd")
 				sources_of_financing := p_sources
+				is_correct := date_start.is_less (date_end)
 			end
 		end
 
