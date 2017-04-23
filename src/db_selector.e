@@ -230,9 +230,9 @@ feature
 		do
 			create Result.make
 			create q_select.make ("SELECT id, country, institution, nature FROM research_collabs WHERE unit = ?1;", db)
-			create q_select2.make ("SELECT name FROM collabs_contacts WHERE collab = ?1;", db)
 			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as i loop
 				create contacts.make (1)
+				create q_select2.make ("SELECT name FROM collabs_contacts WHERE collab = ?1;", db)
 				across q_select2.execute_new_with_arguments (<<i.item.integer_value(1)>>) as i2 loop
 					contacts.sequence_put (i2.item.string_value (1))
 				end
@@ -244,4 +244,44 @@ feature
 				))
 			end
 		end
+
+	phds_of_unit(unit: STRING): LINKED_LIST[PHD_THESIS]
+		require
+			unit_exists (unit)
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+		do
+			create Result.make
+			create q_select.make ("SELECT student, title, publication FROM phd_theses WHERE unit = ?1;", db)
+			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as iter loop
+				Result.put_front (create {PHD_THESIS}.make (iter.item.string_value (1), iter.item.string_value (2), iter.item.string_value (3)))
+			end
+		end
+
+	patents_of_unit (unit: STRING): LINKED_LIST[PATENT]
+		require
+			unit_exists (unit)
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+		do
+			create Result.make
+			create q_select.make ("SELECT title, country FROM phd_theses WHERE unit = ?1;", db)
+			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as iter loop
+				Result.put_front (create {PATENT}.make (iter.item.string_value (1), iter.item.string_value (2)))
+			end
+		end
+
+	ip_licences_of_unit (unit: STRING): LINKED_LIST[IP_LICENCE]
+		require
+			unit_exists (unit)
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+		do
+			create Result.make
+			create q_select.make ("SELECT title FROM phd_theses WHERE unit = ?1;", db)
+			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as iter loop
+				Result.put_front (create {IP_LICENCE}.make (iter.item.string_value (1)))
+			end
+		end
+
 end

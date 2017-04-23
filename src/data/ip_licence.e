@@ -9,6 +9,7 @@ inherit
 
 create
 	default_create,
+	make,
 	make_from_json
 
 feature -- Fields
