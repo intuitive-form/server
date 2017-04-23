@@ -26,6 +26,26 @@ feature -- Sub routines
 
 feature -- Test UNIT routines
 
+	kek
+		local
+			file: PLAIN_TEXT_FILE
+			data: SUBMIT_DATA
+			json: STRING
+		do
+			create file.make_open_read ("tests/test1.json")
+			assert ("file opened", file.is_readable and file.count > 0)
+			from
+				create json.make (file.count)
+			until
+				file.exhausted
+			loop
+				file.read_line
+				json.append (file.last_string)
+			end
+			create data.make (json)
+			assert ("Data parsed", data.is_correct)
+		end
+
 	field_unit_test1
 			-- Correct UNIT creation
 		local
