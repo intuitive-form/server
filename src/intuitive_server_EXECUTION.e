@@ -10,7 +10,7 @@ create
 feature {NONE}
 	db: DB_HANDLER
 		once
-			create Result.make
+			create Result.make ("db.sqlite")
 		end
 
 feature -- Router
@@ -24,7 +24,7 @@ feature -- Router
 			fhdl.set_directory_index (<<"index.html">>)
 
 			router.handle ("/submit", create {POST_SUBMIT}.make(db), router.methods_post)
-			
+
 			router.handle ("/pub", create {POST_PUBLICATIONS}.make(db), router.methods_post) -- query 1
 			router.handle ("/unit", create {POST_UNIT_INFO}.make(db), router.methods_post) -- query 2
 			router.handle ("/courses", create {POST_COURSES}.make(db), router.methods_post) -- query 3

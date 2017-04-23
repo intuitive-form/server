@@ -128,7 +128,6 @@ feature
 			unit_exists (unit)
 		local
 			q_select: SQLITE_QUERY_STATEMENT
-			it: SQLITE_STATEMENT_ITERATION_CURSOR
 		do
 			create Result.make
 			create q_select.make ("SELECT name, semester, level, students, start_date, end_date FROM courses WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)
@@ -149,7 +148,6 @@ feature
 			unit_exists (unit)
 		local
 			q_select: SQLITE_QUERY_STATEMENT
-			it: SQLITE_STATEMENT_ITERATION_CURSOR
 		do
 			create Result.make
 			create q_select.make ("SELECT name, semester, level, students, start_date, end_date FROM courses WHERE unit = ?1 AND start_date >= ?2 AND end_date <= ?3;", db)

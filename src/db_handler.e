@@ -10,15 +10,15 @@ feature {DB_INSERTER, DB_SELECTOR}
 feature {NONE}
 	inserter: DB_INSERTER
 
-	make
+	make (db_path: STRING)
 		local
 			q: SQLITE_MODIFY_STATEMENT
 		do
 			io.put_string ("Make DB_HANDLER%N")
-			if (create {RAW_FILE}.make_with_name("db.sqlite")).exists then
-				create db.make_open_read_write ("db.sqlite")
+			if (create {RAW_FILE}.make_with_name(db_path)).exists then
+				create db.make_open_read_write (db_path)
 			else
-				create db.make_create_read_write ("db.sqlite")
+				create db.make_create_read_write (db_path)
 				across db_schema as query loop
 					create q.make (query.item, db)
 					q.execute
