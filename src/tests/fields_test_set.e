@@ -75,6 +75,18 @@ feature -- Test UNIT routines
 			assert ("Unit created incorrectly. {EMPTY_FIELD}", not unit.is_correct)
 		end
 
+	field_unit_test5
+			-- Incorrect UNIT creation {NOT_PARSED}
+		local
+			unit: UNIT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"unit", "head_name", "reporting_period_start", "reporting_period_end">>
+			values := <<"Robotics Lab", "Nikolaos Mavridis", "2016-01-01", "2016-12-31">>
+			create unit.make_from_json (create_json (keys, values))
+			assert ("Unit created incorrectly. {NOT_PARSED}", not unit.is_correct)
+		end
+
 feature -- Test COURSE routines
 
 	field_course_test1
@@ -181,7 +193,7 @@ feature -- Test COURSE routines
 			keys, values: ARRAY[STRING]
 		do
 			keys := <<"name", "semester", "level", "students_number", "start_date", "end_date">>
-			values := <<"Computer Architecture", "Fall", "", "129",  "2016-11-20", "2016-09-01">>
+			values := <<"Computer Architecture", "Fall", "Bachelor", "129",  "2016-11-20", "2016-09-01">>
 			create course.make_from_json (create_json (keys, values))
 			assert("Course created incorrectly. {WRONG_DATE_PERIOD}", not course.is_correct)
 		end
@@ -198,6 +210,165 @@ feature -- Test COURSE routines
 			assert("Course created incorrectly. {EMPTY_FIELD}", not course.is_correct)
 		end
 
+	field_course_test11
+			-- Incorrect COURSE creation {NOT_PARSED}
+		local
+			course: COURSE
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"not name", "semester", "level", "students_number", "start_date", "end_date">>
+			values := <<"Computer Architecture", "Fall", "Bachelor", "129",  "2016-09-01", "2016-11-20">>
+			create course.make_from_json (create_json (keys, values))
+			assert("Course created incorrectly. {NOT_PARSED}", not course.is_correct)
+		end
+
+feature -- Test EXAM routines
+
+	field_exam_test1
+			-- Correct EXAM creation
+		local
+			exam: EXAM
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"course_name", "semester", "kind", "students_number", "date">>
+			values := <<"Computer Architecture", "Fall", "Final exam", "125", "2016-11-20">>
+			create exam.make_from_json (create_json (keys, values))
+			assert("Exam created correctly", exam.is_correct)
+		end
+
+	field_exam_test2
+			-- Correct EXAM creation
+		local
+			exam: EXAM
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"course_name", "semester", "kind", "students_number", "date">>
+			values := <<"Computer Architecture", "Spring", "Final exam", "125", "2016-11-20">>
+			create exam.make_from_json (create_json (keys, values))
+			assert("Exam created correctly", exam.is_correct)
+		end
+
+	field_exam_test3
+			-- Correct EXAM creation
+		local
+			exam: EXAM
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"course_name", "semester", "kind", "students_number", "date">>
+			values := <<"Computer Architecture", "Fall", "Repetition exam", "125", "2016-11-20">>
+			create exam.make_from_json (create_json (keys, values))
+			assert("Exam created correctly", exam.is_correct)
+		end
+
+	field_exam_test4
+			-- Correct EXAM creation
+		local
+			exam: EXAM
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"course_name", "semester", "kind", "students_number", "date">>
+			values := <<"Computer Architecture", "Fall", "Midterm exam", "125", "2016-11-20">>
+			create exam.make_from_json (create_json (keys, values))
+			assert("Exam created correctly", exam.is_correct)
+		end
+
+	field_exam_test5
+			-- Incorrect EXAM creation {INVALID_SEMESTER}
+		local
+			exam: EXAM
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"course_name", "semester", "kind", "students_number", "date">>
+			values := <<"Computer Architecture", "Summer", "Final exam", "125", "2016-11-20">>
+			create exam.make_from_json (create_json (keys, values))
+			assert("Exam created incorrectly {INVALID_SEMESTER}", not exam.is_correct)
+		end
+
+	field_exam_test6
+			-- Incorrect EXAM creation {INVALID_KIND}
+		local
+			exam: EXAM
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"course_name", "semester", "kind", "students_number", "date">>
+			values := <<"Computer Architecture", "Fall", "Not Final exam", "125", "2016-11-20">>
+			create exam.make_from_json (create_json (keys, values))
+			assert("Exam created incorrectly {INVALID_KIND}", not exam.is_correct)
+		end
+
+	field_exam_test7
+			-- Incorrect EXAM creation {INVALID_NEGATIVE_NUMBER}
+		local
+			exam: EXAM
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"course_name", "semester", "kind", "students_number", "date">>
+			values := <<"Computer Architecture", "Fall", "Final exam", "-125", "2016-11-20">>
+			create exam.make_from_json (create_json (keys, values))
+			assert("Exam created incorrectly {INVALID_NEGATIVE_NUMBER}", not exam.is_correct)
+		end
+
+	field_exam_test8
+			-- Incorrect EXAM creation {INVALID_NUMBER}
+		local
+			exam: EXAM
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"course_name", "semester", "kind", "students_number", "date">>
+			values := <<"Computer Architecture", "Fall", "Final exam", "Number", "2016-11-20">>
+			create exam.make_from_json (create_json (keys, values))
+			assert("Exam created incorrectly {INVALID_NUMBER}", not exam.is_correct)
+		end
+
+	field_exam_test9
+			-- Incorrect EXAM creation {INVALID_SEMESTER}
+		local
+			exam: EXAM
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"course_name", "semester", "kind", "students_number", "date">>
+			values := <<"Computer Architecture", "Fall", "Final exam", "125", "Today">>
+			create exam.make_from_json (create_json (keys, values))
+			assert("Exam created incorrectly {INVALID_NUMBER}", not exam.is_correct)
+		end
+
+	field_exam_test10
+			-- Incorrect EXAM creation {EMPTY_FIELD}
+		local
+			exam: EXAM
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"course_name", "semester", "kind", "students_number", "date">>
+			values := <<"Computer Architecture", "", "Final exam", "125", "2016-11-20">>
+			create exam.make_from_json (create_json (keys, values))
+			assert("Exam created incorrectly {EMPTY_FIELD}", not exam.is_correct)
+		end
+
+	field_exam_test11
+			-- Incorrect EXAM creation {NOT_PARSED}
+		local
+			exam: EXAM
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"course", "semester", "kind", "students_number", "date">>
+			values := <<"Computer Architecture", "Fall", "Final exam", "125", "2016-11-20">>
+			create exam.make_from_json (create_json (keys, values))
+			assert("Exam created incorrectly {NOT_PARSED}", not exam.is_correct)
+		end
+
+feature -- Test STUDENT routines
+
+	field_student_test1
+			-- Correct STUDENT creation
+		local
+			student: STUDENT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"name", "nature_of_work">>
+			values := <<"Ivan Ivanov", "summer internship">>
+			create student.make_from_json (create_json (keys, values))
+			assert("Student created correctly", student.is_correct)
+		end
 end
 
 

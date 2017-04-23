@@ -40,7 +40,6 @@ feature {NONE} -- Constructor
 			then
 				parse_json_object (json_object)
 				is_correct := parsed
-
 				if is_correct then
 					make (
 						parsed_string_array.at (1),
@@ -58,7 +57,8 @@ feature {NONE} -- Constructor
 	make(p_course_name, p_semester, p_kind, number_of_students, p_date: STRING)
 		require
 			fields_exist:	(p_course_name /= Void) and then (p_semester /= Void) and then
-							(p_kind /= Void) and then (number_of_students /= Void)
+							(p_kind /= Void) and then (number_of_students /= Void) and then
+							(p_date /= Void)
 		local
 			checker: DATE_VALIDITY_CHECKER
 		do
