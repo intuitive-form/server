@@ -9,6 +9,7 @@ inherit
 
 create
 	default_create,
+	make_ready,
 	make_from_json
 
 feature -- Fields
@@ -16,6 +17,23 @@ feature -- Fields
 	title, awarder, award_wording: STRING
 	authors: ARRAYED_LIST[STRING]
 	date: DATE
+
+feature
+	to_json: JSON_OBJECT
+		local
+			j_arr: JSON_ARRAY
+		do
+			create Result.make_with_capacity (5)
+			create j_arr.make (authors.count)
+			across authors as iter loop
+				j_arr.add (create {JSON_STRING}.make_from_string (iter.item))
+			end
+			Result.put (create {JSON_STRING}.make_from_string (title), "title")
+			Result.put (create {JSON_STRING}.make_from_string (award_wording), "award_wording")
+			Result.put (create {JSON_STRING}.make_from_string (awarder), "awarder")
+			Result.put (create {JSON_STRING}.make_from_string (date.formatted_out ("yyyy-[0]mm-[0]dd")), "date")
+			Result.put (j_arr, "authors")
+		end
 
 
 feature {NONE} -- Constructors
@@ -66,13 +84,22 @@ feature {NONE} -- Constructors
 			create checker
 			is_correct := checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
 			if is_correct then
-				title := p_title
-				awarder := p_awarder
-				award_wording := p_award_wording
-				authors := p_authors
-				create date.make_from_string(p_date, "yyyy-[0]mm-[0]dd")
+				make_ready (p_title, p_awarder, p_award_wording,
+					create {DATE}.make_from_string(p_date, "yyyy-[0]mm-[0]dd"), p_authors)
 			end
 
+		end
+
+	make_ready (p_title, p_awarder, p_award_wording: STRING; p_date: DATE; p_authors: ARRAYED_LIST[STRING])
+		require
+			fields_exist: 	(p_title /= Void) and then (p_awarder /= Void) and then (p_award_wording /= Void) and then
+							(p_date /= Void) and then (p_authors /= Void)
+		do
+			title := p_title
+			awarder := p_awarder
+			award_wording := p_award_wording
+			date := p_date
+			authors := p_authors
 		end
 
 invariant

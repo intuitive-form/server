@@ -245,6 +245,31 @@ feature
 			end
 		end
 
+	paper_awards_of_unit(unit: STRING): LINKED_LIST[PAPER_AWARD]
+		require
+			unit_exists (unit)
+		local
+			q_select, q_select2: SQLITE_QUERY_STATEMENT
+			authors: ARRAYED_LIST[STRING]
+		do
+			create Result.make
+			create q_select.make ("SELECT id, title, awarder, award_wording, date FROM research_collabs WHERE unit = ?1;", db)
+			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as i loop
+				create authors.make (1)
+				create q_select2.make ("SELECT name FROM paper_authors WHERE paper = ?1;", db)
+				across q_select2.execute_new_with_arguments (<<i.item.integer_64_value (1)>>) as i2 loop
+					authors.sequence_put (i2.item.string_value (1))
+				end
+				Result.put_front (create {PAPER_AWARD}.make_ready (
+					i.item.string_value (2),
+					i.item.string_value (3),
+					i.item.string_value (4),
+					create {DATE}.make_by_days (i.item.integer_value (5)),
+					authors
+				))
+			end
+		end
+
 	phds_of_unit(unit: STRING): LINKED_LIST[PHD_THESIS]
 		require
 			unit_exists (unit)
@@ -284,4 +309,20 @@ feature
 			end
 		end
 
+	academia_members_of_unit (unit: STRING): LINKED_LIST[MEMBERSHIP]
+		require
+			unit_exists (unit)
+		local
+			q_select: SQLITE_QUERY_STATEMENT
+		do
+			create Result.make
+			create q_select.make ("SELECT name, organization, date FROM academia_memberships WHERE unit = ?1;", db)
+			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as iter loop
+				Result.put_front (create {MEMBERSHIP}.make_ready (
+					iter.item.string_value (1),
+					iter.item.string_value (2),
+					create {DATE}.make_by_days (iter.item.integer_value (3))
+				))
+			end
+		end
 end

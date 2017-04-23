@@ -21,7 +21,7 @@ feature -- Execution
 	execute (a_start_path: READABLE_STRING_8; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			j: JSON_OBJECT
-			j_arr: JSON_ARRAY
+			j_arr, j_arr2: JSON_ARRAY
 			j_obj: JSON_OBJECT
 			grants: LIST[GRANT]
 			phds: LIST[PHD_THESIS]
@@ -39,6 +39,7 @@ feature -- Execution
 				j.put (create {JSON_STRING}.make_from_string ("no such unit"), "error")
 			else
 				j.put (create {JSON_STRING}.make_from_string (db.selector.head_name (unit.value)), "head")
+
 				grants := db.selector.grants_of_unit (unit.value)
 				create j_arr.make (grants.count)
 				across grants as g loop
@@ -51,6 +52,7 @@ feature -- Execution
 					j_arr.add (j_obj)
 				end
 				j.put (j_arr, "grants")
+
 				phds := db.selector.phds_of_unit (unit.value)
 				create j_arr.make (phds.count)
 				across phds as phd loop
@@ -61,6 +63,7 @@ feature -- Execution
 					j_arr.add (j_obj)
 				end
 				j.put (j_arr, "phd_theses")
+
 				patents := db.selector.patents_of_unit (unit.value)
 				create j_arr.make (phds.count)
 				across patents as iter loop
@@ -70,12 +73,29 @@ feature -- Execution
 					j_arr.add (j_obj)
 				end
 				j.put (j_arr, "patents")
+
 				licenses := db.selector.ip_licences_of_unit (unit.value)
 				create j_arr.make (phds.count)
 				across patents as iter loop
 					j_arr.add (create {JSON_STRING}.make_from_string (iter.item.title))
 				end
 				j.put (j_arr, "ip_licenses")
+
+				create j_arr.make_empty
+				across db.selector.paper_awards_of_unit (unit.value) as iter loop
+					j_arr.add (iter.item.to_json)
+				end
+				j.put (j_arr, "paper_awards")
+
+				create j_arr.make_empty
+				across db.selector.academia_members_of_unit (unit.value) as iter loop
+					create j_obj.make_with_capacity (3)
+					j_obj.put (create {JSON_STRING}.make_from_string (iter.item.name), "name")
+					j_obj.put (create {JSON_STRING}.make_from_string (iter.item.organization), "organization")
+					j_obj.put (create {JSON_STRING}.make_from_string (iter.item.date.formatted_out ("yyyy-mm-dd")), "date")
+					j_arr.add (j_obj)
+				end
+				j.put (j_arr, "academia_memberships")
 			end
 			res.send (create {WSF_PAGE_RESPONSE}.make_with_body (j.representation))
 		end

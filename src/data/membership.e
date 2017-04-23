@@ -9,6 +9,7 @@ inherit
 
 create
 	default_create,
+	make_ready,
 	make_from_json
 
 feature -- Fields
@@ -58,10 +59,19 @@ feature {NONE} -- Constructors
 			create checker
 			is_correct := checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
 			if is_correct then
-				name := p_name
-				organization := p_organization
-				create date.make_from_string(p_date, "yyyy-[0]mm-[0]dd")
+				make_ready (p_name, p_organization, create {DATE}.make_from_string(p_date, "yyyy-[0]mm-[0]dd"))
 			end
+		end
+
+	make_ready(p_name, p_organization: STRING; p_date: DATE)
+		require
+			fields_exist:	(p_name /= Void) and then (p_organization /= Void) and then
+							(p_date /= Void)
+		do
+
+			name := p_name
+			organization := p_organization
+			date := p_date
 		end
 
 invariant
