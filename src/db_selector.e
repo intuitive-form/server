@@ -253,7 +253,7 @@ feature
 			authors: ARRAYED_LIST[STRING]
 		do
 			create Result.make
-			create q_select.make ("SELECT id, title, awarder, award_wording, date FROM research_collabs WHERE unit = ?1;", db)
+			create q_select.make ("SELECT id, title, awarder, award_wording, date FROM paper_awards WHERE unit = ?1;", db)
 			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as i loop
 				create authors.make (1)
 				create q_select2.make ("SELECT name FROM paper_authors WHERE paper = ?1;", db)
