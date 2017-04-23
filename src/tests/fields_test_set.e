@@ -26,26 +26,6 @@ feature -- Sub routines
 
 feature -- Test UNIT routines
 
-	kek
-		local
-			file: PLAIN_TEXT_FILE
-			data: SUBMIT_DATA
-			json: STRING
-		do
-			create file.make_open_read ("tests/test1.json")
-			assert ("file opened", file.is_readable and file.count > 0)
-			from
-				create json.make (file.count)
-			until
-				file.exhausted
-			loop
-				file.read_line
-				json.append (file.last_string)
-			end
-			create data.make (json)
-			assert ("Data parsed", data.is_correct)
-		end
-
 	field_unit_test1
 			-- Correct UNIT creation
 		local
@@ -389,6 +369,424 @@ feature -- Test STUDENT routines
 			create student.make_from_json (create_json (keys, values))
 			assert("Student created correctly", student.is_correct)
 		end
+
+	field_student_test2
+			-- Incorrect STUDENT creation {EMPTY_FIELD}
+		local
+			student: STUDENT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"name", "nature_of_work">>
+			values := <<"", "summer internship">>
+			create student.make_from_json (create_json (keys, values))
+			assert("Student created incorrectly. {EMPTY_FIELD}", not student.is_correct)
+		end
+
+	field_student_test3
+			-- Incorrect STUDENT creation {NOT_PARSED}
+		local
+			student: STUDENT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"not name", "nature_of_work">>
+			values := <<"Ivan Ivanov", "summer internship">>
+			create student.make_from_json (create_json (keys, values))
+			assert("Student created incorrectly. {NOT_PARSED}", not student.is_correct)
+		end
+
+feature -- Test STUDENT_REPORT creation
+
+	field_student_report_test1
+			-- Correct STUDENT_REPORT creation
+		local
+			student_report: STUDENT_REPORT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"student_name", "title", "plans">>
+			values := <<"Ivan Ivanov", "A parallelized and streamlined vision front-end for tabletop robots", "Maybe">>
+			create student_report.make_from_json (create_json (keys, values))
+			assert("Student report created correctly", student_report.is_correct)
+		end
+
+	field_student_report_test2
+			-- Correct STUDENT_REPORT creation
+		local
+			student_report: STUDENT_REPORT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"student_name", "title", "plans">>
+			values := <<"Ivan Ivanov", "A parallelized and streamlined vision front-end for tabletop robots", "">>
+			create student_report.make_from_json (create_json (keys, values))
+			assert("Student report created correctly", student_report.is_correct)
+		end
+
+	field_student_report_test3
+			-- Incorrect STUDENT_REPORT creation {EMPTY_FIELD}
+		local
+			student_report: STUDENT_REPORT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"student_name", "title", "plans">>
+			values := <<"", "A parallelized and streamlined vision front-end for tabletop robots", "Maybe">>
+			create student_report.make_from_json (create_json (keys, values))
+			assert("Student report created incorrectly. {EMPTY_FIELD}", not student_report.is_correct)
+		end
+
+	field_student_report_test4
+			-- Incorrect STUDENT_REPORT creation {NOT PARSED}
+		local
+			student_report: STUDENT_REPORT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"student", "title", "plans">>
+			values := <<"Ivan Ivanov", "A parallelized and streamlined vision front-end for tabletop robots", "Maybe">>
+			create student_report.make_from_json (create_json (keys, values))
+			assert("Student report created incorrectly. {NOT_PARSED}", not student_report.is_correct)
+		end
+
+feature -- Test PHD_THESIS routines
+
+	field_phd_thesis_test1
+			-- Correct PHD_THESIS creation
+		local
+			phd_thesis: PHD_THESIS
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"student_name", "title", "plans">>
+			values := <<"Ivan Ivanov", "A parallelized and streamlined vision front-end for tabletop robots", "Maybe">>
+			create phd_thesis.make_from_json (create_json (keys, values))
+			assert("Phd thesis created correctly", phd_thesis.is_correct)
+		end
+
+	field_phd_thesis_test2
+			-- Correct PHD_THESIS creation
+		local
+			phd_thesis: PHD_THESIS
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"student_name", "title", "plans">>
+			values := <<"Ivan Ivanov", "A parallelized and streamlined vision front-end for tabletop robots", "">>
+			create phd_thesis.make_from_json (create_json (keys, values))
+			assert("Phd thesis created correctly", phd_thesis.is_correct)
+		end
+
+	field_phd_thesis_test3
+			-- Incorrect PHD_THESIS creation {EMPTY_FIELD}
+		local
+			phd_thesis: PHD_THESIS
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"student_name", "title", "plans">>
+			values := <<"", "A parallelized and streamlined vision front-end for tabletop robots", "Maybe">>
+			create phd_thesis.make_from_json (create_json (keys, values))
+			assert("Phd thesis created incorrectly. {EMPTY_FIELD}", not phd_thesis.is_correct)
+		end
+
+	field_phd_thesis_test4
+			-- Incorrect PHD_THESIS creation {NOT_PARSED}
+		local
+			phd_thesis: PHD_THESIS
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"student", "title", "plans">>
+			values := <<"Ivan Ivanov", "A parallelized and streamlined vision front-end for tabletop robots", "Maybe">>
+			create phd_thesis.make_from_json (create_json (keys, values))
+			assert("Phd thesis created incorrectly. {NOT_PARSED}", not phd_thesis.is_correct)
+		end
+
+feature -- Test GRANT routines
+
+	field_grant_test1
+			-- Correct GRANT creation
+		local
+			grant: GRANT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"title", "agency", "period_start", "period_end", "continuation", "amount">>
+			values := <<"Verifying Deep Mathematical Properties of AI Systems", "USAID",
+				"2016-04-02" , "2017-10-11", "1 year", "100">>
+			create grant.make_from_json (create_json (keys, values))
+			assert("Grant created correctly", grant.is_correct)
+		end
+
+	field_grant_test2
+			-- Correct GRANT creation
+		local
+			grant: GRANT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"title", "agency", "period_start", "period_end", "continuation", "amount">>
+			values := <<"Verifying Deep Mathematical Properties of AI Systems", "USAID",
+				"2016-04-02" , "2017-10-11", "", "100">>
+			create grant.make_from_json (create_json (keys, values))
+			assert("Grant created correctly", grant.is_correct)
+		end
+
+	field_grant_test3
+			-- Incorrect GRANT creation {INVALID_DATE}
+		local
+			grant: GRANT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"title", "agency", "period_start", "period_end", "continuation", "amount">>
+			values := <<"Verifying Deep Mathematical Properties of AI Systems", "USAID",
+				"Yesterday" , "Tomorrow", "1 year", "100">>
+			create grant.make_from_json (create_json (keys, values))
+			assert("Grant created incorrectly. {INVALID_DATE}", not grant.is_correct)
+		end
+
+	field_grant_test4
+			-- Incorrect GRANT creation {WRONG_DATE_PERIOD}
+		local
+			grant: GRANT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"title", "agency", "period_start", "period_end", "continuation", "amount">>
+			values := <<"Verifying Deep Mathematical Properties of AI Systems", "USAID",
+				"2017-10-11" , "2016-04-02", "1 year", "100">>
+			create grant.make_from_json (create_json (keys, values))
+			assert("Grant created incorrectly. {WRONG_DATE_PERIOD}", not grant.is_correct)
+		end
+
+	field_grant_test5
+			-- Incorrect GRANT creation {INVALID_NUMBER}
+		local
+			grant: GRANT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"title", "agency", "period_start", "period_end", "continuation", "amount">>
+			values := <<"Verifying Deep Mathematical Properties of AI Systems", "USAID",
+				"2016-04-02" , "2017-10-11", "1 year", "Number">>
+			create grant.make_from_json (create_json (keys, values))
+			assert("Grant created incorrectly. {INVALID_NUMBER}", not grant.is_correct)
+		end
+
+	field_grant_test6
+			-- Incorrect GRANT creation {INVALID_NEGATIVE_NUMBER}
+		local
+			grant: GRANT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"title", "agency", "period_start", "period_end", "continuation", "amount">>
+			values := <<"Verifying Deep Mathematical Properties of AI Systems", "USAID",
+				"2016-04-02" , "2017-10-11", "1 year", "-100">>
+			create grant.make_from_json (create_json (keys, values))
+			assert("Grant created incorrectly. {INVALID_NEGATIVE_NUMBER}", not grant.is_correct)
+		end
+
+	field_grant_test7
+			-- Incorrect GRANT creation {EMPTY_FIELD}
+		local
+			grant: GRANT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"title", "agency", "period_start", "period_end", "continuation", "amount">>
+			values := <<"Verifying Deep Mathematical Properties of AI Systems", "",
+				"2016-04-02" , "2017-10-11", "1 year", "100">>
+			create grant.make_from_json (create_json (keys, values))
+			assert("Grant created incorrectly. {EMPTY_FIELD}", not grant.is_correct)
+		end
+
+	field_grant_test8
+			-- Incorrect GRANT creation {NOT_PARSED}
+		local
+			grant: GRANT
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"not title", "agency", "period_start", "period_end", "continuation", "amount">>
+			values := <<"Verifying Deep Mathematical Properties of AI Systems", "USAID",
+				"2016-04-02" , "2017-10-11", "1 year", "100">>
+			create grant.make_from_json (create_json (keys, values))
+			assert("Grant created incorrectly. {NOT_PARSED}", not grant.is_correct)
+		end
+
+feature -- Test RESEARCH_PROJECT routines
+
+	field_researh_project_test1
+			-- Correct RESEARCH_PROJECT creation
+		local
+			researh_project: RESEARCH_PROJECT
+			keys, values: ARRAY[STRING]
+			json_object: JSON_OBJECT
+			json_array_1, json_array_2: JSON_ARRAY
+		do
+			keys := <<"title", "start_date", "end_date", "financing">>
+			values := <<"Smart MutHaf: 3D Models, Motion Capture, and Animations towards an Interactive Online Museum of the UAE",
+				"2016-03-16", "2016-09-10", "UAEU">>
+			json_object := create_json (keys, values)
+
+			create json_array_1.make (2)
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Hend Al Tair"))
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Amna Yammahi"))
+
+			create json_array_2.make (2)
+			json_array_2.add (create {JSON_STRING}.make_from_string ("Vasya"))
+			json_array_2.add (create {JSON_STRING}.make_from_string ("Petya"))
+
+			json_object.put (json_array_1, "personnel")
+			json_object.put (json_array_2, "extra_personnel")
+			create researh_project.make_from_json (json_object)
+			assert("Research project created correctly", researh_project.is_correct)
+		end
+
+	field_researh_project_test2
+			-- Correct RESEARCH_PROJECT creation
+		local
+			researh_project: RESEARCH_PROJECT
+			keys, values: ARRAY[STRING]
+			json_object: JSON_OBJECT
+			json_array_1, json_array_2: JSON_ARRAY
+		do
+			keys := <<"title", "start_date", "end_date", "financing">>
+			values := <<"Smart MutHaf: 3D Models, Motion Capture, and Animations towards an Interactive Online Museum of the UAE",
+				"2016-03-16", "2016-09-10", "UAEU">>
+			json_object := create_json (keys, values)
+
+			create json_array_1.make (2)
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Hend Al Tair"))
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Amna Yammahi"))
+
+			create json_array_2.make_empty
+
+			json_object.put (json_array_1, "personnel")
+			json_object.put (json_array_2, "extra_personnel")
+			create researh_project.make_from_json (json_object)
+			assert("Research project created correctly", researh_project.is_correct)
+		end
+
+	field_researh_project_test3
+			-- Incorrect RESEARCH_PROJECT creation {INVALID_DATE}
+		local
+			researh_project: RESEARCH_PROJECT
+			keys, values: ARRAY[STRING]
+			json_object: JSON_OBJECT
+			json_array_1, json_array_2: JSON_ARRAY
+		do
+			keys := <<"title", "start_date", "end_date", "financing">>
+			values := <<"Smart MutHaf: 3D Models, Motion Capture, and Animations towards an Interactive Online Museum of the UAE",
+				"Yesterday", "Tomorrow", "UAEU">>
+			json_object := create_json (keys, values)
+
+			create json_array_1.make (2)
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Hend Al Tair"))
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Amna Yammahi"))
+
+			create json_array_2.make (2)
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Vasya"))
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Petya"))
+
+			json_object.put (json_array_1, "personnel")
+			json_object.put (json_array_2, "extra_personnel")
+			create researh_project.make_from_json (json_object)
+			assert("Research project created incorrectly. {INVALID_DATE}", not researh_project.is_correct)
+		end
+
+	field_researh_project_test4
+			-- Incorrect RESEARCH_PROJECT creation {WRONG_DATE_PERIOD}
+		local
+			researh_project: RESEARCH_PROJECT
+			keys, values: ARRAY[STRING]
+			json_object: JSON_OBJECT
+			json_array_1, json_array_2: JSON_ARRAY
+		do
+			keys := <<"title", "start_date", "end_date", "financing">>
+			values := <<"Smart MutHaf: 3D Models, Motion Capture, and Animations towards an Interactive Online Museum of the UAE",
+				"2016-09-10", "2016-03-16", "UAEU">>
+			json_object := create_json (keys, values)
+
+			create json_array_1.make (2)
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Hend Al Tair"))
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Amna Yammahi"))
+
+			create json_array_2.make (2)
+			json_array_2.add (create {JSON_STRING}.make_from_string ("Vasya"))
+			json_array_2.add (create {JSON_STRING}.make_from_string ("Petya"))
+
+			json_object.put (json_array_1, "personnel")
+			json_object.put (json_array_2, "extra_personnel")
+			create researh_project.make_from_json (json_object)
+			assert("Research project created incorrectly. {WRONG_DATE_PERIOD}", not researh_project.is_correct)
+		end
+
+	field_researh_project_test5
+			-- Incorrect RESEARCH_PROJECT creation {EMPTY_ARRAY}
+		local
+			researh_project: RESEARCH_PROJECT
+			keys, values: ARRAY[STRING]
+			json_object: JSON_OBJECT
+			json_array_1, json_array_2: JSON_ARRAY
+		do
+			keys := <<"title", "start_date", "end_date", "financing">>
+			values := <<"Smart MutHaf: 3D Models, Motion Capture, and Animations towards an Interactive Online Museum of the UAE",
+				"2016-03-16", "2016-09-10", "UAEU">>
+			json_object := create_json (keys, values)
+
+			create json_array_1.make_empty
+
+			create json_array_2.make (2)
+			json_array_2.add (create {JSON_STRING}.make_from_string ("Vasya"))
+			json_array_2.add (create {JSON_STRING}.make_from_string ("Petya"))
+
+			json_object.put (json_array_1, "personnel")
+			json_object.put (json_array_2, "extra_personnel")
+			create researh_project.make_from_json (json_object)
+			assert("Research project created incorrectly. {EMPTY_ARRAY}", not researh_project.is_correct)
+		end
+
+	field_researh_project_test6
+			-- Incorrect RESEARCH_PROJECT creation {EMPTY_FIELD}
+		local
+			researh_project: RESEARCH_PROJECT
+			keys, values: ARRAY[STRING]
+			json_object: JSON_OBJECT
+			json_array_1, json_array_2: JSON_ARRAY
+		do
+			keys := <<"title", "start_date", "end_date", "financing">>
+			values := <<"Smart MutHaf: 3D Models, Motion Capture, and Animations towards an Interactive Online Museum of the UAE",
+				"2016-03-16", "2016-09-10", "">>
+			json_object := create_json (keys, values)
+
+			create json_array_1.make (2)
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Hend Al Tair"))
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Amna Yammahi"))
+
+			create json_array_2.make (2)
+			json_array_2.add (create {JSON_STRING}.make_from_string ("Vasya"))
+			json_array_2.add (create {JSON_STRING}.make_from_string ("Petya"))
+
+			json_object.put (json_array_1, "personnel")
+			json_object.put (json_array_2, "extra_personnel")
+			create researh_project.make_from_json (json_object)
+			assert("Research project created incorrectly. {EMPTY_FIELD}", not researh_project.is_correct)
+		end
+
+	field_researh_project_test7
+			-- Incorrect RESEARCH_PROJECT creation {NOT_PARSED}
+		local
+			researh_project: RESEARCH_PROJECT
+			keys, values: ARRAY[STRING]
+			json_object: JSON_OBJECT
+			json_array_1, json_array_2: JSON_ARRAY
+		do
+			keys := <<"not title", "start_date", "end_date", "financing">>
+			values := <<"Smart MutHaf: 3D Models, Motion Capture, and Animations towards an Interactive Online Museum of the UAE",
+				"2016-03-16", "2016-09-10", "UAEU">>
+			json_object := create_json (keys, values)
+
+			create json_array_1.make (2)
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Hend Al Tair"))
+			json_array_1.add (create {JSON_STRING}.make_from_string ("Amna Yammahi"))
+
+			create json_array_2.make (2)
+			json_array_2.add (create {JSON_STRING}.make_from_string ("Vasya"))
+			json_array_2.add (create {JSON_STRING}.make_from_string ("Petya"))
+
+			json_object.put (json_array_1, "personnel")
+			json_object.put (json_array_2, "extra_personnel")
+			create researh_project.make_from_json (json_object)
+			assert("Research project created incorrectly. {NOT_PARSED}", not researh_project.is_correct)
+		end
+
 end
 
 

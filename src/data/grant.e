@@ -76,6 +76,7 @@ feature {NONE} -- Constuctor
 				create period_end.make_from_string(p_period_end, "yyyy-[0]mm-[0]dd")
 				continuation := p_continuation
 				amount := p_amount.to_integer
+				is_correct := period_start.is_less (period_end)
 			else
 				is_correct := False
 			end
