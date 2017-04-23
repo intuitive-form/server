@@ -290,7 +290,7 @@ feature
 			q_select: SQLITE_QUERY_STATEMENT
 		do
 			create Result.make
-			create q_select.make ("SELECT title, country FROM phd_theses WHERE unit = ?1;", db)
+			create q_select.make ("SELECT title, country FROM patents WHERE unit = ?1;", db)
 			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as iter loop
 				Result.put_front (create {PATENT}.make (iter.item.string_value (1), iter.item.string_value (2)))
 			end
@@ -303,7 +303,7 @@ feature
 			q_select: SQLITE_QUERY_STATEMENT
 		do
 			create Result.make
-			create q_select.make ("SELECT title FROM phd_theses WHERE unit = ?1;", db)
+			create q_select.make ("SELECT title FROM intellectual_propery_licences WHERE unit = ?1;", db)
 			across q_select.execute_new_with_arguments (<<unit_id (unit)>>) as iter loop
 				Result.put_front (create {IP_LICENCE}.make (iter.item.string_value (1)))
 			end
