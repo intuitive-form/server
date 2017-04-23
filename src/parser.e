@@ -52,27 +52,18 @@ feature -- Queries
 		end
 
 	parse_json_array(json_value: JSON_ARRAY)
-		-- Extacts data from 'json_array' into 'parsed_string_value'
-		local
-			json_temp: ARRAYED_LIST[JSON_VALUE]
+		-- Extacts data from 'json_array' into 'parsed_string_value'\
 		do
 			parsed := True
-			if
-				attached {JSON_ARRAY} json_value as json_array
-			then
-				create parsed_string_array.make(1)
-				json_temp := json_array.array_representation
-				across json_temp as iter
-				loop
-					if
-						attached {JSON_STRING} iter.item as value and then
-						not value.item.is_empty
-					then
-						parsed_string_array.sequence_put(value.item)
-					end
+			create parsed_string_array.make(1)
+			across json_value.array_representation as iter
+			loop
+				if
+					attached {JSON_STRING} iter.item as value and then
+					not value.item.is_empty
+				then
+					parsed_string_array.sequence_put(value.item)
 				end
-			else
-				parsed := False
 			end
 		ensure
 			parsed implies parsed_string_array /= Void

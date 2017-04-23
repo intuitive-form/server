@@ -1,5 +1,6 @@
 class
 	UNIT
+
 inherit
 	FIELD
 	redefine
@@ -67,7 +68,7 @@ feature {NONE} -- Constructor
 				create start_date.make_from_string(p_start_date, "yyyy-[0]mm-[0]dd")
 				create end_date.make_from_string(p_end_date, "yyyy-[0]mm-[0]dd")
 				misc := p_misc
-				is_correct := start_date.is_less (end_date)
+				is_correct := start_date.days < end_date.days
 			end
 
 		end
