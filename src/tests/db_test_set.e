@@ -3,29 +3,8 @@ class
 
 inherit
 	EQA_TEST_SET
-	redefine
-		on_prepare, on_clean
-	end
 
 feature {NONE}
-	on_prepare
-		local
-			dir: DIRECTORY
-			file: RAW_FILE
-		do
-			create dir.make ("test_temp")
-			if not dir.exists then
-				dir.create_dir
-			end
-			dir.delete_content
-		ensure then
-			(create {DIRECTORY}.make ("test_temp")).is_empty
-		end
-
-	on_clean
-		do
-			on_prepare
-		end
 
 	get_test_data (path: STRING): SUBMIT_DATA
 		local
