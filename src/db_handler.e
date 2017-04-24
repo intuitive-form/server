@@ -15,7 +15,14 @@ feature {NONE}
 			q: SQLITE_MODIFY_STATEMENT
 		do
 			io.put_string ("Make DB_HANDLER%N")
-			if (create {RAW_FILE}.make_with_name(db_path)).exists then
+			if db_path.is_empty then
+				create db.make (create {SQLITE_FILE_SOURCE}.make_temporary)
+				db.open_create_read_write
+				across db_schema as query loop
+					create q.make (query.item, db)
+					q.execute
+				end
+			elseif (create {RAW_FILE}.make_with_name(db_path)).exists then
 				create db.make_open_read_write (db_path)
 			else
 				create db.make_create_read_write (db_path)

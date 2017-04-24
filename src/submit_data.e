@@ -35,7 +35,7 @@ feature {NONE} -- Initialization
 									<<>>,
 									<< 	s2_courses, s2_examinations, s2_students, s2_student_reports, s2_phd>>,
 									<< 	s3_grants, s3_research_projects, s3_research_collaborations,
-										s3_conference_publications, s3_research_collaborations >>,
+										s3_conference_publications, s3_journal_publications >>,
 									<<	s4_patents, s4_ip_licensing >>,
 									<<	s5_paper_awards, s5_memberships, s5_prizes >>,
 									<<	s6_collaborations>>
