@@ -13,6 +13,7 @@ feature {NONE}
 	q_conf_pub, q_conf_pub_author, q_journal_pub, q_journal_pub_author: SQLITE_INSERT_STATEMENT
 	q_patent, q_ip_licence: SQLITE_INSERT_STATEMENT
 	q_paper_award, q_paper_author, q_membership, q_prize: SQLITE_INSERT_STATEMENT
+	q_ind_collab: SQLITE_INSERT_STATEMENT
 
 	make (p_handler: DB_HANDLER)
 		require
@@ -44,6 +45,7 @@ feature {NONE}
 			create q_paper_author.make ("INSERT INTO paper_authors (paper, name) VALUES (?1, ?2);", db)
 			create q_membership.make ("INSERT INTO academia_memberships (unit, name, organization, date) VALUES (?1, ?2, ?3, ?4);", db)
 			create q_prize.make ("INSERT INTO prizes (unit, recipient, name, granter, date) VALUES (?1, ?2, ?3, ?4, ?5);", db)
+			create q_ind_collab.make ("INSERT INTO industry_collabs (unit, company, nature) VALUES (?1, ?2, ?3);", db)
 
 		end
 
@@ -162,4 +164,23 @@ feature {DB_HANDLER}
 				q_paper_author.execute_with_arguments (<<last_added_id, a.item>>)
 			end
 		end
+
+	insert_membership(p_membership: MEMBERSHIP; unit_id: INTEGER_64)
+		do
+			q_membership.execute_with_arguments (<<unit_id, p_membership.name, p_membership.organization, p_membership.date.days>>)
+			last_added_id := q_membership.last_row_id
+		end
+
+	insert_prize (p_prize: PRIZE; unit_id: INTEGER_64)
+		do
+			q_prize.execute_with_arguments (<<unit_id, p_prize.recipient, p_prize.name, p_prize.institution, p_prize.date.days>>)
+			last_added_id := q_prize.last_row_id
+		end
+
+	insert_industrial_collab(p_collab: COLLABORATION; unit_id: INTEGER_64)
+		do
+			q_ind_collab.execute_with_arguments (<<unit_id, p_collab.company, p_collab.nature>>)
+			last_added_id := q_prize.last_row_id
+		end
+
 end

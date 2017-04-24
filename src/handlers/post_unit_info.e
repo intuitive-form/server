@@ -65,7 +65,7 @@ feature -- Execution
 				j.put (j_arr, "phd_theses")
 
 				patents := db.selector.patents_of_unit (unit.value)
-				create j_arr.make (phds.count)
+				create j_arr.make (patents.count)
 				across patents as iter loop
 					create j_obj.make_with_capacity (2)
 					j_obj.put (create {JSON_STRING}.make_from_string (iter.item.title), "title")
@@ -75,8 +75,8 @@ feature -- Execution
 				j.put (j_arr, "patents")
 
 				licenses := db.selector.ip_licences_of_unit (unit.value)
-				create j_arr.make (phds.count)
-				across patents as iter loop
+				create j_arr.make (licenses.count)
+				across licenses as iter loop
 					j_arr.add (create {JSON_STRING}.make_from_string (iter.item.title))
 				end
 				j.put (j_arr, "ip_licenses")

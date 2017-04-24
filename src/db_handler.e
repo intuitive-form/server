@@ -119,6 +119,24 @@ feature
 			across data.s3_journal_publications as p loop
 				inserter.insert_journal_pub(p.item, unit_id)
 			end
+			across data.s4_ip_licensing as iter loop
+				inserter.insert_ip_licence (iter.item, unit_id)
+			end
+			across data.s4_patents as iter loop
+				inserter.insert_patent (iter.item, unit_id)
+			end
+			across data.s5_memberships as iter loop
+				inserter.insert_membership (iter.item, unit_id)
+			end
+			across data.s5_paper_awards as iter loop
+				inserter.insert_paper_award (iter.item, unit_id)
+			end
+			across data.s5_prizes as iter loop
+				inserter.insert_prize (iter.item, unit_id)
+			end
+			across data.s6_collaborations as iter loop
+				inserter.insert_industrial_collab (iter.item, unit_id)
+			end
 
 			io.put_string ("Inserted in DB%N")
 		end
