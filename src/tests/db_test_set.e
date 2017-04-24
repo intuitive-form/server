@@ -57,4 +57,17 @@ feature
 			)
 		end
 
+	db_insert_test3
+		local
+			data1, data2: SUBMIT_DATA
+			db: DB_HANDLER
+		do
+			create db.make ("")
+			data1 := get_test_data ("tests/test1.json")
+			data2 := get_test_data ("tests/test2.json")
+			db.insert (data1)
+			db.insert (data2)
+			assert ("Course inserted", data1.s2_courses.count + data2.s2_courses.count = db.selector.courses.count)
+		end
+
 end
