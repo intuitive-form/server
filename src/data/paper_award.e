@@ -82,7 +82,7 @@ feature {NONE} -- Constructors
 			checker: DATE_VALIDITY_CHECKER
 		do
 			create checker
-			is_correct := checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
+			is_correct := p_authors.count > 0 and checker.date_valid (p_date, "yyyy-[0]mm-[0]dd")
 			if is_correct then
 				make_ready (p_title, p_awarder, p_award_wording,
 					create {DATE}.make_from_string(p_date, "yyyy-[0]mm-[0]dd"), p_authors)
