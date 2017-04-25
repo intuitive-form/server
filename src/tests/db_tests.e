@@ -14,6 +14,8 @@ feature {NONE}
 				dir.create_dir
 			end
 			dir.delete_content
+		ensure
+			(create {DIRECTORY}.make ("test_temp")).is_empty
 		end
 
 	get_test_data (path: STRING): SUBMIT_DATA
@@ -51,9 +53,6 @@ feature
 			db.insert (data)
 			assert ("Course inserted", across data.s2_courses as iter all db.selector.get_course_id (iter.item.name, iter.item.semester) /= -1 end and
 				data.s2_courses.count = db.selector.courses.count)
-			empty_temp
-		ensure
-			(create {DIRECTORY}.make ("test_temp")).is_empty
 		end
 
 end
