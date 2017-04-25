@@ -19,6 +19,7 @@ feature {NONE}
 			assert ("file opened", file.file_readable and file.count > 0)
 			create json.make_filled ('0', file.count)
 			read := file.read_to_string (json, 1, file.count)
+			json.remove_tail (json.count - read)
 			assert ("Not empty", json.count > 0)
 			create Result.make (json)
 		ensure
