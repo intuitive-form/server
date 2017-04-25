@@ -1345,6 +1345,180 @@ feature -- Test PAPER_AWARD routines
 			create paper_award.make_from_json (json_object)
 			assert("Paper award created incorrectly {EMPTY_FIELD}", not paper_award.is_correct)
 		end
+
+feature -- Test MEMBERSHIP routines
+
+	field_membership_test1
+			-- Correct MEMBERSHIP creation
+		local
+			membership: MEMBERSHIP
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"name", "organization", "date">>
+			values := <<"WAT", "Microsoft", "2016-03-02">>
+			create membership.make_from_json (create_json (keys, values))
+			assert("Membership created correctly", membership.is_correct)
+		end
+
+	field_membership_test2
+			-- Correct MEMBERSHIP creation
+		local
+			membership: MEMBERSHIP
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"date", "name", "organization">>
+			values := <<"2016-03-02", "WAT", "Microsoft">>
+			create membership.make_from_json (create_json (keys, values))
+			assert("Membership created correctly", membership.is_correct)
+		end
+
+	field_membership_test3
+			-- Incorrect MEMBERSHIP creation {INVALID_DATE}
+		local
+			membership: MEMBERSHIP
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"name", "organization", "date">>
+			values := <<"WAT", "Microsoft", "Today">>
+			create membership.make_from_json (create_json (keys, values))
+			assert("Membership created incorrectly. {INVALID_DATE}", not membership.is_correct)
+		end
+
+	field_membership_test4
+			-- Incorrect MEMBERSHIP creation {EMPTY_FIELD}
+		local
+			membership: MEMBERSHIP
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"name", "organization", "date">>
+			values := <<"", "Microsoft", "2016-03-02">>
+			create membership.make_from_json (create_json (keys, values))
+			assert("Membership created incorrectly. {EMPTY_FIELD}", not membership.is_correct)
+		end
+
+	field_membership_test5
+			-- Incorrect MEMBERSHIP creation {NOT_PARSED}
+		local
+			membership: MEMBERSHIP
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"not name", "organization", "date">>
+			values := <<"WAT", "Microsoft", "2016-03-02">>
+			create membership.make_from_json (create_json (keys, values))
+			assert("Membership created incorrectly. {NOT_PARSED}", not membership.is_correct)
+		end
+
+feature -- Test PRIZE routines
+
+	field_prize_test1
+			-- Correct PRIZE creation
+		local
+			prize: PRIZE
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"recipient", "name", "institution", "date">>
+			values := <<"Nikolaos Mavridis", "Best Professor", "Innopolis", "2016-10-15">>
+			create prize.make_from_json (create_json (keys, values))
+			assert("Prize created correctly", prize.is_correct)
+		end
+
+	field_prize_test2
+			-- Correct PRIZE creation
+		local
+			prize: PRIZE
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"date", "recipient", "name", "institution">>
+			values := <<"2016-10-15", "Nikolaos Mavridis", "Best Professor", "Innopolis">>
+			create prize.make_from_json (create_json (keys, values))
+			assert("Prize created correctly", prize.is_correct)
+		end
+
+	field_prize_test3
+			-- Incorrect PRIZE creation {INVALID_DATE}
+		local
+			prize: PRIZE
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"recipient", "name", "institution", "date">>
+			values := <<"Nikolaos Mavridis", "Best Professor", "Innopolis", "Today">>
+			create prize.make_from_json (create_json (keys, values))
+			assert("Prize created incorrectly. {INVALID_DATE}", not prize.is_correct)
+		end
+
+	field_prize_test4
+			-- Incorrect PRIZE creation {EMPTY_FIELD}
+		local
+			prize: PRIZE
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"recipient", "name", "institution", "date">>
+			values := <<"", "Best Professor", "Innopolis", "2016-10-15">>
+			create prize.make_from_json (create_json (keys, values))
+			assert("Prize created incorrectly. {EMPTY_FIELD}", not prize.is_correct)
+		end
+
+	field_prize_test5
+			-- Incorrect PRIZE creation {NOT_PARSED}
+		local
+			prize: PRIZE
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"recipient", "", "institution", "date">>
+			values := <<"Nikolaos Mavridis", "Best Professor", "Innopolis", "2016-10-15">>
+			create prize.make_from_json (create_json (keys, values))
+			assert("Prize created incorrectly. {NOT_PARSED}", not prize.is_correct)
+		end
+
+feature -- Test COLLABORATION routines
+
+	field_collaboration_test1
+			-- Correct COLLABORATION creation
+		local
+			collaboration: COLLABORATION
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"company", "nature">>
+			values := <<"Microsoft", "financing">>
+			create collaboration.make_from_json (create_json (keys, values))
+			assert("Collaboration created correctly", collaboration.is_correct)
+		end
+
+	field_collaboration_test2
+			-- Correct COLLABORATION creation
+		local
+			collaboration: COLLABORATION
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"nature", "company">>
+			values := <<"financing", "Microsoft">>
+			create collaboration.make_from_json (create_json (keys, values))
+			assert("Collaboration created correctly", collaboration.is_correct)
+		end
+
+	field_collaboration_test3
+			-- Incorrect COLLABORATION creation {EMPTY_FIELD}
+		local
+			collaboration: COLLABORATION
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"company", "nature">>
+			values := <<"", "financing">>
+			create collaboration.make_from_json (create_json (keys, values))
+			assert("Collaboration created incorrectly. {EMPTY_FIELD}", not collaboration.is_correct)
+		end
+
+	field_collaboration_test4
+			-- Incorrect COLLABORATION creation {NOT_PARSED}
+		local
+			collaboration: COLLABORATION
+			keys, values: ARRAY[STRING]
+		do
+			keys := <<"not company", "nature">>
+			values := <<"Microsoft", "financing">>
+			create collaboration.make_from_json (create_json (keys, values))
+			assert("Collaboration created incorrectly. {NOT_PARSED}", not collaboration.is_correct)
+		end
 end
 
 
