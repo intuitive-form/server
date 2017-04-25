@@ -237,9 +237,9 @@ feature
 					contacts.sequence_put (i2.item.string_value (1))
 				end
 				Result.put_front (create {RESEARCH_COLLABORATION}.make (
-					i.item.string_value (1),
 					i.item.string_value (2),
 					i.item.string_value (3),
+					i.item.string_value (4),
 					contacts
 				))
 			end
